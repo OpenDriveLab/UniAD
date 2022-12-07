@@ -9,7 +9,8 @@ This repository will host the code of UniAD.
 
 > Goal-oriented Autonomous Driving
 >
-> Yihan Hu*, Jiazhi Yang*, Li Chen*, Keyu Li*, Chonghao Sima, Xizhou Zhu, Siqi Chai, Senyao Du, Tianwei Lin, Wenhai Wang, Lewei Lu, Xiaosong Jia, Qiang Liu, Jifeng Dai, Yu Qiao, Hongyang Li
+> Yihan Hu*, Jiazhi Yang*, [Li Chen*](https://scholar.google.com/citations?user=ulZxvY0AAAAJ&hl=en&authuser=1), Keyu Li*, Chonghao Sima, Xizhou Zhu, Siqi Chai, Senyao Du, Tianwei Lin, Wenhai Wang, Lewei Lu, Xiaosong Jia, Qiang Liu, Jifeng Dai, Yu Qiao, [Hongyang Li](https://lihongyang.info/)
+> - Primary contact: Li Chen ( lichen@pjlab.org.cn )
 > - [arXiv preprint]()
 
 
