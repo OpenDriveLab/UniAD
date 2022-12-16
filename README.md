@@ -31,6 +31,8 @@ This repository will host the code of UniAD.
 > - Primary contact: Li Chen ( lichen@pjlab.org.cn )
 > - [arXiv preprint]()
 
+![teaser](sources/pipeline.png)
+
 ## Highlights
 
 - :oncoming_automobile: **Goal-oriented philosophy**: UniAD is a Unified Autonomous Driving algorithm framework devised following a goal-oriented philosophy. Instead of standalone modular design and multi-task learning, perception, prediciton and planning tasks/components should opt in and be prioritized hierarchically, and we demonstrate the performance can be enhanced to a new level.
@@ -40,11 +42,13 @@ This repository will host the code of UniAD.
 
 - [] UniAD [paper]() is available on arXiv! Please stay tuned for code release!
 
+<!-- 
 ## Getting started
 
 - [Installation]()
 - [Dataset preparation]()
 - [Train and eval]()
+-->
 
 ## Main results
 
