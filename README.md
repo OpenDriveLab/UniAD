@@ -4,14 +4,14 @@
 </div>
 
 <p align="center">
- <a href="">
+ <a href="https://opendrivelab.github.io/UniAD/">
     <img alt="Project Page" src="https://img.shields.io/badge/Project%20Page-Open-blue.svg" target="_blank" />
   </a>
-  <a href="https://github.com/OpenPerceptionX/UniAD/blob/master/LICENSE">
+  <a href="https://github.com/OpenDriveLab/UniAD/blob/master/LICENSE">
     <img alt="License: Apache2.0" src="https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg" target="_blank" />
   </a>
-  <a href="https://github.com/OpenPerceptionX/UniAD/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
-    <img alt="Good first issue" src="https://img.shields.io/github/issues/OpenPerceptionX/UniAD/good%20first%20issue" target="_blank" />
+  <a href="https://github.com/OpenDriveLab/UniAD/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
+    <img alt="Good first issue" src="https://img.shields.io/github/issues/OpenDriveLab/UniAD/good%20first%20issue" target="_blank" />
   </a>
 </p>
 
@@ -55,7 +55,7 @@ Pre-trained models and results under main metrics are provided below. We refer y
 
 ## License
 
-All assets and code are under the [Apache 2.0 license](https://github.com/OpenPerceptionX/UniAD/blob/master/LICENSE) unless specified otherwise.
+All assets and code are under the [Apache 2.0 license](https://github.com/OpenDriveLab/UniAD/blob/master/LICENSE) unless specified otherwise.
 
 ## Citation
 
