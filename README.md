@@ -39,7 +39,7 @@ This repository will host the code of UniAD.
 
 ## News
 
-- [] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv! Please stay tuned for code release!
+- [2022/12/21] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv! Please stay tuned for code release!
 
 <!-- 
 ## Getting started
@@ -65,7 +65,7 @@ Please consider citing our paper if the project helps your research with the fol
 @article{uniad,
  title={Goal-oriented Autonomous Driving}, 
  author={Yihan Hu and Jiazhi Yang and Li Chen and Keyu Li and Chonghao Sima and Xizhou Zhu and Siqi Chai and Senyao Du and Tianwei Lin and Wenhai Wang and Lewei Lu and Xiaosong Jia and Qiang Liu and Jifeng Dai and Yu Qiao and Hongyang Li},
- journal={arXiv preprint arXiv:},
+ journal={arXiv preprint arXiv:2212.10156},
  year={2022},
 }
 ```
