@@ -16,8 +16,8 @@
 </p>
 
 <h3 align="center">
-  <a href="">project page</a> |
-  <a href="">arXiv</a> |
+  <a href="https://opendrivelab.github.io/UniAD/">project page</a> |
+  <a href="https://arxiv.org/abs/2212.10156">arXiv</a> |
   <a href="">video</a> 
 </h3>
 
@@ -29,7 +29,6 @@ This repository will host the code of UniAD.
 >
 > Yihan Hu*, Jiazhi Yang*, [Li Chen*](https://scholar.google.com/citations?user=ulZxvY0AAAAJ&hl=en&authuser=1), Keyu Li*, Chonghao Sima, Xizhou Zhu, Siqi Chai, Senyao Du, Tianwei Lin, Wenhai Wang, Lewei Lu, Xiaosong Jia, Qiang Liu, Jifeng Dai, Yu Qiao, [Hongyang Li](https://lihongyang.info/)
 > - Primary contact: Li Chen ( lichen@pjlab.org.cn )
-> - [arXiv preprint]()
 
 ![teaser](sources/pipeline.png)
 
@@ -40,7 +39,7 @@ This repository will host the code of UniAD.
 
 ## News
 
-- [] UniAD [paper]() is available on arXiv! Please stay tuned for code release!
+- [] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv! Please stay tuned for code release!
 
 <!-- 
 ## Getting started
@@ -52,7 +51,7 @@ This repository will host the code of UniAD.
 
 ## Main results
 
-Pre-trained models and results under main metrics are provided below. We refer you to the [paper]() for more details.
+Pre-trained models and results under main metrics are provided below. We refer you to the [paper](https://arxiv.org/abs/2212.10156) for more details.
 
 ## License
 
@@ -79,3 +78,4 @@ Please consider citing our paper if the project helps your research with the fol
 - [ST-P3](https://github.com/OpenPerceptionX/ST-P3) (:rocket:Ours!)
 - [FIERY](https://github.com/wayveai/fiery)
 - [MOTR](https://github.com/megvii-research/MOTR)
+- [BEVerse](https://github.com/zhangyp15/BEVerse)
