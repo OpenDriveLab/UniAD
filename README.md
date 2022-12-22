@@ -5,10 +5,10 @@
 
 <p align="center">
  <a href="https://opendrivelab.github.io/UniAD/">
-    <img alt="Project Page" src="https://img.shields.io/badge/Project%20Page-Open-blue.svg" target="_blank" />
+    <img alt="Project Page" src="https://img.shields.io/badge/Project%20Page-Open-yellowgreen.svg" target="_blank" />
   </a>
   <a href="https://github.com/OpenDriveLab/UniAD/blob/master/LICENSE">
-    <img alt="License: Apache2.0" src="https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg" target="_blank" />
+    <img alt="License: Apache2.0" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" target="_blank" />
   </a>
   <a href="https://github.com/OpenDriveLab/UniAD/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
     <img alt="Good first issue" src="https://img.shields.io/github/issues/OpenDriveLab/UniAD/good%20first%20issue" target="_blank" />
@@ -52,6 +52,12 @@ This repository will host the code of UniAD.
 ## Main results
 
 Pre-trained models and results under main metrics are provided below. We refer you to the [paper](https://arxiv.org/abs/2212.10156) for more details.
+
+| Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | Motion<br>minADE |Occupancy<br>IoU-n. | Planning<br>avg.Col. | config | Download |
+| :---: | :---: | :---: | :---: | :---:|:---:| :---: | :---: | :---: |
+| UniAD-S | R50 | 0.241  | 0.315 | 0.788 | 59.4  | 0.32 | TBA | TBA |
+| UniAD-M | R101 | 0.359 | 0.313 | 0.708 | 63.4 | 0.31 |  TBA | TBA |
+| UniAD-L | V2-99 | 0.409 | 0.323 | 0.723 | 64.1 | 0.29 | TBA | TBA |
 
 ## License
 
