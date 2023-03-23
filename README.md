@@ -41,6 +41,7 @@ This repository will host the code of UniAD.
 ## News
 
 - Code & model release: We are actively re-organizing the codebase for better readability. The estimated time is late March. Please stay tuned!
+- About the title: To avoid confusion about the "goal", we change the title from "Goal-oriented" to "Planning-oriented" as suggested by the reviewers. We originally use "goal" to indicate the final safe planning in an AD pipeline, rather than "goal-point" -- the destination of a sequence of actions.
 - [2023/03/21] :rocket::rocket: UniAD paper is accepted by CVPR 2023, as an **award candidate** (12 out of 9155 submissions and 2360 accepted papers)!
 - [2022/12/21] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv!
 
