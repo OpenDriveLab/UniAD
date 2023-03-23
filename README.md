@@ -1,6 +1,6 @@
 <div align="center">   
   
-# Goal-oriented Autonomous Driving
+# Planning-oriented Autonomous Driving
 </div>
 
 <p align="center">
@@ -25,21 +25,24 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 
 This repository will host the code of UniAD.
 
-> Goal-oriented Autonomous Driving
+> Planning-oriented Autonomous Driving
 >
 > Yihan Hu*, Jiazhi Yang*, [Li Chen*](https://scholar.google.com/citations?user=ulZxvY0AAAAJ&hl=en&authuser=1), Keyu Li*, Chonghao Sima, Xizhou Zhu, Siqi Chai, Senyao Du, Tianwei Lin, Wenhai Wang, Lewei Lu, Xiaosong Jia, Qiang Liu, Jifeng Dai, Yu Qiao, [Hongyang Li](https://lihongyang.info/)
+> - CVPR 2023, award candidate
 > - Primary contact: Li Chen ( lichen@pjlab.org.cn )
 
 ![teaser](sources/pipeline.png)
 
 ## Highlights
 
-- :oncoming_automobile: **Goal-oriented philosophy**: UniAD is a Unified Autonomous Driving algorithm framework devised following a goal-oriented philosophy. Instead of standalone modular design and multi-task learning, perception, prediciton and planning tasks/components should opt in and be prioritized hierarchically, and we demonstrate the performance can be enhanced to a new level.
+- :oncoming_automobile: **Planning-oriented philosophy**: UniAD is a Unified Autonomous Driving algorithm framework devised following a planning-oriented philosophy. Instead of standalone modular design and multi-task learning, perception, prediciton and planning tasks/components should opt in and be prioritized hierarchically, and we demonstrate the performance can be enhanced to a new level.
 - :trophy: **SOTA performance**: All tasks among UniAD achieve SOTA performance, especially prediction and planning (motion: 0.71m minADE, occ: 63.4% IoU-n., plan: 0.31% avg.Col)
 
 ## News
 
-- [2022/12/21] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv! Please stay tuned for code release!
+- Code & model release: We are actively re-organizing the codebase for better readability. The estimated time is late March. Please stay tuned!
+- [2023/03/21] :rocket::rocket: UniAD paper is accepted by CVPR 2023, as an **award candidate** (12 out of 9155 submissions and 2360 accepted papers)!
+- [2022/12/21] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv!
 
 <!-- 
 ## Getting started
@@ -67,12 +70,12 @@ All assets and code are under the [Apache 2.0 license](https://github.com/OpenDr
 
 Please consider citing our paper if the project helps your research with the following BibTex:
 
-```
-@article{uniad,
- title={Goal-oriented Autonomous Driving}, 
+```bibtex
+@inproceedings{uniad,
+ title={Planning-oriented Autonomous Driving}, 
  author={Yihan Hu and Jiazhi Yang and Li Chen and Keyu Li and Chonghao Sima and Xizhou Zhu and Siqi Chai and Senyao Du and Tianwei Lin and Wenhai Wang and Lewei Lu and Xiaosong Jia and Qiang Liu and Jifeng Dai and Yu Qiao and Hongyang Li},
- journal={arXiv preprint arXiv:2212.10156},
- year={2022},
+ booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+ year={2023},
 }
 ```
 ## Related resources
