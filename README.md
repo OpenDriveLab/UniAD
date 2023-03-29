@@ -87,7 +87,7 @@ UniAD is trained in two stages. Pretrained checkpoints of both stages will be re
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | config | Download |
 | :---: | :---: | :---: | :---: | :---:|:---:| 
 | UniAD-S | R50 | -  | - | TBA | TBA |
-| UniAD-B | R101 | 0.390 | 0.297 |  [base-stage1](projects/configs/track_map/base_stage1.py) | [base-stage1](https://github.com/OpenDriveLab/UniAD/releases/download/untagged-d7e1d5e20eded789eee9/uniad_base_track_map.pth) |
+| UniAD-B | R101 | 0.390 | 0.297 |  [base-stage1](projects/configs/track_map/base_stage1.py) | [base-stage1](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_track_map.pth) |
 | UniAD-L | V2-99 | - | - | TBA | TBA |
 
 

@@ -19,8 +19,8 @@ mkdir data
 cd UniAD/data
 mkdir infos
 cd infos
-wget https://github.com/OpenDriveLab/UniAD/releases/download/untagged-d7e1d5e20eded789eee9/nuscenes_infos_temporal_train.pkl  # train_infos
-wget https://github.com/OpenDriveLab/UniAD/releases/download/untagged-d7e1d5e20eded789eee9/nuscenes_infos_temporal_val.pkl  # val_infos
+wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/nuscenes_infos_temporal_train.pkl  # train_infos
+wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/nuscenes_infos_temporal_val.pkl  # val_infos
 ```
 
 
@@ -37,7 +37,7 @@ mkdir infos
 cd UniAD/data
 mkdir others
 cd others
-wget https://github.com/OpenDriveLab/UniAD/releases/download/untagged-d7e1d5e20eded789eee9/motion_anchor_infos_mode6.pkl
+wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/motion_anchor_infos_mode6.pkl
 ```
 
 **The Overall Structure**
