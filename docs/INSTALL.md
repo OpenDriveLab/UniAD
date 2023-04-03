@@ -48,12 +48,8 @@ git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
 git checkout v0.17.1 # Other versions may not be compatible.
 python setup.py install
+pip install -r requirements.txt  # Install packages for mmdet3d
 ```
-
-<!-- **h. Install timm.**
-```shell
-pip install timm
-``` -->
 
 **h. Clone UniAD.**
 ```shell
@@ -63,9 +59,7 @@ git clone https://github.com/OpenDriveLab/UniAD.git
 **i. Install the rest of the packages.**
 ```shell
 cd UniAD
-pip install -r requirements.txt --no-deps
-# --no-deps is to avoid conflicts
-# After installation, please make sure your numpy version is 1.20.0 by running `pip list | grep numpy`
+pip install -r requirements.txt
 ```
 
 **j. Prepare pretrained weights.**
