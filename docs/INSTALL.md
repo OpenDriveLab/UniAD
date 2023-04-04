@@ -44,6 +44,7 @@ pip install mmsegmentation==0.14.1
 
 **g. Install mmdet3d from source code.**
 ```shell
+cd ~
 git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
 git checkout v0.17.1 # Other versions may not be compatible.
@@ -51,20 +52,17 @@ python setup.py install
 pip install -r requirements.txt  # Install packages for mmdet3d
 ```
 
-**h. Clone UniAD.**
+**h. Install UniAD.**
 ```shell
+cd ~
 git clone https://github.com/OpenDriveLab/UniAD.git
-```
-
-**i. Install the rest of the packages.**
-```shell
 cd UniAD
 pip install -r requirements.txt
 ```
 
-**j. Prepare pretrained weights.**
+
+**i. Prepare pretrained weights.**
 ```shell
-cd UniAD
 mkdir ckpts
 wget https://github.com/zhiqi-li/storage/releases/download/v1.0/bevformer_r101_dcn_24ep.pth
 wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_track_map.pth
