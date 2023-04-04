@@ -34,8 +34,8 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 3. [Getting Started](#start)
    - [Installation](docs/INSTALL.md)
    - [Prepare Dataset](docs/DATA_PREP.md)
-   - [Evaluation Example](docs/TRAIN_EVAL.md)
-   - [GPU Requirements](docs/TRAIN_EVAL.md)
+   - [Evaluation Example](docs/TRAIN_EVAL.md#example)
+   - [GPU Requirements](docs/TRAIN_EVAL.md#gpu)
    - [Train/Eval](docs/TRAIN_EVAL.md)
 4. [Results and Models](#models)
 5. [TODO List](#todos)
@@ -59,23 +59,11 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 
 
 
-<!-- ## Table of Contents:
-1. [Installation](docs/INSTALL.md)
-2. [Prepare Data](docs/DATA_PREP.md)
-3. [Evaluation Example](docs/TRAIN_EVAL.md#example)
-4. [UniAD Training](docs/TRAIN_EVAL.md#train)
-5. [UniAD Evaluation](docs/TRAIN_EVAL.md#eval)
-6. [Results and Models](#models)
-7. [TODO List](#todos)
-7. [License](#license)
-8. [Citing](#citation) -->
-
-
 ## Getting Started <a name="start"></a>
 - [Installation](docs/INSTALL.md)
 - [Prepare Dataset](docs/DATA_PREP.md)
-- [Evaluation Example](docs/TRAIN_EVAL.md)
-- [GPU Requirements](docs/TRAIN_EVAL.md)
+- [Evaluation Example](docs/TRAIN_EVAL.md#example)
+- [GPU Requirements](docs/TRAIN_EVAL.md#gpu)
 - [Train/Eval](docs/TRAIN_EVAL.md)
 
 ## Results and Pre-trained Models <a name="models"></a>
