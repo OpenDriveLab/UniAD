@@ -730,18 +730,18 @@ class UniADTrack(MVXTwoStageDetector):
         track_instances.ref_pts = last_ref_pts[0]
         # hard_code: assume the 901 query is sdc query 
         track_instances.obj_idxes[900] = -2
-        """ update track base ?? """
+        """ update track base """
         self.track_base.update(track_instances, None)
        
         active_index = (track_instances.obj_idxes>=0) & (track_instances.scores >= self.track_base.filter_score_thresh)    # filter out sleep objects
         out.update(self.select_active_track_query(track_instances, active_index, img_metas))
         out.update(self.select_sdc_track_query(track_instances[track_instances.obj_idxes==-2], img_metas))
 
-        """ update with memory_bank ??"""
+        """ update with memory_bank """
         if self.memory_bank is not None:
             track_instances = self.memory_bank(track_instances)
 
-        """  Update track instances using matcher ??"""
+        """  Update track instances using matcher """
         tmp = {}
         tmp["init_track_instances"] = self._generate_empty_tracks()
         tmp["track_instances"] = track_instances
