@@ -22,9 +22,7 @@ RECALL	0.489
 
 ## GPU Requirements <a name="gpu"></a>
 
-`How to run UniAD lightweight, say just two 3090s at an affordable cost, is definitely an incoming feature.`
-
-`Stay tuned!`
+`How to run UniAD lightweight, say just two 3090s at an affordable cost, is definitely an incoming feature. Stay tuned!`
 
 UniAD is trained in two stages. The first stage is to train the perception modules (e.g., track and map), and the second stage initializes the weights trained from last stage and optimizes all task modules together. It's recommended to use at least 8 GPUs for training in both two stages. Training with fewer GPUs is fine but would cost more time.
 
