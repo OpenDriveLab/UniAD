@@ -176,4 +176,4 @@ dependencies:
       - yapf==0.32.0
       - yarl==1.8.2
       - zipp==3.15.0
-prefix: /nethome/hyou37/anaconda3/envs/uniad
+prefix: /root/anaconda3/envs/uniad
