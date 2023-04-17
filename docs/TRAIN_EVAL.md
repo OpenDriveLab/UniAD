@@ -64,7 +64,7 @@ The second-stage training takes ~ 17 GB GPU memory, ~ 4 days for 20 epochs on 8 
 ### Eval Command
 ```shell
 # N_GPUS is the number of GPUs used.  Recommended =8.
-# Evaluate with different number of GPUs (rather than 8) might slightly jitter the results.
+# If you evaluate with different number of GPUs rather than 8, the results might be slightly different.
 
 ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./path/to/ckpts.pth N_GPUS
 
