@@ -50,6 +50,8 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 ## News <a name="news"></a>
 
 - **`Paper Title Change`**: To avoid confusion with the "goal-point" navigation in Robotics, we change the title from "Goal-oriented" to "Planning-oriented" suggested by Reviewers. Thank you!
+
+- [2023/04/18] New feature: You can replace BEVFormer with other BEV Encoding methods, e.g., LSS, as long as you provide the `bev_embed` and `bev_pos` in [track_train](https://github.com/OpenDriveLab/UniAD/blob/4d7bb0436c5ca94ab664e3f3e073b11617e4f47b/projects/mmdet3d_plugin/uniad/detectors/uniad_track.py#L394) and [track_inference](https://github.com/OpenDriveLab/UniAD/blob/4d7bb0436c5ca94ab664e3f3e073b11617e4f47b/projects/mmdet3d_plugin/uniad/detectors/uniad_track.py#L661). Make sure your `bev_embed` and ours are of the same shape.
 - [2023/04/18] Base-model checkpoints are released.
 
 
