@@ -71,7 +71,7 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 ## Results and Pre-trained Models <a name="models"></a>
 UniAD is trained in two stages. Pretrained checkpoints of both stages will be released and the results of each model are listed in the following tables.
 
-### Stage-one: Perception training
+### Stage1: Perception training
 > We first train the perception modules (i.e., track and map) to obtain a stable weight initlization for the next stage. BEV features are aggregated with 5 frames (queue_length = 5).
 
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | config | Download |
@@ -80,7 +80,7 @@ UniAD is trained in two stages. Pretrained checkpoints of both stages will be re
 
 
 
-### Stage-two: End-to-end training
+### Stage2: End-to-end training
 > We optimize all task modules together, including track, map, motion, occupancy and planning. BEV features are aggregated with 3 frames (queue_length = 3).
 
 <!-- 
