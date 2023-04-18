@@ -50,7 +50,7 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 ## News <a name="news"></a>
 
 - **`Paper Title Change`**: To avoid confusion with the "goal-point" navigation in Robotics, we change the title from "Goal-oriented" to "Planning-oriented" suggested by Reviewers. Thank you!
-- [2023/04] **_Estimated_**. Model checkpoints release `v2.0`
+- [2023/04/18] Base-model checkpoints are released.
 
 
 - [2023/03/29] Code & model initial release `v1.0`
@@ -70,27 +70,23 @@ https://user-images.githubusercontent.com/48089846/202974395-15fe83ac-eebb-4f38-
 UniAD is trained in two stages. Pretrained checkpoints of both stages will be released and the results of each model are listed in the following tables.
 
 ### Stage-one: Perception training
-> We first train the perception modules (i.e., track and map) to obtain a stable initlization for the next stage.
+> We first train the perception modules (i.e., track and map) to obtain a stable weight initlization for the next stage. BEV features are aggregated with 5 frames (queue_length = 5).
 
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | config | Download |
 | :---: | :---: | :---: | :---: | :---:|:---:| 
-| UniAD-S | R50 | -  | - | TBA | TBA |
-| UniAD-B | R101 | 0.390 | 0.297 |  [base-stage1](projects/configs/track_map/base_stage1.py) | [base-stage1](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_track_map.pth) |
-| UniAD-L | V2-99 | - | - | TBA | TBA |
+| UniAD-B | R101 | 0.390 | 0.297 |  [base-stage1](projects/configs/stage1_track_map/base_track_map.py) | [base-stage1](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_track_map.pth) |
 
 
 
 ### Stage-two: End-to-end training
-> We optimize all task modules together, including track, map, motion, occupancy and planning.
+> We optimize all task modules together, including track, map, motion, occupancy and planning. BEV features are aggregated with 3 frames (queue_length = 3).
 
 <!-- 
 Pre-trained models and results under main metrics are provided below. We refer you to the [paper](https://arxiv.org/abs/2212.10156) for more details. -->
 
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | Motion<br>minADE |Occupancy<br>IoU-n. | Planning<br>avg.Col. | config | Download |
 | :---: | :---: | :---: | :---: | :---:|:---:| :---: | :---: | :---: |
-| UniAD-S | R50 | 0.241  | 0.315 | 0.788 | 59.4  | 0.32 | TBA | TBA |
-| UniAD-B | R101 | 0.359 | 0.313 | 0.708 | 63.4 | 0.31 |  TBA | TBA |
-| UniAD-L | V2-99 | 0.409 | 0.323 | 0.723 | 64.1 | 0.29 | TBA | TBA |
+| UniAD-B | R101 | 0.358 | 0.317 | 0.709 | 64.1 | 0.25 |  [base-stage2](projects/configs/stage2_e2e/base_e2e.py) | [base-stage2](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_e2e.pth) |
 
 ### Checkpoint Usage
 * Download the checkpoints you need into `UniAD/ckpts/` directory.
@@ -102,11 +98,11 @@ Pre-trained models and results under main metrics are provided below. We refer y
 The overall pipeline of UniAD is controlled by [uniad_e2e.py](projects/mmdet3d_plugin/uniad/detectors/uniad_e2e.py) which coordinates all the task modules in `UniAD/projects/mmdet3d_plugin/uniad/dense_heads`. If you are interested in the implementation of a specific task module, please refer to its corresponding file, e.g., [motion_head](projects/mmdet3d_plugin/uniad/dense_heads/motion_head.py).
 
 ## TODO List <a name="todos"></a>
-- [ ] Base-model configs & checkpoints [Est. 2023/04]
-- [ ] Separating BEV encoder and tracking module [Est. 2023/04]
 - [ ] Support larger batch size [Est. 2023/04]
 - [ ] (Long-term) Improve flexibility for future extensions
 - [ ] All configs & checkpoints
+- [x] Separating BEV encoder and tracking module
+- [x] Base-model configs & checkpoints
 - [x] Code initialization
 
 
