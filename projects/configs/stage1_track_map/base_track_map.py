@@ -420,16 +420,16 @@ test_pipeline = [
     dict(type="NormalizeMultiviewImage", **img_norm_cfg),
     dict(type="PadMultiViewImage", size_divisor=32),
     dict(type='LoadAnnotations3D_E2E', 
-         with_bbox_3d=False,  # NOTE: NO need for gt_bboxes and gt_labels for testing, only need occ_gt for evaluation
+         with_bbox_3d=False,
          with_label_3d=False, 
          with_attr_label=False,
 
-         with_future_anns=True,  # occ_flow gt
-         with_ins_inds_3d=False,  # No need to use matching in test
-         ins_inds_add_1=True,    # ins_inds start from 1
+         with_future_anns=True,
+         with_ins_inds_3d=False,
+         ins_inds_add_1=True, # ins_inds start from 1
          ),
     dict(type='GenerateOccFlowLabels', grid_conf=occflow_grid_conf, ignore_index=255, only_vehicle=True, 
-                                       filter_invisible=False),  # NOTE: Currently vis_token is not in pkl
+                                       filter_invisible=False),
     dict(
         type="MultiScaleFlipAug3D",
         img_scale=(1600, 900),
@@ -559,7 +559,7 @@ lr_config = dict(
     min_lr_ratio=1e-3,
 )
 total_epochs = 6
-evaluation = dict(interval=1, pipeline=test_pipeline)
+evaluation = dict(interval=2, pipeline=test_pipeline)
 runner = dict(type="EpochBasedRunner", max_epochs=total_epochs)
 log_config = dict(
     interval=10, hooks=[dict(type="TextLoggerHook"), dict(type="TensorboardLoggerHook")]
