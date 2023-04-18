@@ -17,6 +17,7 @@ from projects.mmdet3d_plugin.datasets.builder import build_dataloader
 from mmdet3d.models import build_model
 from mmdet.apis import set_random_seed
 from projects.mmdet3d_plugin.uniad.apis.test import custom_multi_gpu_test
+from projects.mmdet3d_plugin.uniad.apis.test import custom_multi_gpu_profile_test
 from mmdet.datasets import replace_ImageToTensor
 import time
 import os.path as osp
@@ -28,6 +29,7 @@ def parse_args():
         description='MMDet test (and eval) a model')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
+    parser.add_argument("batchindex", help="the index of batch")
     parser.add_argument('--out', default='output/results.pkl', help='output result file in pickle format')
     parser.add_argument(
         '--fuse-conv-bn',
@@ -106,6 +108,7 @@ def parse_args():
 
 
 def main():
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4,5,6,7"
     args = parse_args()
 
     assert args.out or args.eval or args.format_only or args.show \
@@ -228,8 +231,12 @@ def main():
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
-        outputs = custom_multi_gpu_test(model, data_loader, args.tmpdir,
-                                        args.gpu_collect)
+        #outputs = custom_multi_gpu_test(model, data_loader, args.tmpdir,
+        #                                args.gpu_collect)
+        outputs = custom_multi_gpu_profile_test(model, data_loader, int(args.batchindex))
+        if outputs == "Profile":
+            print("Profile Done")
+            return
 
     rank, _ = get_dist_info()
     if rank == 0:

@@ -17,8 +17,12 @@ from ..dense_heads.planning_head_plugin import PlanningMetric
 import mmcv
 import numpy as np
 import pycocotools.mask as mask_util
+from mmcv.parallel import DataContainer
 
+# Benchmark's Import
+import csv
 import logging
+import itertools
 
 def custom_encode_mask_results(mask_results):
     """Encode bitmap mask to RLE code. Semantic Masks only
@@ -41,38 +45,54 @@ def custom_encode_mask_results(mask_results):
     return [encoded_mask_results]
 
 
-def custom_multi_gpu_profile_test(model, data_loader):
-    model.eval()
+@torch.no_grad()
+def gpu_profile_one_batch(model, data_loader, index, step=20, worker_num=1):
+    start_index = index * step
 
     dataset = data_loader.dataset
     rank, world_size = get_dist_info()
     if rank == 0:
-        prog_bar = mmcv.ProgressBar(len(dataset))
-    time.sleep(2)  # This line can prevent deadlock problem in some cases.
+        prog_bar = mmcv.ProgressBar(step * worker_num)
 
-    inputs, _ = next(iter(data_loader))
-    tfb_writer = SummaryWriter(os.path.join("benchmark_logs/{0}_rank{1}".format("UniAD", rank)))
-    tfb_writer.add_graph(model, inputs)
-    warmup_iters = 2
+
+    #for i, data in enumerate(data_loader):
+    #    inputs = data
+    #    for i in range(len((inputs['img_metas']))):
+    #        inputs['img_metas'][i] = inputs['img_metas'][i].data
+    #    for i in range(len((inputs['img']))):
+    #        inputs['img'][i] = inputs['img'][i].data
+    #    break
+
+    profile_path = os.path.join("benchmark_logs/{0}_rank{1}_batch_{2}".format("UniAD", rank, index))
+
+    # tfb_writer = SummaryWriter(profile_path)
+    # tfb_writer.add_graph(model, inputs)
+    warmup_iters = 10
     wait_iters = 2
     batch_num = len(data_loader)
-    print("Totally Has {0} batches!".format(batch_num))
-    num_iters = batch_num - wait_iters - warmup_iters
+    num_iters = step - wait_iters - warmup_iters
 
     with torch.profiler.profile(
+            activities=[
+                torch.profiler.ProfilerActivity.CPU,
+                torch.profiler.ProfilerActivity.CUDA],
             schedule=torch.profiler.schedule(
                 wait=wait_iters,
                 warmup=warmup_iters,
                 active=num_iters,
                 repeat=1),
-            on_trace_ready=torch.profiler.tensorboard_trace_handler(
-                os.path.join("benchmark_logs/{0}_rank{1}".format("UniAD", rank))),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler(profile_path),
             with_stack=False,
             # with_stack=True incurs an additional overhead, and is better suited for investigating code. Remember to remove it if you are benchmarking performance.
-            profile_memory=True,
+            profile_memory=False,
             with_flops=True
     ) as profiler:
-        for i, data in enumerate(data_loader):
+        end_index = start_index + step
+        if end_index > len(data_loader):
+            end_index = len(data_loader)
+        print("\n\nfrom {0} to {1} in rank {2}, batch{3}\n\n"
+              .format(start_index, end_index, rank, index))
+        for i, data in enumerate(itertools.islice(data_loader, index, end_index)):
             result = model(return_loss=False, rescale=True, **data)
             batch_size = len(result)
             # bug from UniAD: 这样progress bar会不对，因为dataset不一定能被batchsize整除
@@ -82,23 +102,42 @@ def custom_multi_gpu_profile_test(model, data_loader):
 
             torch.cuda.synchronize()
             profiler.step()
-                
-    key_averages_by_cuda_time = profiler.key_averages().table(sort_by="self_cuda_time_total", row_limit=-1)
-    # save to the log
-    logging.info(key_averages_by_cuda_time)
-    time_per_image = key_averages_by_cuda_time.split("\n")[-2].split(" ")[-1][:-1]
-    if "m" in time_per_image:
-        time_per_image = float(time_per_image[:-1]) / 1000
-    else:
-        time_per_image = float(time_per_image)
-    imgs_per_sec = batch_size * num_iters / time_per_image
-    memory = torch.cuda.max_memory_allocated() / 1024*1024
 
-    def print_and_log(info):
-        print(info)
-        logging.info(info)
+        print("\n\nrank {0} batch {1} done!\n\n".format(rank, index))
+                    
+        key_averages_by_cuda_time = profiler.key_averages().table(sort_by="self_cuda_time_total", row_limit=-1)
+        # save to the log
+        logging.info(key_averages_by_cuda_time)
+        time_per_image = key_averages_by_cuda_time.split("\n")[-2].split(" ")[-1][:-1]
+        if "m" in time_per_image:
+            time_per_image = float(time_per_image[:-1]) / 1000
+        else:
+            time_per_image = float(time_per_image)
+        imgs_per_sec = batch_size * num_iters / time_per_image
+        memory = torch.cuda.max_memory_allocated() / 1024*1024
 
-    print_and_log(f"(batch_size: {batch_size}): {imgs_per_sec:.2f} FPS, max mem: {memory:.2f} MB")
+        def print_and_log(info):
+            print(info)
+            logging.info(info)
+
+        print_and_log(f"(batch_size: {batch_size}): {imgs_per_sec:.2f} FPS, max mem: {memory:.2f} MB, batch: {index}, rank: {rank}")
+
+        with open("{0}_key_averages.txt".format(profile_path), 'w') as file:
+            table = profiler.key_averages().table(sort_by="self_cpu_time_total")
+            file.write(table)
+
+    return end_index == len(data_loader)
+
+
+
+@torch.no_grad()
+def custom_multi_gpu_profile_test(model, data_loader, index):
+    model.eval()
+
+    time.sleep(2)  # This line can prevent deadlock problem in some cases.
+
+    gpu_profile_one_batch(model, data_loader, index)
+
     return "Profile"
 
 

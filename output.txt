@@ -1,0 +1,1016 @@
+sion 2.
+2023-04-18 04:37:57,263 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,265 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,268 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,270 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,273 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,275 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,278 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,280 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,283 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,285 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,288 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,290 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:37:57,293 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:37:57,297 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:37:57,300 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2 is upgraded to vers
+ion 2.
+The model and loaded state dict do not match exactly
+
+unexpected key in source state_dict: occ_head.bev_light_proj.conv_layers.0.conv.weight, occ_head.bev_light_proj
+.conv_layers.0.bn.weight, occ_head.bev_light_proj.conv_layers.0.bn.bias, occ_head.bev_light_proj.conv_layers.0.
+bn.running_mean, occ_head.bev_light_proj.conv_layers.0.bn.running_var, occ_head.bev_light_proj.conv_layers.0.bn
+.num_batches_tracked, occ_head.bev_light_proj.conv_layers.1.conv.weight, occ_head.bev_light_proj.conv_layers.1.
+bn.weight, occ_head.bev_light_proj.conv_layers.1.bn.bias, occ_head.bev_light_proj.conv_layers.1.bn.running_mean
+, occ_head.bev_light_proj.conv_layers.1.bn.running_var, occ_head.bev_light_proj.conv_layers.1.bn.num_batches_tr
+acked, occ_head.bev_light_proj.conv_layers.2.conv.weight, occ_head.bev_light_proj.conv_layers.2.bn.weight, occ_
+head.bev_light_proj.conv_layers.2.bn.bias, occ_head.bev_light_proj.conv_layers.2.bn.running_mean, occ_head.bev_
+light_proj.conv_layers.2.bn.running_var, occ_head.bev_light_proj.conv_layers.2.bn.num_batches_tracked, occ_head
+.bev_light_proj.conv_layers.3.weight, occ_head.bev_light_proj.conv_layers.3.bias, occ_head.base_downscale.0.lay
+ers.conv_down_project.weight, occ_head.base_downscale.0.layers.abn_down_project.0.weight, occ_head.base_downsca
+le.0.layers.abn_down_project.0.bias, occ_head.base_downscale.0.layers.abn_down_project.0.running_mean, occ_head
+.base_downscale.0.layers.abn_down_project.0.running_var, occ_head.base_downscale.0.layers.abn_down_project.0.nu
+m_batches_tracked, occ_head.base_downscale.0.layers.conv.weight, occ_head.base_downscale.0.layers.abn.0.weight,
+ occ_head.base_downscale.0.layers.abn.0.bias, occ_head.base_downscale.0.layers.abn.0.running_mean, occ_head.bas
+e_downscale.0.layers.abn.0.running_var, occ_head.base_downscale.0.layers.abn.0.num_batches_tracked, occ_head.ba
+se_downscale.0.layers.conv_up_project.weight, occ_head.base_downscale.0.layers.abn_up_project.0.weight, occ_hea
+d.base_downscale.0.layers.abn_up_project.0.bias, occ_head.base_downscale.0.layers.abn_up_project.0.running_mean
+, occ_head.base_downscale.0.layers.abn_up_project.0.running_var, occ_head.base_downscale.0.layers.abn_up_projec
+t.0.num_batches_tracked, occ_head.base_downscale.0.projection.conv_skip_proj.weight, occ_head.base_downscale.0.
+projection.bn_skip_proj.weight, occ_head.base_downscale.0.projection.bn_skip_proj.bias, occ_head.base_downscale
+.0.projection.bn_skip_proj.running_mean, occ_head.base_downscale.0.projection.bn_skip_proj.running_var, occ_hea
+d.base_downscale.0.projection.bn_skip_proj.num_batches_tracked, occ_head.base_downscale.1.layers.conv_down_proj
+ect.weight, occ_head.base_downscale.1.layers.abn_down_project.0.weight, occ_head.base_downscale.1.layers.abn_do
+wn_project.0.bias, occ_head.base_downscale.1.layers.abn_down_project.0.running_mean, occ_head.base_downscale.1.
+layers.abn_down_project.0.running_var, occ_head.base_downscale.1.layers.abn_down_project.0.num_batches_tracked,
+ occ_head.base_downscale.1.layers.conv.weight, occ_head.base_downscale.1.layers.abn.0.weight, occ_head.base_dow
+nscale.1.layers.abn.0.bias, occ_head.base_downscale.1.layers.abn.0.running_mean, occ_head.base_downscale.1.laye
+rs.abn.0.running_var, occ_head.base_downscale.1.layers.abn.0.num_batches_tracked, occ_head.base_downscale.1.lay
+ers.conv_up_project.weight, occ_head.base_downscale.1.layers.abn_up_project.0.weight, occ_head.base_downscale.1
+.layers.abn_up_project.0.bias, occ_head.base_downscale.1.layers.abn_up_project.0.running_mean, occ_head.base_do
+wnscale.1.layers.abn_up_project.0.running_var, occ_head.base_downscale.1.layers.abn_up_project.0.num_batches_tr
+acked, occ_head.base_downscale.1.projection.conv_skip_proj.weight, occ_head.base_downscale.1.projection.bn_skip
+_proj.weight, occ_head.base_downscale.1.projection.bn_skip_proj.bias, occ_head.base_downscale.1.projection.bn_s
+kip_proj.running_mean, occ_head.base_downscale.1.projection.bn_skip_proj.running_var, occ_head.base_downscale.1
+.projection.bn_skip_proj.num_batches_tracked, occ_head.transformer_decoder.layers.0.attentions.0.attn.in_proj_w
+eight, occ_head.transformer_decoder.layers.0.attentions.0.attn.in_proj_bias, occ_head.transformer_decoder.layer
+s.0.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.0.attentions.0.attn.out_proj.bias, o
+cc_head.transformer_decoder.layers.0.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.layers.0.at
+tentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.0.attentions.1.attn.out_proj.weight, occ_head
+.transformer_decoder.layers.0.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.0.ffns.0.lay
+ers.0.0.weight, occ_head.transformer_decoder.layers.0.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.laye
+rs.0.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.0.ffns.0.layers.1.bias, occ_head.transformer_d
+ecoder.layers.0.norms.0.weight, occ_head.transformer_decoder.layers.0.norms.0.bias, occ_head.transformer_decode
+r.layers.0.norms.1.weight, occ_head.transformer_decoder.layers.0.norms.1.bias, occ_head.transformer_decoder.lay
+ers.0.norms.2.weight, occ_head.transformer_decoder.layers.0.norms.2.bias, occ_head.transformer_decoder.layers.1
+.attentions.0.attn.in_proj_weight, occ_head.transformer_decoder.layers.1.attentions.0.attn.in_proj_bias, occ_he
+ad.transformer_decoder.layers.1.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.1.attent
+ions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.1.attentions.1.attn.in_proj_weight, occ_head.tra
+nsformer_decoder.layers.1.attentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.1.attentions.1.at
+tn.out_proj.weight, occ_head.transformer_decoder.layers.1.attentions.1.attn.out_proj.bias, occ_head.transformer
+_decoder.layers.1.ffns.0.layers.0.0.weight, occ_head.transformer_decoder.layers.1.ffns.0.layers.0.0.bias, occ_h
+ead.transformer_decoder.layers.1.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.1.ffns.0.layers.1.
+bias, occ_head.transformer_decoder.layers.1.norms.0.weight, occ_head.transformer_decoder.layers.1.norms.0.bias,
+ occ_head.transformer_decoder.layers.1.norms.1.weight, occ_head.transformer_decoder.layers.1.norms.1.bias, occ_
+head.transformer_decoder.layers.1.norms.2.weight, occ_head.transformer_decoder.layers.1.norms.2.bias, occ_head.
+transformer_decoder.layers.2.attentions.0.attn.in_proj_weight, occ_head.transformer_decoder.layers.2.attentions
+.0.attn.in_proj_bias, occ_head.transformer_decoder.layers.2.attentions.0.attn.out_proj.weight, occ_head.transfo
+rmer_decoder.layers.2.attentions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.2.attentions.1.attn.
+in_proj_weight, occ_head.transformer_decoder.layers.2.attentions.1.attn.in_proj_bias, occ_head.transformer_deco
+der.layers.2.attentions.1.attn.out_proj.weight, occ_head.transformer_decoder.layers.2.attentions.1.attn.out_pro
+j.bias, occ_head.transformer_decoder.layers.2.ffns.0.layers.0.0.weight, occ_head.transformer_decoder.layers.2.f
+fns.0.layers.0.0.bias, occ_head.transformer_decoder.layers.2.ffns.0.layers.1.weight, occ_head.transformer_decod
+er.layers.2.ffns.0.layers.1.bias, occ_head.transformer_decoder.layers.2.norms.0.weight, occ_head.transformer_de
+coder.layers.2.norms.0.bias, occ_head.transformer_decoder.layers.2.norms.1.weight, occ_head.transformer_decoder
+.layers.2.norms.1.bias, occ_head.transformer_decoder.layers.2.norms.2.weight, occ_head.transformer_decoder.laye
+rs.2.norms.2.bias, occ_head.transformer_decoder.layers.3.attentions.0.attn.in_proj_weight, occ_head.transformer
+_decoder.layers.3.attentions.0.attn.in_proj_bias, occ_head.transformer_decoder.layers.3.attentions.0.attn.out_p
+roj.weight, occ_head.transformer_decoder.layers.3.attentions.0.attn.out_proj.bias, occ_head.transformer_decoder
+.layers.3.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.layers.3.attentions.1.attn.in_proj_bia
+s, occ_head.transformer_decoder.layers.3.attentions.1.attn.out_proj.weight, occ_head.transformer_decoder.layers
+.3.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.3.ffns.0.layers.0.0.weight, occ_head.tr
+ansformer_decoder.layers.3.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.layers.3.ffns.0.layers.1.weight
+, occ_head.transformer_decoder.layers.3.ffns.0.layers.1.bias, occ_head.transformer_decoder.layers.3.norms.0.wei
+ght, occ_head.transformer_decoder.layers.3.norms.0.bias, occ_head.transformer_decoder.layers.3.norms.1.weight,
+occ_head.transformer_decoder.layers.3.norms.1.bias, occ_head.transformer_decoder.layers.3.norms.2.weight, occ_h
+ead.transformer_decoder.layers.3.norms.2.bias, occ_head.transformer_decoder.layers.4.attentions.0.attn.in_proj_
+weight, occ_head.transformer_decoder.layers.4.attentions.0.attn.in_proj_bias, occ_head.transformer_decoder.laye
+rs.4.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.4.attentions.0.attn.out_proj.bias,
+occ_head.transformer_decoder.layers.4.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.layers.4.a
+ttentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.4.attentions.1.attn.out_proj.weight, occ_hea
+d.transformer_decoder.layers.4.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.4.ffns.0.la
+yers.0.0.weight, occ_head.transformer_decoder.layers.4.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.lay
+ers.4.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.4.ffns.0.layers.1.bias, occ_head.transformer_
+decoder.layers.4.norms.0.weight, occ_head.transformer_decoder.layers.4.norms.0.bias, occ_head.transformer_decod
+er.layers.4.norms.1.weight, occ_head.transformer_decoder.layers.4.norms.1.bias, occ_head.transformer_decoder.la
+yers.4.norms.2.weight, occ_head.transformer_decoder.layers.4.norms.2.bias, occ_head.transformer_decoder.post_no
+rm.weight, occ_head.transformer_decoder.post_norm.bias, occ_head.temporal_mlps.0.layers.0.weight, occ_head.temp
+oral_mlps.0.layers.0.bias, occ_head.temporal_mlps.0.layers.1.weight, occ_head.temporal_mlps.0.layers.1.bias, oc
+c_head.temporal_mlps.1.layers.0.weight, occ_head.temporal_mlps.1.layers.0.bias, occ_head.temporal_mlps.1.layers
+.1.weight, occ_head.temporal_mlps.1.layers.1.bias, occ_head.temporal_mlps.2.layers.0.weight, occ_head.temporal_
+mlps.2.layers.0.bias, occ_head.temporal_mlps.2.layers.1.weight, occ_head.temporal_mlps.2.layers.1.bias, occ_hea
+d.temporal_mlps.3.layers.0.weight, occ_head.temporal_mlps.3.layers.0.bias, occ_head.temporal_mlps.3.layers.1.we
+ight, occ_head.temporal_mlps.3.layers.1.bias, occ_head.temporal_mlps.4.layers.0.weight, occ_head.temporal_mlps.
+4.layers.0.bias, occ_head.temporal_mlps.4.layers.1.weight, occ_head.temporal_mlps.4.layers.1.bias, occ_head.dow
+nscale_convs.0.layers.conv_down_project.weight, occ_head.downscale_convs.0.layers.abn_down_project.0.weight, oc
+c_head.downscale_convs.0.layers.abn_down_project.0.bias, occ_head.downscale_convs.0.layers.abn_down_project.0.r
+unning_mean, occ_head.downscale_convs.0.layers.abn_down_project.0.running_var, occ_head.downscale_convs.0.layer
+s.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.0.layers.conv.weight, occ_head.downscale_con
+vs.0.layers.abn.0.weight, occ_head.downscale_convs.0.layers.abn.0.bias, occ_head.downscale_convs.0.layers.abn.0
+.running_mean, occ_head.downscale_convs.0.layers.abn.0.running_var, occ_head.downscale_convs.0.layers.abn.0.num
+_batches_tracked, occ_head.downscale_convs.0.layers.conv_up_project.weight, occ_head.downscale_convs.0.layers.a
+bn_up_project.0.weight, occ_head.downscale_convs.0.layers.abn_up_project.0.bias, occ_head.downscale_convs.0.lay
+ers.abn_up_project.0.running_mean, occ_head.downscale_convs.0.layers.abn_up_project.0.running_var, occ_head.dow
+nscale_convs.0.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.0.projection.conv_skip_pro
+j.weight, occ_head.downscale_convs.0.projection.bn_skip_proj.weight, occ_head.downscale_convs.0.projection.bn_s
+kip_proj.bias, occ_head.downscale_convs.0.projection.bn_skip_proj.running_mean, occ_head.downscale_convs.0.proj
+ection.bn_skip_proj.running_var, occ_head.downscale_convs.0.projection.bn_skip_proj.num_batches_tracked, occ_he
+ad.downscale_convs.1.layers.conv_down_project.weight, occ_head.downscale_convs.1.layers.abn_down_project.0.weig
+ht, occ_head.downscale_convs.1.layers.abn_down_project.0.bias, occ_head.downscale_convs.1.layers.abn_down_proje
+ct.0.running_mean, occ_head.downscale_convs.1.layers.abn_down_project.0.running_var, occ_head.downscale_convs.1
+.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.1.layers.conv.weight, occ_head.downsca
+le_convs.1.layers.abn.0.weight, occ_head.downscale_convs.1.layers.abn.0.bias, occ_head.downscale_convs.1.layers
+.abn.0.running_mean, occ_head.downscale_convs.1.layers.abn.0.running_var, occ_head.downscale_convs.1.layers.abn
+.0.num_batches_tracked, occ_head.downscale_convs.1.layers.conv_up_project.weight, occ_head.downscale_convs.1.la
+yers.abn_up_project.0.weight, occ_head.downscale_convs.1.layers.abn_up_project.0.bias, occ_head.downscale_convs
+.1.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.1.layers.abn_up_project.0.running_var, occ_he
+ad.downscale_convs.1.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.1.projection.conv_sk
+ip_proj.weight, occ_head.downscale_convs.1.projection.bn_skip_proj.weight, occ_head.downscale_convs.1.projectio
+n.bn_skip_proj.bias, occ_head.downscale_convs.1.projection.bn_skip_proj.running_mean, occ_head.downscale_convs.
+1.projection.bn_skip_proj.running_var, occ_head.downscale_convs.1.projection.bn_skip_proj.num_batches_tracked,
+occ_head.downscale_convs.2.layers.conv_down_project.weight, occ_head.downscale_convs.2.layers.abn_down_project.
+0.weight, occ_head.downscale_convs.2.layers.abn_down_project.0.bias, occ_head.downscale_convs.2.layers.abn_down
+_project.0.running_mean, occ_head.downscale_convs.2.layers.abn_down_project.0.running_var, occ_head.downscale_c
+onvs.2.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.2.layers.conv.weight, occ_head.d
+ownscale_convs.2.layers.abn.0.weight, occ_head.downscale_convs.2.layers.abn.0.bias, occ_head.downscale_convs.2.
+layers.abn.0.running_mean, occ_head.downscale_convs.2.layers.abn.0.running_var, occ_head.downscale_convs.2.laye
+rs.abn.0.num_batches_tracked, occ_head.downscale_convs.2.layers.conv_up_project.weight, occ_head.downscale_conv
+s.2.layers.abn_up_project.0.weight, occ_head.downscale_convs.2.layers.abn_up_project.0.bias, occ_head.downscale
+_convs.2.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.2.layers.abn_up_project.0.running_var,
+occ_head.downscale_convs.2.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.2.projection.c
+onv_skip_proj.weight, occ_head.downscale_convs.2.projection.bn_skip_proj.weight, occ_head.downscale_convs.2.pro
+jection.bn_skip_proj.bias, occ_head.downscale_convs.2.projection.bn_skip_proj.running_mean, occ_head.downscale_
+convs.2.projection.bn_skip_proj.running_var, occ_head.downscale_convs.2.projection.bn_skip_proj.num_batches_tra
+cked, occ_head.downscale_convs.3.layers.conv_down_project.weight, occ_head.downscale_convs.3.layers.abn_down_pr
+oject.0.weight, occ_head.downscale_convs.3.layers.abn_down_project.0.bias, occ_head.downscale_convs.3.layers.ab
+n_down_project.0.running_mean, occ_head.downscale_convs.3.layers.abn_down_project.0.running_var, occ_head.downs
+cale_convs.3.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.3.layers.conv.weight, occ_
+head.downscale_convs.3.layers.abn.0.weight, occ_head.downscale_convs.3.layers.abn.0.bias, occ_head.downscale_co
+nvs.3.layers.abn.0.running_mean, occ_head.downscale_convs.3.layers.abn.0.running_var, occ_head.downscale_convs.
+3.layers.abn.0.num_batches_tracked, occ_head.downscale_convs.3.layers.conv_up_project.weight, occ_head.downscal
+e_convs.3.layers.abn_up_project.0.weight, occ_head.downscale_convs.3.layers.abn_up_project.0.bias, occ_head.dow
+nscale_convs.3.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.3.layers.abn_up_project.0.running
+_var, occ_head.downscale_convs.3.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.3.projec
+tion.conv_skip_proj.weight, occ_head.downscale_convs.3.projection.bn_skip_proj.weight, occ_head.downscale_convs
+.3.projection.bn_skip_proj.bias, occ_head.downscale_convs.3.projection.bn_skip_proj.running_mean, occ_head.down
+scale_convs.3.projection.bn_skip_proj.running_var, occ_head.downscale_convs.3.projection.bn_skip_proj.num_batch
+es_tracked, occ_head.downscale_convs.4.layers.conv_down_project.weight, occ_head.downscale_convs.4.layers.abn_d
+own_project.0.weight, occ_head.downscale_convs.4.layers.abn_down_project.0.bias, occ_head.downscale_convs.4.lay
+ers.abn_down_project.0.running_mean, occ_head.downscale_convs.4.layers.abn_down_project.0.running_var, occ_head
+.downscale_convs.4.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.4.layers.conv.weight
+, occ_head.downscale_convs.4.layers.abn.0.weight, occ_head.downscale_convs.4.layers.abn.0.bias, occ_head.downsc
+ale_convs.4.layers.abn.0.running_mean, occ_head.downscale_convs.4.layers.abn.0.running_var, occ_head.downscale_
+convs.4.layers.abn.0.num_batches_tracked, occ_head.downscale_convs.4.layers.conv_up_project.weight, occ_head.do
+wnscale_convs.4.layers.abn_up_project.0.weight, occ_head.downscale_convs.4.layers.abn_up_project.0.bias, occ_he
+ad.downscale_convs.4.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.4.layers.abn_up_project.0.r
+unning_var, occ_head.downscale_convs.4.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.4.
+projection.conv_skip_proj.weight, occ_head.downscale_convs.4.projection.bn_skip_proj.weight, occ_head.downscale
+_convs.4.projection.bn_skip_proj.bias, occ_head.downscale_convs.4.projection.bn_skip_proj.running_mean, occ_hea
+d.downscale_convs.4.projection.bn_skip_proj.running_var, occ_head.downscale_convs.4.projection.bn_skip_proj.num
+_batches_tracked, occ_head.upsample_adds.0.upsample_layer.1.weight, occ_head.upsample_adds.0.upsample_layer.2.w
+eight, occ_head.upsample_adds.0.upsample_layer.2.bias, occ_head.upsample_adds.0.upsample_layer.2.running_mean,
+occ_head.upsample_adds.0.upsample_layer.2.running_var, occ_head.upsample_adds.0.upsample_layer.2.num_batches_tr
+acked, occ_head.upsample_adds.1.upsample_layer.1.weight, occ_head.upsample_adds.1.upsample_layer.2.weight, occ_
+head.upsample_adds.1.upsample_layer.2.bias, occ_head.upsample_adds.1.upsample_layer.2.running_mean, occ_head.up
+sample_adds.1.upsample_layer.2.running_var, occ_head.upsample_adds.1.upsample_layer.2.num_batches_tracked, occ_
+head.upsample_adds.2.upsample_layer.1.weight, occ_head.upsample_adds.2.upsample_layer.2.weight, occ_head.upsamp
+le_adds.2.upsample_layer.2.bias, occ_head.upsample_adds.2.upsample_layer.2.running_mean, occ_head.upsample_adds
+.2.upsample_layer.2.running_var, occ_head.upsample_adds.2.upsample_layer.2.num_batches_tracked, occ_head.upsamp
+le_adds.3.upsample_layer.1.weight, occ_head.upsample_adds.3.upsample_layer.2.weight, occ_head.upsample_adds.3.u
+psample_layer.2.bias, occ_head.upsample_adds.3.upsample_layer.2.running_mean, occ_head.upsample_adds.3.upsample
+_layer.2.running_var, occ_head.upsample_adds.3.upsample_layer.2.num_batches_tracked, occ_head.upsample_adds.4.u
+psample_layer.1.weight, occ_head.upsample_adds.4.upsample_layer.2.weight, occ_head.upsample_adds.4.upsample_lay
+er.2.bias, occ_head.upsample_adds.4.upsample_layer.2.running_mean, occ_head.upsample_adds.4.upsample_layer.2.ru
+nning_var, occ_head.upsample_adds.4.upsample_layer.2.num_batches_tracked, occ_head.dense_decoder.layers.0.conv.
+1.weight, occ_head.dense_decoder.layers.0.conv.2.weight, occ_head.dense_decoder.layers.0.conv.2.bias, occ_head.
+dense_decoder.layers.0.conv.2.running_mean, occ_head.dense_decoder.layers.0.conv.2.running_var, occ_head.dense_
+decoder.layers.0.conv.2.num_batches_tracked, occ_head.dense_decoder.layers.0.conv.4.weight, occ_head.dense_deco
+der.layers.0.conv.5.weight, occ_head.dense_decoder.layers.0.conv.5.bias, occ_head.dense_decoder.layers.0.conv.5
+.running_mean, occ_head.dense_decoder.layers.0.conv.5.running_var, occ_head.dense_decoder.layers.0.conv.5.num_b
+atches_tracked, occ_head.dense_decoder.layers.0.up.weight, occ_head.dense_decoder.layers.0.up.bias, occ_head.de
+nse_decoder.layers.1.conv.1.weight, occ_head.dense_decoder.layers.1.conv.2.weight, occ_head.dense_decoder.layer
+s.1.conv.2.bias, occ_head.dense_decoder.layers.1.conv.2.running_mean, occ_head.dense_decoder.layers.1.conv.2.ru
+nning_var, occ_head.dense_decoder.layers.1.conv.2.num_batches_tracked, occ_head.dense_decoder.layers.1.conv.4.w
+eight, occ_head.dense_decoder.layers.1.conv.5.weight, occ_head.dense_decoder.layers.1.conv.5.bias, occ_head.den
+se_decoder.layers.1.conv.5.running_mean, occ_head.dense_decoder.layers.1.conv.5.running_var, occ_head.dense_dec
+oder.layers.1.conv.5.num_batches_tracked, occ_head.dense_decoder.layers.1.up.weight, occ_head.dense_decoder.lay
+ers.1.up.bias, occ_head.mode_fuser.0.weight, occ_head.mode_fuser.0.bias, occ_head.mode_fuser.1.weight, occ_head
+.mode_fuser.1.bias, occ_head.multi_query_fuser.0.weight, occ_head.multi_query_fuser.0.bias, occ_head.multi_quer
+y_fuser.1.weight, occ_head.multi_query_fuser.1.bias, occ_head.multi_query_fuser.3.weight, occ_head.multi_query_
+fuser.3.bias, occ_head.query_to_occ_feat.layers.0.weight, occ_head.query_to_occ_feat.layers.0.bias, occ_head.qu
+ery_to_occ_feat.layers.1.weight, occ_head.query_to_occ_feat.layers.1.bias, occ_head.query_to_occ_feat.layers.2.
+weight, occ_head.query_to_occ_feat.layers.2.bias, motion_head.learnable_motion_query_embedding.weight, motion_h
+ead.deep_interact.intention_interaction_layers.interaction_transformer.self_attn.in_proj_weight, motion_head.de
+ep_interact.intention_interaction_layers.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_inter
+act.intention_interaction_layers.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact.i
+ntention_interaction_layers.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.intentio
+n_interaction_layers.interaction_transformer.linear1.weight, motion_head.deep_interact.intention_interaction_la
+yers.interaction_transformer.linear1.bias, motion_head.deep_interact.intention_interaction_layers.interaction_t
+ransformer.linear2.weight, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.linea
+r2.bias, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.norm1.weight, motion_he
+ad.deep_interact.intention_interaction_layers.interaction_transformer.norm1.bias, motion_head.deep_interact.int
+ention_interaction_layers.interaction_transformer.norm2.weight, motion_head.deep_interact.intention_interaction
+_layers.interaction_transformer.norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interact
+ion_transformer.self_attn.in_proj_weight, motion_head.deep_interact.track_agent_interaction_layers.0.interactio
+n_transformer.self_attn.in_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tr
+ansformer.self_attn.out_proj.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tra
+nsformer.self_attn.out_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transf
+ormer.multihead_attn.in_proj_weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tra
+nsformer.multihead_attn.in_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tr
+ansformer.multihead_attn.out_proj.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interactio
+n_transformer.multihead_attn.out_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interact
+ion_transformer.linear1.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transfor
+mer.linear1.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer.linear2.we
+ight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer.linear2.bias, motion_h
+ead.deep_interact.track_agent_interaction_layers.0.interaction_transformer.norm1.weight, motion_head.deep_inter
+act.track_agent_interaction_layers.0.interaction_transformer.norm1.bias, motion_head.deep_interact.track_agent_
+interaction_layers.0.interaction_transformer.norm2.weight, motion_head.deep_interact.track_agent_interaction_la
+yers.0.interaction_transformer.norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interacti
+on_transformer.norm3.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer
+.norm3.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.in_pr
+oj_weight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.in_proj
+_bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.out_proj.we
+ight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.out_proj.bia
+s, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.in_proj_we
+ight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.in_proj
+_bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.out_pr
+oj.weight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.ou
+t_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.linear1.weight,
+ motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.linear1.bias, motion_head.d
+eep_interact.track_agent_interaction_layers.1.interaction_transformer.linear2.weight, motion_head.deep_interact
+.track_agent_interaction_layers.1.interaction_transformer.linear2.bias, motion_head.deep_interact.track_agent_i
+nteraction_layers.1.interaction_transformer.norm1.weight, motion_head.deep_interact.track_agent_interaction_lay
+ers.1.interaction_transformer.norm1.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interactio
+n_transformer.norm2.weight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.
+norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.norm3.weight, mo
+tion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.norm3.bias, motion_head.deep_i
+nteract.track_agent_interaction_layers.2.interaction_transformer.self_attn.in_proj_weight, motion_head.deep_int
+eract.track_agent_interaction_layers.2.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_interac
+t.track_agent_interaction_layers.2.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact
+.track_agent_interaction_layers.2.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.tr
+ack_agent_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact
+.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep_interac
+t.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.weight, motion_head.deep_int
+eract.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.bias, motion_head.deep_i
+nteract.track_agent_interaction_layers.2.interaction_transformer.linear1.weight, motion_head.deep_interact.trac
+k_agent_interaction_layers.2.interaction_transformer.linear1.bias, motion_head.deep_interact.track_agent_intera
+ction_layers.2.interaction_transformer.linear2.weight, motion_head.deep_interact.track_agent_interaction_layers
+.2.interaction_transformer.linear2.bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction
+_transformer.norm1.weight, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.n
+orm1.bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.norm2.weight, mot
+ion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.norm2.bias, motion_head.deep_in
+teract.track_agent_interaction_layers.2.interaction_transformer.norm3.weight, motion_head.deep_interact.track_a
+gent_interaction_layers.2.interaction_transformer.norm3.bias, motion_head.deep_interact.map_interaction_layers.
+0.interaction_transformer.self_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.0.interact
+ion_transformer.self_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transfor
+mer.self_attn.out_proj.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.self_
+attn.out_proj.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.i
+n_proj_weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.in_pro
+j_bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.out_proj.weig
+ht, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.out_proj.bias, mo
+tion_head.deep_interact.map_interaction_layers.0.interaction_transformer.linear1.weight, motion_head.deep_inter
+act.map_interaction_layers.0.interaction_transformer.linear1.bias, motion_head.deep_interact.map_interaction_la
+yers.0.interaction_transformer.linear2.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_t
+ransformer.linear2.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.norm1.weigh
+t, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.norm1.bias, motion_head.deep_inte
+ract.map_interaction_layers.0.interaction_transformer.norm2.weight, motion_head.deep_interact.map_interaction_l
+ayers.0.interaction_transformer.norm2.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_tran
+sformer.norm3.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.norm3.bias, mo
+tion_head.deep_interact.map_interaction_layers.1.interaction_transformer.self_attn.in_proj_weight, motion_head.
+deep_interact.map_interaction_layers.1.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_interac
+t.map_interaction_layers.1.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact.map_int
+eraction_layers.1.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.map_interaction_la
+yers.1.interaction_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.
+1.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.1.inter
+action_transformer.multihead_attn.out_proj.weight, motion_head.deep_interact.map_interaction_layers.1.interacti
+on_transformer.multihead_attn.out_proj.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_tra
+nsformer.linear1.weight, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.linear1.bia
+s, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.linear2.weight, motion_head.deep_
+interact.map_interaction_layers.1.interaction_transformer.linear2.bias, motion_head.deep_interact.map_interacti
+on_layers.1.interaction_transformer.norm1.weight, motion_head.deep_interact.map_interaction_layers.1.interactio
+n_transformer.norm1.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm2.weig
+ht, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm2.bias, motion_head.deep_int
+eract.map_interaction_layers.1.interaction_transformer.norm3.weight, motion_head.deep_interact.map_interaction_
+layers.1.interaction_transformer.norm3.bias, motion_head.deep_interact.map_interaction_layers.2.interaction_tra
+nsformer.self_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.s
+elf_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.self_attn.out
+_proj.weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.self_attn.out_proj.bia
+s, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_weight, mo
+tion_head.deep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_bias, motion_he
+ad.deep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.weight, motion_head.d
+eep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.bias, motion_head.deep_in
+teract.map_interaction_layers.2.interaction_transformer.linear1.weight, motion_head.deep_interact.map_interacti
+on_layers.2.interaction_transformer.linear1.bias, motion_head.deep_interact.map_interaction_layers.2.interactio
+n_transformer.linear2.weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.linear
+2.bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.norm1.weight, motion_head.de
+ep_interact.map_interaction_layers.2.interaction_transformer.norm1.bias, motion_head.deep_interact.map_interact
+ion_layers.2.interaction_transformer.norm2.weight, motion_head.deep_interact.map_interaction_layers.2.interacti
+on_transformer.norm2.bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.norm3.wei
+ght, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.norm3.bias, motion_head.deep_in
+teract.bev_interaction_layers.0.attentions.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction
+_layers.0.attentions.0.sampling_offsets.bias, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.a
+ttention_weights.weight, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.attention_weights.bias
+, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.value_proj.weight, motion_head.deep_interact.
+bev_interaction_layers.0.attentions.0.value_proj.bias, motion_head.deep_interact.bev_interaction_layers.0.atten
+tions.0.output_proj.0.weight, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.output_proj.0.bia
+s, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.output_proj.1.weight, motion_head.deep_inter
+act.bev_interaction_layers.0.attentions.0.output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.
+0.ffns.0.layers.0.0.weight, motion_head.deep_interact.bev_interaction_layers.0.ffns.0.layers.0.0.bias, motion_h
+ead.deep_interact.bev_interaction_layers.0.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_la
+yers.0.ffns.0.layers.1.bias, motion_head.deep_interact.bev_interaction_layers.0.norms.0.weight, motion_head.dee
+p_interact.bev_interaction_layers.0.norms.0.bias, motion_head.deep_interact.bev_interaction_layers.0.norms.1.we
+ight, motion_head.deep_interact.bev_interaction_layers.0.norms.1.bias, motion_head.deep_interact.bev_interactio
+n_layers.1.attentions.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions.
+0.sampling_offsets.bias, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.attention_weights.weig
+ht, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.attention_weights.bias, motion_head.deep_in
+teract.bev_interaction_layers.1.attentions.0.value_proj.weight, motion_head.deep_interact.bev_interaction_layer
+s.1.attentions.0.value_proj.bias, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.0
+.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.0.bias, motion_head.deep_i
+nteract.bev_interaction_layers.1.attentions.0.output_proj.1.weight, motion_head.deep_interact.bev_interaction_l
+ayers.1.attentions.0.output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.0.0.w
+eight, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.0.0.bias, motion_head.deep_interact.bev
+_interaction_layers.1.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.
+1.bias, motion_head.deep_interact.bev_interaction_layers.1.norms.0.weight, motion_head.deep_interact.bev_intera
+ction_layers.1.norms.0.bias, motion_head.deep_interact.bev_interaction_layers.1.norms.1.weight, motion_head.dee
+p_interact.bev_interaction_layers.1.norms.1.bias, motion_head.deep_interact.bev_interaction_layers.2.attentions
+.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.sampling_offsets.bi
+as, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.attention_weights.weight, motion_head.deep_
+interact.bev_interaction_layers.2.attentions.0.attention_weights.bias, motion_head.deep_interact.bev_interactio
+n_layers.2.attentions.0.value_proj.weight, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.valu
+e_proj.bias, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.output_proj.0.weight, motion_head.
+deep_interact.bev_interaction_layers.2.attentions.0.output_proj.0.bias, motion_head.deep_interact.bev_interacti
+on_layers.2.attentions.0.output_proj.1.weight, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.
+output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.2.ffns.0.layers.0.0.weight, motion_head.de
+ep_interact.bev_interaction_layers.2.ffns.0.layers.0.0.bias, motion_head.deep_interact.bev_interaction_layers.2
+.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_layers.2.ffns.0.layers.1.bias, motion_head.d
+eep_interact.bev_interaction_layers.2.norms.0.weight, motion_head.deep_interact.bev_interaction_layers.2.norms.
+0.bias, motion_head.deep_interact.bev_interaction_layers.2.norms.1.weight, motion_head.deep_interact.bev_intera
+ction_layers.2.norms.1.bias, motion_head.deep_interact.static_dynamic_fuser.0.weight, motion_head.deep_interact
+.static_dynamic_fuser.0.bias, motion_head.deep_interact.static_dynamic_fuser.2.weight, motion_head.deep_interac
+t.static_dynamic_fuser.2.bias, motion_head.deep_interact.dynamic_embed_fuser.0.weight, motion_head.deep_interac
+t.dynamic_embed_fuser.0.bias, motion_head.deep_interact.dynamic_embed_fuser.2.weight, motion_head.deep_interact
+.dynamic_embed_fuser.2.bias, motion_head.deep_interact.query_fuser.0.weight, motion_head.deep_interact.query_fu
+ser.0.bias, motion_head.deep_interact.query_fuser.2.weight, motion_head.deep_interact.query_fuser.2.bias, motio
+n_head.traj_cls_branches.0.0.weight, motion_head.traj_cls_branches.0.0.bias, motion_head.traj_cls_branches.0.1.
+weight, motion_head.traj_cls_branches.0.1.bias, motion_head.traj_cls_branches.0.3.weight, motion_head.traj_cls_
+branches.0.3.bias, motion_head.traj_cls_branches.0.4.weight, motion_head.traj_cls_branches.0.4.bias, motion_hea
+d.traj_cls_branches.0.6.weight, motion_head.traj_cls_branches.0.6.bias, motion_head.traj_cls_branches.1.0.weigh
+t, motion_head.traj_cls_branches.1.0.bias, motion_head.traj_cls_branches.1.1.weight, motion_head.traj_cls_branc
+hes.1.1.bias, motion_head.traj_cls_branches.1.3.weight, motion_head.traj_cls_branches.1.3.bias, motion_head.tra
+j_cls_branches.1.4.weight, motion_head.traj_cls_branches.1.4.bias, motion_head.traj_cls_branches.1.6.weight, mo
+tion_head.traj_cls_branches.1.6.bias, motion_head.traj_cls_branches.2.0.weight, motion_head.traj_cls_branches.2
+.0.bias, motion_head.traj_cls_branches.2.1.weight, motion_head.traj_cls_branches.2.1.bias, motion_head.traj_cls
+_branches.2.3.weight, motion_head.traj_cls_branches.2.3.bias, motion_head.traj_cls_branches.2.4.weight, motion_
+head.traj_cls_branches.2.4.bias, motion_head.traj_cls_branches.2.6.weight, motion_head.traj_cls_branches.2.6.bi
+as, motion_head.traj_reg_branches.0.0.weight, motion_head.traj_reg_branches.0.0.bias, motion_head.traj_reg_bran
+ches.0.2.weight, motion_head.traj_reg_branches.0.2.bias, motion_head.traj_reg_branches.0.4.weight, motion_head.
+traj_reg_branches.0.4.bias, motion_head.traj_reg_branches.1.0.weight, motion_head.traj_reg_branches.1.0.bias, m
+otion_head.traj_reg_branches.1.2.weight, motion_head.traj_reg_branches.1.2.bias, motion_head.traj_reg_branches.
+1.4.weight, motion_head.traj_reg_branches.1.4.bias, motion_head.traj_reg_branches.2.0.weight, motion_head.traj_
+reg_branches.2.0.bias, motion_head.traj_reg_branches.2.2.weight, motion_head.traj_reg_branches.2.2.bias, motion
+_head.traj_reg_branches.2.4.weight, motion_head.traj_reg_branches.2.4.bias, motion_head.intention_ep_embedding_
+agent.0.weight, motion_head.intention_ep_embedding_agent.0.bias, motion_head.intention_ep_embedding_agent.2.wei
+ght, motion_head.intention_ep_embedding_agent.2.bias, motion_head.intention_ep_embedding_offset.0.weight, motio
+n_head.intention_ep_embedding_offset.0.bias, motion_head.intention_ep_embedding_offset.2.weight, motion_head.in
+tention_ep_embedding_offset.2.bias, motion_head.intention_ep_embedding_ego.0.weight, motion_head.intention_ep_e
+mbedding_ego.0.bias, motion_head.intention_ep_embedding_ego.2.weight, motion_head.intention_ep_embedding_ego.2.
+bias, motion_head.query_embedding_box.0.weight, motion_head.query_embedding_box.0.bias, motion_head.query_embed
+ding_box.2.weight, motion_head.query_embedding_box.2.bias
+
+[                                                  ] 0/8, elapsed: 0s, ETA:
+
+from 0 to 8 in rank 0, batch0
+
+
+[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 8/8, 0.3 task/s, elapsed: 25s, ETA:     0swriting result in benchmark_logs
+/UniAD_rank0_batch_0.json
+Traceback (most recent call last):
+  File "./tools/test.py", line 268, in <module>
+    main()
+  File "./tools/test.py", line 236, in main
+    outputs = custom_multi_gpu_profile_test(model, data_loader, int(args.batchindex))
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/autograd/grad_mode.py", line 28,
+ in decorate_context
+    return func(*args, **kwargs)
+  File "/nethome/hyou37/xluo/UniAD/projects/mmdet3d_plugin/uniad/apis/test.py", line 144, in custom_multi_gpu_p
+rofile_test
+    gpu_profile_one_batch(model, data_loader, index)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/autograd/grad_mode.py", line 28,
+ in decorate_context
+    return func(*args, **kwargs)
+  File "/nethome/hyou37/xluo/UniAD/projects/mmdet3d_plugin/uniad/apis/test.py", line 108, in gpu_profile_one_ba
+tch
+    profiler.export_chrome_trace('{0}_{1}.json'
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/profiler/profiler.py", line 330,
+ in export_chrome_trace
+    return self.profiler.export_chrome_trace(path)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/autograd/profiler.py", line 537,
+ in export_chrome_trace
+    self.kineto_results.save(path)
+RuntimeError: Trace is already saved
+/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py:178: FutureWarning
+: The module torch.distributed.launch is deprecated
+and will be removed in future. Use torch.distributed.run.
+Note that --use_env is set by default in torch.distributed.run.
+If your script expects `--local_rank` argument to be set, please
+change it to read from `os.environ['LOCAL_RANK']` instead. See
+https://pytorch.org/docs/stable/distributed.html#launch-utility for
+further instructions
+
+  warnings.warn(
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 901889) of binary:
+ /nethome/hyou37/anaconda3/envs/uniad/bin/python
+Traceback (most recent call last):
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 193
+, in <module>
+    main()
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 189
+, in main
+    launch(args)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 174
+, in launch
+    run(args)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/run.py", line 689, i
+n run
+    elastic_launch(
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launcher/api.py", li
+ne 116, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launcher/api.py", li
+ne 244, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
+***************************************
+         ./tools/test.py FAILED
+=======================================
+Root Cause:
+[0]:
+  time: 2023-04-18_04:39:24
+  rank: 0 (local_rank: 0)
+  exitcode: 1 (pid: 901889)
+  error_file: <N/A>
+  msg: "Process failed with exitcode 1"
+=======================================
+Other Failures:
+  <NO_OTHER_FAILURES>
+***************************************
+
+(uniad) hyou37@eic-gt-gpu1:~/xluo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py
+ ./ckpts/uniad_base_track_map.pth 1 0
+projects.mmdet3d_plugin
+======
+Loading NuScenes tables for version v1.0-trainval...
+23 category,
+8 attribute,
+4 visibility,
+64386 instance,
+12 sensor,
+10200 calibrated_sensor,
+2631083 ego_pose,
+68 log,
+850 scene,
+34149 sample,
+2631083 sample_data,
+1166187 sample_annotation,
+4 map,
+Done loading in 35.797 seconds.
+======
+Reverse indexing ...
+Done reverse indexing in 8.4 seconds.
+======
+load checkpoint from local path: ./ckpts/uniad_base_track_map.pth
+2023-04-18 04:43:41,291 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,296 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,300 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,303 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,307 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,310 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,314 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,317 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,321 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,325 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,328 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,332 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,335 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,339 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,342 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,346 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,349 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,353 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,356 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,360 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,363 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,367 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,371 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv2 is upgraded to ver
+sion 2.
+2023-04-18 04:43:41,374 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,380 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2 is upgraded to vers
+ion 2.
+2023-04-18 04:43:41,383 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2 is upgraded to vers
+ion 2.
+The model and loaded state dict do not match exactly
+
+unexpected key in source state_dict: occ_head.bev_light_proj.conv_layers.0.conv.weight, occ_head.bev_light_proj
+.conv_layers.0.bn.weight, occ_head.bev_light_proj.conv_layers.0.bn.bias, occ_head.bev_light_proj.conv_layers.0.
+bn.running_mean, occ_head.bev_light_proj.conv_layers.0.bn.running_var, occ_head.bev_light_proj.conv_layers.0.bn
+.num_batches_tracked, occ_head.bev_light_proj.conv_layers.1.conv.weight, occ_head.bev_light_proj.conv_layers.1.
+bn.weight, occ_head.bev_light_proj.conv_layers.1.bn.bias, occ_head.bev_light_proj.conv_layers.1.bn.running_mean
+, occ_head.bev_light_proj.conv_layers.1.bn.running_var, occ_head.bev_light_proj.conv_layers.1.bn.num_batches_tr
+acked, occ_head.bev_light_proj.conv_layers.2.conv.weight, occ_head.bev_light_proj.conv_layers.2.bn.weight, occ_
+head.bev_light_proj.conv_layers.2.bn.bias, occ_head.bev_light_proj.conv_layers.2.bn.running_mean, occ_head.bev_
+light_proj.conv_layers.2.bn.running_var, occ_head.bev_light_proj.conv_layers.2.bn.num_batches_tracked, occ_head
+.bev_light_proj.conv_layers.3.weight, occ_head.bev_light_proj.conv_layers.3.bias, occ_head.base_downscale.0.lay
+ers.conv_down_project.weight, occ_head.base_downscale.0.layers.abn_down_project.0.weight, occ_head.base_downsca
+le.0.layers.abn_down_project.0.bias, occ_head.base_downscale.0.layers.abn_down_project.0.running_mean, occ_head
+.base_downscale.0.layers.abn_down_project.0.running_var, occ_head.base_downscale.0.layers.abn_down_project.0.nu
+m_batches_tracked, occ_head.base_downscale.0.layers.conv.weight, occ_head.base_downscale.0.layers.abn.0.weight,
+ occ_head.base_downscale.0.layers.abn.0.bias, occ_head.base_downscale.0.layers.abn.0.running_mean, occ_head.bas
+e_downscale.0.layers.abn.0.running_var, occ_head.base_downscale.0.layers.abn.0.num_batches_tracked, occ_head.ba
+se_downscale.0.layers.conv_up_project.weight, occ_head.base_downscale.0.layers.abn_up_project.0.weight, occ_hea
+d.base_downscale.0.layers.abn_up_project.0.bias, occ_head.base_downscale.0.layers.abn_up_project.0.running_mean
+, occ_head.base_downscale.0.layers.abn_up_project.0.running_var, occ_head.base_downscale.0.layers.abn_up_projec
+t.0.num_batches_tracked, occ_head.base_downscale.0.projection.conv_skip_proj.weight, occ_head.base_downscale.0.
+projection.bn_skip_proj.weight, occ_head.base_downscale.0.projection.bn_skip_proj.bias, occ_head.base_downscale
+.0.projection.bn_skip_proj.running_mean, occ_head.base_downscale.0.projection.bn_skip_proj.running_var, occ_hea
+d.base_downscale.0.projection.bn_skip_proj.num_batches_tracked, occ_head.base_downscale.1.layers.conv_down_proj
+ect.weight, occ_head.base_downscale.1.layers.abn_down_project.0.weight, occ_head.base_downscale.1.layers.abn_do
+wn_project.0.bias, occ_head.base_downscale.1.layers.abn_down_project.0.running_mean, occ_head.base_downscale.1.
+layers.abn_down_project.0.running_var, occ_head.base_downscale.1.layers.abn_down_project.0.num_batches_tracked,
+ occ_head.base_downscale.1.layers.conv.weight, occ_head.base_downscale.1.layers.abn.0.weight, occ_head.base_dow
+nscale.1.layers.abn.0.bias, occ_head.base_downscale.1.layers.abn.0.running_mean, occ_head.base_downscale.1.laye
+rs.abn.0.running_var, occ_head.base_downscale.1.layers.abn.0.num_batches_tracked, occ_head.base_downscale.1.lay
+ers.conv_up_project.weight, occ_head.base_downscale.1.layers.abn_up_project.0.weight, occ_head.base_downscale.1
+.layers.abn_up_project.0.bias, occ_head.base_downscale.1.layers.abn_up_project.0.running_mean, occ_head.base_do
+wnscale.1.layers.abn_up_project.0.running_var, occ_head.base_downscale.1.layers.abn_up_project.0.num_batches_tr
+acked, occ_head.base_downscale.1.projection.conv_skip_proj.weight, occ_head.base_downscale.1.projection.bn_skip
+_proj.weight, occ_head.base_downscale.1.projection.bn_skip_proj.bias, occ_head.base_downscale.1.projection.bn_s
+kip_proj.running_mean, occ_head.base_downscale.1.projection.bn_skip_proj.running_var, occ_head.base_downscale.1
+.projection.bn_skip_proj.num_batches_tracked, occ_head.transformer_decoder.layers.0.attentions.0.attn.in_proj_w
+eight, occ_head.transformer_decoder.layers.0.attentions.0.attn.in_proj_bias, occ_head.transformer_decoder.layer
+s.0.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.0.attentions.0.attn.out_proj.bias, o
+cc_head.transformer_decoder.layers.0.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.layers.0.at
+tentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.0.attentions.1.attn.out_proj.weight, occ_head
+.transformer_decoder.layers.0.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.0.ffns.0.lay
+ers.0.0.weight, occ_head.transformer_decoder.layers.0.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.laye
+rs.0.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.0.ffns.0.layers.1.bias, occ_head.transformer_d
+ecoder.layers.0.norms.0.weight, occ_head.transformer_decoder.layers.0.norms.0.bias, occ_head.transformer_decode
+r.layers.0.norms.1.weight, occ_head.transformer_decoder.layers.0.norms.1.bias, occ_head.transformer_decoder.lay
+ers.0.norms.2.weight, occ_head.transformer_decoder.layers.0.norms.2.bias, occ_head.transformer_decoder.layers.1
+.attentions.0.attn.in_proj_weight, occ_head.transformer_decoder.layers.1.attentions.0.attn.in_proj_bias, occ_he
+ad.transformer_decoder.layers.1.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.1.attent
+ions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.1.attentions.1.attn.in_proj_weight, occ_head.tra
+nsformer_decoder.layers.1.attentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.1.attentions.1.at
+tn.out_proj.weight, occ_head.transformer_decoder.layers.1.attentions.1.attn.out_proj.bias, occ_head.transformer
+_decoder.layers.1.ffns.0.layers.0.0.weight, occ_head.transformer_decoder.layers.1.ffns.0.layers.0.0.bias, occ_h
+ead.transformer_decoder.layers.1.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.1.ffns.0.layers.1.
+bias, occ_head.transformer_decoder.layers.1.norms.0.weight, occ_head.transformer_decoder.layers.1.norms.0.bias,
+ occ_head.transformer_decoder.layers.1.norms.1.weight, occ_head.transformer_decoder.layers.1.norms.1.bias, occ_
+head.transformer_decoder.layers.1.norms.2.weight, occ_head.transformer_decoder.layers.1.norms.2.bias, occ_head.
+transformer_decoder.layers.2.attentions.0.attn.in_proj_weight, occ_head.transformer_decoder.layers.2.attentions
+.0.attn.in_proj_bias, occ_head.transformer_decoder.layers.2.attentions.0.attn.out_proj.weight, occ_head.transfo
+rmer_decoder.layers.2.attentions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.2.attentions.1.attn.
+in_proj_weight, occ_head.transformer_decoder.layers.2.attentions.1.attn.in_proj_bias, occ_head.transformer_deco
+der.layers.2.attentions.1.attn.out_proj.weight, occ_head.transformer_decoder.layers.2.attentions.1.attn.out_pro
+j.bias, occ_head.transformer_decoder.layers.2.ffns.0.layers.0.0.weight, occ_head.transformer_decoder.layers.2.f
+fns.0.layers.0.0.bias, occ_head.transformer_decoder.layers.2.ffns.0.layers.1.weight, occ_head.transformer_decod
+er.layers.2.ffns.0.layers.1.bias, occ_head.transformer_decoder.layers.2.norms.0.weight, occ_head.transformer_de
+coder.layers.2.norms.0.bias, occ_head.transformer_decoder.layers.2.norms.1.weight, occ_head.transformer_decoder
+.layers.2.norms.1.bias, occ_head.transformer_decoder.layers.2.norms.2.weight, occ_head.transformer_decoder.laye
+rs.2.norms.2.bias, occ_head.transformer_decoder.layers.3.attentions.0.attn.in_proj_weight, occ_head.transformer
+_decoder.layers.3.attentions.0.attn.in_proj_bias, occ_head.transformer_decoder.layers.3.attentions.0.attn.out_p
+roj.weight, occ_head.transformer_decoder.layers.3.attentions.0.attn.out_proj.bias, occ_head.transformer_decoder
+.layers.3.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.layers.3.attentions.1.attn.in_proj_bia
+s, occ_head.transformer_decoder.layers.3.attentions.1.attn.out_proj.weight, occ_head.transformer_decoder.layers
+.3.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.3.ffns.0.layers.0.0.weight, occ_head.tr
+ansformer_decoder.layers.3.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.layers.3.ffns.0.layers.1.weight
+, occ_head.transformer_decoder.layers.3.ffns.0.layers.1.bias, occ_head.transformer_decoder.layers.3.norms.0.wei
+ght, occ_head.transformer_decoder.layers.3.norms.0.bias, occ_head.transformer_decoder.layers.3.norms.1.weight,
+occ_head.transformer_decoder.layers.3.norms.1.bias, occ_head.transformer_decoder.layers.3.norms.2.weight, occ_h
+ead.transformer_decoder.layers.3.norms.2.bias, occ_head.transformer_decoder.layers.4.attentions.0.attn.in_proj_
+weight, occ_head.transformer_decoder.layers.4.attentions.0.attn.in_proj_bias, occ_head.transformer_decoder.laye
+rs.4.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.4.attentions.0.attn.out_proj.bias,
+occ_head.transformer_decoder.layers.4.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.layers.4.a
+ttentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.4.attentions.1.attn.out_proj.weight, occ_hea
+d.transformer_decoder.layers.4.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.4.ffns.0.la
+yers.0.0.weight, occ_head.transformer_decoder.layers.4.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.lay
+ers.4.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.4.ffns.0.layers.1.bias, occ_head.transformer_
+decoder.layers.4.norms.0.weight, occ_head.transformer_decoder.layers.4.norms.0.bias, occ_head.transformer_decod
+er.layers.4.norms.1.weight, occ_head.transformer_decoder.layers.4.norms.1.bias, occ_head.transformer_decoder.la
+yers.4.norms.2.weight, occ_head.transformer_decoder.layers.4.norms.2.bias, occ_head.transformer_decoder.post_no
+rm.weight, occ_head.transformer_decoder.post_norm.bias, occ_head.temporal_mlps.0.layers.0.weight, occ_head.temp
+oral_mlps.0.layers.0.bias, occ_head.temporal_mlps.0.layers.1.weight, occ_head.temporal_mlps.0.layers.1.bias, oc
+c_head.temporal_mlps.1.layers.0.weight, occ_head.temporal_mlps.1.layers.0.bias, occ_head.temporal_mlps.1.layers
+.1.weight, occ_head.temporal_mlps.1.layers.1.bias, occ_head.temporal_mlps.2.layers.0.weight, occ_head.temporal_
+mlps.2.layers.0.bias, occ_head.temporal_mlps.2.layers.1.weight, occ_head.temporal_mlps.2.layers.1.bias, occ_hea
+d.temporal_mlps.3.layers.0.weight, occ_head.temporal_mlps.3.layers.0.bias, occ_head.temporal_mlps.3.layers.1.we
+ight, occ_head.temporal_mlps.3.layers.1.bias, occ_head.temporal_mlps.4.layers.0.weight, occ_head.temporal_mlps.
+4.layers.0.bias, occ_head.temporal_mlps.4.layers.1.weight, occ_head.temporal_mlps.4.layers.1.bias, occ_head.dow
+nscale_convs.0.layers.conv_down_project.weight, occ_head.downscale_convs.0.layers.abn_down_project.0.weight, oc
+c_head.downscale_convs.0.layers.abn_down_project.0.bias, occ_head.downscale_convs.0.layers.abn_down_project.0.r
+unning_mean, occ_head.downscale_convs.0.layers.abn_down_project.0.running_var, occ_head.downscale_convs.0.layer
+s.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.0.layers.conv.weight, occ_head.downscale_con
+vs.0.layers.abn.0.weight, occ_head.downscale_convs.0.layers.abn.0.bias, occ_head.downscale_convs.0.layers.abn.0
+.running_mean, occ_head.downscale_convs.0.layers.abn.0.running_var, occ_head.downscale_convs.0.layers.abn.0.num
+_batches_tracked, occ_head.downscale_convs.0.layers.conv_up_project.weight, occ_head.downscale_convs.0.layers.a
+bn_up_project.0.weight, occ_head.downscale_convs.0.layers.abn_up_project.0.bias, occ_head.downscale_convs.0.lay
+ers.abn_up_project.0.running_mean, occ_head.downscale_convs.0.layers.abn_up_project.0.running_var, occ_head.dow
+nscale_convs.0.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.0.projection.conv_skip_pro
+j.weight, occ_head.downscale_convs.0.projection.bn_skip_proj.weight, occ_head.downscale_convs.0.projection.bn_s
+kip_proj.bias, occ_head.downscale_convs.0.projection.bn_skip_proj.running_mean, occ_head.downscale_convs.0.proj
+ection.bn_skip_proj.running_var, occ_head.downscale_convs.0.projection.bn_skip_proj.num_batches_tracked, occ_he
+ad.downscale_convs.1.layers.conv_down_project.weight, occ_head.downscale_convs.1.layers.abn_down_project.0.weig
+ht, occ_head.downscale_convs.1.layers.abn_down_project.0.bias, occ_head.downscale_convs.1.layers.abn_down_proje
+ct.0.running_mean, occ_head.downscale_convs.1.layers.abn_down_project.0.running_var, occ_head.downscale_convs.1
+.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.1.layers.conv.weight, occ_head.downsca
+le_convs.1.layers.abn.0.weight, occ_head.downscale_convs.1.layers.abn.0.bias, occ_head.downscale_convs.1.layers
+.abn.0.running_mean, occ_head.downscale_convs.1.layers.abn.0.running_var, occ_head.downscale_convs.1.layers.abn
+.0.num_batches_tracked, occ_head.downscale_convs.1.layers.conv_up_project.weight, occ_head.downscale_convs.1.la
+yers.abn_up_project.0.weight, occ_head.downscale_convs.1.layers.abn_up_project.0.bias, occ_head.downscale_convs
+.1.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.1.layers.abn_up_project.0.running_var, occ_he
+ad.downscale_convs.1.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.1.projection.conv_sk
+ip_proj.weight, occ_head.downscale_convs.1.projection.bn_skip_proj.weight, occ_head.downscale_convs.1.projectio
+n.bn_skip_proj.bias, occ_head.downscale_convs.1.projection.bn_skip_proj.running_mean, occ_head.downscale_convs.
+1.projection.bn_skip_proj.running_var, occ_head.downscale_convs.1.projection.bn_skip_proj.num_batches_tracked,
+occ_head.downscale_convs.2.layers.conv_down_project.weight, occ_head.downscale_convs.2.layers.abn_down_project.
+0.weight, occ_head.downscale_convs.2.layers.abn_down_project.0.bias, occ_head.downscale_convs.2.layers.abn_down
+_project.0.running_mean, occ_head.downscale_convs.2.layers.abn_down_project.0.running_var, occ_head.downscale_c
+onvs.2.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.2.layers.conv.weight, occ_head.d
+ownscale_convs.2.layers.abn.0.weight, occ_head.downscale_convs.2.layers.abn.0.bias, occ_head.downscale_convs.2.
+layers.abn.0.running_mean, occ_head.downscale_convs.2.layers.abn.0.running_var, occ_head.downscale_convs.2.laye
+rs.abn.0.num_batches_tracked, occ_head.downscale_convs.2.layers.conv_up_project.weight, occ_head.downscale_conv
+s.2.layers.abn_up_project.0.weight, occ_head.downscale_convs.2.layers.abn_up_project.0.bias, occ_head.downscale
+_convs.2.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.2.layers.abn_up_project.0.running_var,
+occ_head.downscale_convs.2.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.2.projection.c
+onv_skip_proj.weight, occ_head.downscale_convs.2.projection.bn_skip_proj.weight, occ_head.downscale_convs.2.pro
+jection.bn_skip_proj.bias, occ_head.downscale_convs.2.projection.bn_skip_proj.running_mean, occ_head.downscale_
+convs.2.projection.bn_skip_proj.running_var, occ_head.downscale_convs.2.projection.bn_skip_proj.num_batches_tra
+cked, occ_head.downscale_convs.3.layers.conv_down_project.weight, occ_head.downscale_convs.3.layers.abn_down_pr
+oject.0.weight, occ_head.downscale_convs.3.layers.abn_down_project.0.bias, occ_head.downscale_convs.3.layers.ab
+n_down_project.0.running_mean, occ_head.downscale_convs.3.layers.abn_down_project.0.running_var, occ_head.downs
+cale_convs.3.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.3.layers.conv.weight, occ_
+head.downscale_convs.3.layers.abn.0.weight, occ_head.downscale_convs.3.layers.abn.0.bias, occ_head.downscale_co
+nvs.3.layers.abn.0.running_mean, occ_head.downscale_convs.3.layers.abn.0.running_var, occ_head.downscale_convs.
+3.layers.abn.0.num_batches_tracked, occ_head.downscale_convs.3.layers.conv_up_project.weight, occ_head.downscal
+e_convs.3.layers.abn_up_project.0.weight, occ_head.downscale_convs.3.layers.abn_up_project.0.bias, occ_head.dow
+nscale_convs.3.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.3.layers.abn_up_project.0.running
+_var, occ_head.downscale_convs.3.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.3.projec
+tion.conv_skip_proj.weight, occ_head.downscale_convs.3.projection.bn_skip_proj.weight, occ_head.downscale_convs
+.3.projection.bn_skip_proj.bias, occ_head.downscale_convs.3.projection.bn_skip_proj.running_mean, occ_head.down
+scale_convs.3.projection.bn_skip_proj.running_var, occ_head.downscale_convs.3.projection.bn_skip_proj.num_batch
+es_tracked, occ_head.downscale_convs.4.layers.conv_down_project.weight, occ_head.downscale_convs.4.layers.abn_d
+own_project.0.weight, occ_head.downscale_convs.4.layers.abn_down_project.0.bias, occ_head.downscale_convs.4.lay
+ers.abn_down_project.0.running_mean, occ_head.downscale_convs.4.layers.abn_down_project.0.running_var, occ_head
+.downscale_convs.4.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.4.layers.conv.weight
+, occ_head.downscale_convs.4.layers.abn.0.weight, occ_head.downscale_convs.4.layers.abn.0.bias, occ_head.downsc
+ale_convs.4.layers.abn.0.running_mean, occ_head.downscale_convs.4.layers.abn.0.running_var, occ_head.downscale_
+convs.4.layers.abn.0.num_batches_tracked, occ_head.downscale_convs.4.layers.conv_up_project.weight, occ_head.do
+wnscale_convs.4.layers.abn_up_project.0.weight, occ_head.downscale_convs.4.layers.abn_up_project.0.bias, occ_he
+ad.downscale_convs.4.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.4.layers.abn_up_project.0.r
+unning_var, occ_head.downscale_convs.4.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.4.
+projection.conv_skip_proj.weight, occ_head.downscale_convs.4.projection.bn_skip_proj.weight, occ_head.downscale
+_convs.4.projection.bn_skip_proj.bias, occ_head.downscale_convs.4.projection.bn_skip_proj.running_mean, occ_hea
+d.downscale_convs.4.projection.bn_skip_proj.running_var, occ_head.downscale_convs.4.projection.bn_skip_proj.num
+_batches_tracked, occ_head.upsample_adds.0.upsample_layer.1.weight, occ_head.upsample_adds.0.upsample_layer.2.w
+eight, occ_head.upsample_adds.0.upsample_layer.2.bias, occ_head.upsample_adds.0.upsample_layer.2.running_mean,
+occ_head.upsample_adds.0.upsample_layer.2.running_var, occ_head.upsample_adds.0.upsample_layer.2.num_batches_tr
+acked, occ_head.upsample_adds.1.upsample_layer.1.weight, occ_head.upsample_adds.1.upsample_layer.2.weight, occ_
+head.upsample_adds.1.upsample_layer.2.bias, occ_head.upsample_adds.1.upsample_layer.2.running_mean, occ_head.up
+sample_adds.1.upsample_layer.2.running_var, occ_head.upsample_adds.1.upsample_layer.2.num_batches_tracked, occ_
+head.upsample_adds.2.upsample_layer.1.weight, occ_head.upsample_adds.2.upsample_layer.2.weight, occ_head.upsamp
+le_adds.2.upsample_layer.2.bias, occ_head.upsample_adds.2.upsample_layer.2.running_mean, occ_head.upsample_adds
+.2.upsample_layer.2.running_var, occ_head.upsample_adds.2.upsample_layer.2.num_batches_tracked, occ_head.upsamp
+le_adds.3.upsample_layer.1.weight, occ_head.upsample_adds.3.upsample_layer.2.weight, occ_head.upsample_adds.3.u
+psample_layer.2.bias, occ_head.upsample_adds.3.upsample_layer.2.running_mean, occ_head.upsample_adds.3.upsample
+_layer.2.running_var, occ_head.upsample_adds.3.upsample_layer.2.num_batches_tracked, occ_head.upsample_adds.4.u
+psample_layer.1.weight, occ_head.upsample_adds.4.upsample_layer.2.weight, occ_head.upsample_adds.4.upsample_lay
+er.2.bias, occ_head.upsample_adds.4.upsample_layer.2.running_mean, occ_head.upsample_adds.4.upsample_layer.2.ru
+nning_var, occ_head.upsample_adds.4.upsample_layer.2.num_batches_tracked, occ_head.dense_decoder.layers.0.conv.
+1.weight, occ_head.dense_decoder.layers.0.conv.2.weight, occ_head.dense_decoder.layers.0.conv.2.bias, occ_head.
+dense_decoder.layers.0.conv.2.running_mean, occ_head.dense_decoder.layers.0.conv.2.running_var, occ_head.dense_
+decoder.layers.0.conv.2.num_batches_tracked, occ_head.dense_decoder.layers.0.conv.4.weight, occ_head.dense_deco
+der.layers.0.conv.5.weight, occ_head.dense_decoder.layers.0.conv.5.bias, occ_head.dense_decoder.layers.0.conv.5
+.running_mean, occ_head.dense_decoder.layers.0.conv.5.running_var, occ_head.dense_decoder.layers.0.conv.5.num_b
+atches_tracked, occ_head.dense_decoder.layers.0.up.weight, occ_head.dense_decoder.layers.0.up.bias, occ_head.de
+nse_decoder.layers.1.conv.1.weight, occ_head.dense_decoder.layers.1.conv.2.weight, occ_head.dense_decoder.layer
+s.1.conv.2.bias, occ_head.dense_decoder.layers.1.conv.2.running_mean, occ_head.dense_decoder.layers.1.conv.2.ru
+nning_var, occ_head.dense_decoder.layers.1.conv.2.num_batches_tracked, occ_head.dense_decoder.layers.1.conv.4.w
+eight, occ_head.dense_decoder.layers.1.conv.5.weight, occ_head.dense_decoder.layers.1.conv.5.bias, occ_head.den
+se_decoder.layers.1.conv.5.running_mean, occ_head.dense_decoder.layers.1.conv.5.running_var, occ_head.dense_dec
+oder.layers.1.conv.5.num_batches_tracked, occ_head.dense_decoder.layers.1.up.weight, occ_head.dense_decoder.lay
+ers.1.up.bias, occ_head.mode_fuser.0.weight, occ_head.mode_fuser.0.bias, occ_head.mode_fuser.1.weight, occ_head
+.mode_fuser.1.bias, occ_head.multi_query_fuser.0.weight, occ_head.multi_query_fuser.0.bias, occ_head.multi_quer
+y_fuser.1.weight, occ_head.multi_query_fuser.1.bias, occ_head.multi_query_fuser.3.weight, occ_head.multi_query_
+fuser.3.bias, occ_head.query_to_occ_feat.layers.0.weight, occ_head.query_to_occ_feat.layers.0.bias, occ_head.qu
+ery_to_occ_feat.layers.1.weight, occ_head.query_to_occ_feat.layers.1.bias, occ_head.query_to_occ_feat.layers.2.
+weight, occ_head.query_to_occ_feat.layers.2.bias, motion_head.learnable_motion_query_embedding.weight, motion_h
+ead.deep_interact.intention_interaction_layers.interaction_transformer.self_attn.in_proj_weight, motion_head.de
+ep_interact.intention_interaction_layers.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_inter
+act.intention_interaction_layers.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact.i
+ntention_interaction_layers.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.intentio
+n_interaction_layers.interaction_transformer.linear1.weight, motion_head.deep_interact.intention_interaction_la
+yers.interaction_transformer.linear1.bias, motion_head.deep_interact.intention_interaction_layers.interaction_t
+ransformer.linear2.weight, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.linea
+r2.bias, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.norm1.weight, motion_he
+ad.deep_interact.intention_interaction_layers.interaction_transformer.norm1.bias, motion_head.deep_interact.int
+ention_interaction_layers.interaction_transformer.norm2.weight, motion_head.deep_interact.intention_interaction
+_layers.interaction_transformer.norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interact
+ion_transformer.self_attn.in_proj_weight, motion_head.deep_interact.track_agent_interaction_layers.0.interactio
+n_transformer.self_attn.in_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tr
+ansformer.self_attn.out_proj.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tra
+nsformer.self_attn.out_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transf
+ormer.multihead_attn.in_proj_weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tra
+nsformer.multihead_attn.in_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_tr
+ansformer.multihead_attn.out_proj.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interactio
+n_transformer.multihead_attn.out_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interact
+ion_transformer.linear1.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transfor
+mer.linear1.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer.linear2.we
+ight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer.linear2.bias, motion_h
+ead.deep_interact.track_agent_interaction_layers.0.interaction_transformer.norm1.weight, motion_head.deep_inter
+act.track_agent_interaction_layers.0.interaction_transformer.norm1.bias, motion_head.deep_interact.track_agent_
+interaction_layers.0.interaction_transformer.norm2.weight, motion_head.deep_interact.track_agent_interaction_la
+yers.0.interaction_transformer.norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interacti
+on_transformer.norm3.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer
+.norm3.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.in_pr
+oj_weight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.in_proj
+_bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.out_proj.we
+ight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.out_proj.bia
+s, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.in_proj_we
+ight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.in_proj
+_bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.out_pr
+oj.weight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.ou
+t_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.linear1.weight,
+ motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.linear1.bias, motion_head.d
+eep_interact.track_agent_interaction_layers.1.interaction_transformer.linear2.weight, motion_head.deep_interact
+.track_agent_interaction_layers.1.interaction_transformer.linear2.bias, motion_head.deep_interact.track_agent_i
+nteraction_layers.1.interaction_transformer.norm1.weight, motion_head.deep_interact.track_agent_interaction_lay
+ers.1.interaction_transformer.norm1.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interactio
+n_transformer.norm2.weight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.
+norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.norm3.weight, mo
+tion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.norm3.bias, motion_head.deep_i
+nteract.track_agent_interaction_layers.2.interaction_transformer.self_attn.in_proj_weight, motion_head.deep_int
+eract.track_agent_interaction_layers.2.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_interac
+t.track_agent_interaction_layers.2.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact
+.track_agent_interaction_layers.2.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.tr
+ack_agent_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact
+.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep_interac
+t.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.weight, motion_head.deep_int
+eract.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.bias, motion_head.deep_i
+nteract.track_agent_interaction_layers.2.interaction_transformer.linear1.weight, motion_head.deep_interact.trac
+k_agent_interaction_layers.2.interaction_transformer.linear1.bias, motion_head.deep_interact.track_agent_intera
+ction_layers.2.interaction_transformer.linear2.weight, motion_head.deep_interact.track_agent_interaction_layers
+.2.interaction_transformer.linear2.bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction
+_transformer.norm1.weight, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.n
+orm1.bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.norm2.weight, mot
+ion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.norm2.bias, motion_head.deep_in
+teract.track_agent_interaction_layers.2.interaction_transformer.norm3.weight, motion_head.deep_interact.track_a
+gent_interaction_layers.2.interaction_transformer.norm3.bias, motion_head.deep_interact.map_interaction_layers.
+0.interaction_transformer.self_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.0.interact
+ion_transformer.self_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transfor
+mer.self_attn.out_proj.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.self_
+attn.out_proj.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.i
+n_proj_weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.in_pro
+j_bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.out_proj.weig
+ht, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.out_proj.bias, mo
+tion_head.deep_interact.map_interaction_layers.0.interaction_transformer.linear1.weight, motion_head.deep_inter
+act.map_interaction_layers.0.interaction_transformer.linear1.bias, motion_head.deep_interact.map_interaction_la
+yers.0.interaction_transformer.linear2.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_t
+ransformer.linear2.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.norm1.weigh
+t, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.norm1.bias, motion_head.deep_inte
+ract.map_interaction_layers.0.interaction_transformer.norm2.weight, motion_head.deep_interact.map_interaction_l
+ayers.0.interaction_transformer.norm2.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_tran
+sformer.norm3.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.norm3.bias, mo
+tion_head.deep_interact.map_interaction_layers.1.interaction_transformer.self_attn.in_proj_weight, motion_head.
+deep_interact.map_interaction_layers.1.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_interac
+t.map_interaction_layers.1.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact.map_int
+eraction_layers.1.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.map_interaction_la
+yers.1.interaction_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.
+1.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.1.inter
+action_transformer.multihead_attn.out_proj.weight, motion_head.deep_interact.map_interaction_layers.1.interacti
+on_transformer.multihead_attn.out_proj.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_tra
+nsformer.linear1.weight, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.linear1.bia
+s, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.linear2.weight, motion_head.deep_
+interact.map_interaction_layers.1.interaction_transformer.linear2.bias, motion_head.deep_interact.map_interacti
+on_layers.1.interaction_transformer.norm1.weight, motion_head.deep_interact.map_interaction_layers.1.interactio
+n_transformer.norm1.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm2.weig
+ht, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm2.bias, motion_head.deep_int
+eract.map_interaction_layers.1.interaction_transformer.norm3.weight, motion_head.deep_interact.map_interaction_
+layers.1.interaction_transformer.norm3.bias, motion_head.deep_interact.map_interaction_layers.2.interaction_tra
+nsformer.self_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.s
+elf_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.self_attn.out
+_proj.weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.self_attn.out_proj.bia
+s, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_weight, mo
+tion_head.deep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_bias, motion_he
+ad.deep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.weight, motion_head.d
+eep_interact.map_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.bias, motion_head.deep_in
+teract.map_interaction_layers.2.interaction_transformer.linear1.weight, motion_head.deep_interact.map_interacti
+on_layers.2.interaction_transformer.linear1.bias, motion_head.deep_interact.map_interaction_layers.2.interactio
+n_transformer.linear2.weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.linear
+2.bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.norm1.weight, motion_head.de
+ep_interact.map_interaction_layers.2.interaction_transformer.norm1.bias, motion_head.deep_interact.map_interact
+ion_layers.2.interaction_transformer.norm2.weight, motion_head.deep_interact.map_interaction_layers.2.interacti
+on_transformer.norm2.bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.norm3.wei
+ght, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.norm3.bias, motion_head.deep_in
+teract.bev_interaction_layers.0.attentions.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction
+_layers.0.attentions.0.sampling_offsets.bias, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.a
+ttention_weights.weight, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.attention_weights.bias
+, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.value_proj.weight, motion_head.deep_interact.
+bev_interaction_layers.0.attentions.0.value_proj.bias, motion_head.deep_interact.bev_interaction_layers.0.atten
+tions.0.output_proj.0.weight, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.output_proj.0.bia
+s, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.output_proj.1.weight, motion_head.deep_inter
+act.bev_interaction_layers.0.attentions.0.output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.
+0.ffns.0.layers.0.0.weight, motion_head.deep_interact.bev_interaction_layers.0.ffns.0.layers.0.0.bias, motion_h
+ead.deep_interact.bev_interaction_layers.0.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_la
+yers.0.ffns.0.layers.1.bias, motion_head.deep_interact.bev_interaction_layers.0.norms.0.weight, motion_head.dee
+p_interact.bev_interaction_layers.0.norms.0.bias, motion_head.deep_interact.bev_interaction_layers.0.norms.1.we
+ight, motion_head.deep_interact.bev_interaction_layers.0.norms.1.bias, motion_head.deep_interact.bev_interactio
+n_layers.1.attentions.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions.
+0.sampling_offsets.bias, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.attention_weights.weig
+ht, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.attention_weights.bias, motion_head.deep_in
+teract.bev_interaction_layers.1.attentions.0.value_proj.weight, motion_head.deep_interact.bev_interaction_layer
+s.1.attentions.0.value_proj.bias, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.0
+.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.0.bias, motion_head.deep_i
+nteract.bev_interaction_layers.1.attentions.0.output_proj.1.weight, motion_head.deep_interact.bev_interaction_l
+ayers.1.attentions.0.output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.0.0.w
+eight, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.0.0.bias, motion_head.deep_interact.bev
+_interaction_layers.1.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.
+1.bias, motion_head.deep_interact.bev_interaction_layers.1.norms.0.weight, motion_head.deep_interact.bev_intera
+ction_layers.1.norms.0.bias, motion_head.deep_interact.bev_interaction_layers.1.norms.1.weight, motion_head.dee
+p_interact.bev_interaction_layers.1.norms.1.bias, motion_head.deep_interact.bev_interaction_layers.2.attentions
+.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.sampling_offsets.bi
+as, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.attention_weights.weight, motion_head.deep_
+interact.bev_interaction_layers.2.attentions.0.attention_weights.bias, motion_head.deep_interact.bev_interactio
+n_layers.2.attentions.0.value_proj.weight, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.valu
+e_proj.bias, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.output_proj.0.weight, motion_head.
+deep_interact.bev_interaction_layers.2.attentions.0.output_proj.0.bias, motion_head.deep_interact.bev_interacti
+on_layers.2.attentions.0.output_proj.1.weight, motion_head.deep_interact.bev_interaction_layers.2.attentions.0.
+output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.2.ffns.0.layers.0.0.weight, motion_head.de
+ep_interact.bev_interaction_layers.2.ffns.0.layers.0.0.bias, motion_head.deep_interact.bev_interaction_layers.2
+.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_layers.2.ffns.0.layers.1.bias, motion_head.d
+eep_interact.bev_interaction_layers.2.norms.0.weight, motion_head.deep_interact.bev_interaction_layers.2.norms.
+0.bias, motion_head.deep_interact.bev_interaction_layers.2.norms.1.weight, motion_head.deep_interact.bev_intera
+ction_layers.2.norms.1.bias, motion_head.deep_interact.static_dynamic_fuser.0.weight, motion_head.deep_interact
+.static_dynamic_fuser.0.bias, motion_head.deep_interact.static_dynamic_fuser.2.weight, motion_head.deep_interac
+t.static_dynamic_fuser.2.bias, motion_head.deep_interact.dynamic_embed_fuser.0.weight, motion_head.deep_interac
+t.dynamic_embed_fuser.0.bias, motion_head.deep_interact.dynamic_embed_fuser.2.weight, motion_head.deep_interact
+.dynamic_embed_fuser.2.bias, motion_head.deep_interact.query_fuser.0.weight, motion_head.deep_interact.query_fu
+ser.0.bias, motion_head.deep_interact.query_fuser.2.weight, motion_head.deep_interact.query_fuser.2.bias, motio
+n_head.traj_cls_branches.0.0.weight, motion_head.traj_cls_branches.0.0.bias, motion_head.traj_cls_branches.0.1.
+weight, motion_head.traj_cls_branches.0.1.bias, motion_head.traj_cls_branches.0.3.weight, motion_head.traj_cls_
+branches.0.3.bias, motion_head.traj_cls_branches.0.4.weight, motion_head.traj_cls_branches.0.4.bias, motion_hea
+d.traj_cls_branches.0.6.weight, motion_head.traj_cls_branches.0.6.bias, motion_head.traj_cls_branches.1.0.weigh
+t, motion_head.traj_cls_branches.1.0.bias, motion_head.traj_cls_branches.1.1.weight, motion_head.traj_cls_branc
+hes.1.1.bias, motion_head.traj_cls_branches.1.3.weight, motion_head.traj_cls_branches.1.3.bias, motion_head.tra
+j_cls_branches.1.4.weight, motion_head.traj_cls_branches.1.4.bias, motion_head.traj_cls_branches.1.6.weight, mo
+tion_head.traj_cls_branches.1.6.bias, motion_head.traj_cls_branches.2.0.weight, motion_head.traj_cls_branches.2
+.0.bias, motion_head.traj_cls_branches.2.1.weight, motion_head.traj_cls_branches.2.1.bias, motion_head.traj_cls
+_branches.2.3.weight, motion_head.traj_cls_branches.2.3.bias, motion_head.traj_cls_branches.2.4.weight, motion_
+head.traj_cls_branches.2.4.bias, motion_head.traj_cls_branches.2.6.weight, motion_head.traj_cls_branches.2.6.bi
+as, motion_head.traj_reg_branches.0.0.weight, motion_head.traj_reg_branches.0.0.bias, motion_head.traj_reg_bran
+ches.0.2.weight, motion_head.traj_reg_branches.0.2.bias, motion_head.traj_reg_branches.0.4.weight, motion_head.
+traj_reg_branches.0.4.bias, motion_head.traj_reg_branches.1.0.weight, motion_head.traj_reg_branches.1.0.bias, m
+otion_head.traj_reg_branches.1.2.weight, motion_head.traj_reg_branches.1.2.bias, motion_head.traj_reg_branches.
+1.4.weight, motion_head.traj_reg_branches.1.4.bias, motion_head.traj_reg_branches.2.0.weight, motion_head.traj_
+reg_branches.2.0.bias, motion_head.traj_reg_branches.2.2.weight, motion_head.traj_reg_branches.2.2.bias, motion
+_head.traj_reg_branches.2.4.weight, motion_head.traj_reg_branches.2.4.bias, motion_head.intention_ep_embedding_
+agent.0.weight, motion_head.intention_ep_embedding_agent.0.bias, motion_head.intention_ep_embedding_agent.2.wei
+ght, motion_head.intention_ep_embedding_agent.2.bias, motion_head.intention_ep_embedding_offset.0.weight, motio
+n_head.intention_ep_embedding_offset.0.bias, motion_head.intention_ep_embedding_offset.2.weight, motion_head.in
+tention_ep_embedding_offset.2.bias, motion_head.intention_ep_embedding_ego.0.weight, motion_head.intention_ep_e
+mbedding_ego.0.bias, motion_head.intention_ep_embedding_ego.2.weight, motion_head.intention_ep_embedding_ego.2.
+bias, motion_head.query_embedding_box.0.weight, motion_head.query_embedding_box.0.bias, motion_head.query_embed
+ding_box.2.weight, motion_head.query_embedding_box.2.bias
+
+[                                                  ] 0/8, elapsed: 0s, ETA:
+
+from 0 to 8 in rank 0, batch0
+
+
+[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 8/8, 0.4 task/s, elapsed: 23s, ETA:     0swriting result in benchmark_logs
+/UniAD_rank0_batch_0.json
+Traceback (most recent call last):
+  File "./tools/test.py", line 268, in <module>
+    main()
+  File "./tools/test.py", line 236, in main
+    outputs = custom_multi_gpu_profile_test(model, data_loader, int(args.batchindex))
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/autograd/grad_mode.py", line 28,
+ in decorate_context
+    return func(*args, **kwargs)
+  File "/nethome/hyou37/xluo/UniAD/projects/mmdet3d_plugin/uniad/apis/test.py", line 144, in custom_multi_gpu_p
+rofile_test
+    gpu_profile_one_batch(model, data_loader, index)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/autograd/grad_mode.py", line 28,
+ in decorate_context
+    return func(*args, **kwargs)
+  File "/nethome/hyou37/xluo/UniAD/projects/mmdet3d_plugin/uniad/apis/test.py", line 108, in gpu_profile_one_ba
+tch
+    profiler.export_chrome_trace('{0}_{1}.json'
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/profiler/profiler.py", line 330,
+ in export_chrome_trace
+    return self.profiler.export_chrome_trace(path)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/autograd/profiler.py", line 537,
+ in export_chrome_trace
+    self.kineto_results.save(path)
+RuntimeError: Trace is already saved
+/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py:178: FutureWarning
+: The module torch.distributed.launch is deprecated
+and will be removed in future. Use torch.distributed.run.
+Note that --use_env is set by default in torch.distributed.run.
+If your script expects `--local_rank` argument to be set, please
+change it to read from `os.environ['LOCAL_RANK']` instead. See
+https://pytorch.org/docs/stable/distributed.html#launch-utility for
+further instructions
+
+  warnings.warn(
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 905194) of binary:
+ /nethome/hyou37/anaconda3/envs/uniad/bin/python
+Traceback (most recent call last):
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 193
+, in <module>
+    main()
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 189
+, in main
+    launch(args)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 174
+, in launch
+    run(args)
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/run.py", line 689, i
+n run
+    elastic_launch(
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launcher/api.py", li
+ne 116, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launcher/api.py", li
+ne 244, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
+***************************************
+         ./tools/test.py FAILED
+=======================================
+Root Cause:
+[0]:
+  time: 2023-04-18_04:45:03
+  rank: 0 (local_rank: 0)
+  exitcode: 1 (pid: 905194)
+  error_file: <N/A>
+  msg: "Process failed with exitcode 1"
+=======================================
+Other Failures:
+  <NO_OTHER_FAILURES>
+***************************************
+
+(uniad) hyou37@eic-gt-gpu1:~/xluo/UniAD$
