@@ -123,7 +123,6 @@ class UniAD(UniADTrack):
         """Forward training function for the model that includes multiple tasks, such as tracking, segmentation, motion prediction, occupancy prediction, and planning.
 
             Args:
-            points (list[torch.Tensor], optional): List of point cloud tensors for each sample. Defaults to None.
             img (torch.Tensor, optional): Tensor containing images of each sample with shape (N, C, H, W). Defaults to None.
             img_metas (list[dict], optional): List of dictionaries containing meta information for each sample. Defaults to None.
             gt_bboxes_3d (list[:obj:BaseInstance3DBoxes], optional): List of ground truth 3D bounding boxes for each sample. Defaults to None.
@@ -146,12 +145,6 @@ class UniAD(UniADTrack):
             gt_sdc_fut_traj_mask (list[torch.Tensor], optional): List of tensors containing ground truth self-driving car future trajectory masks. Defaults to None.
             gt_segmentation (list[torch.Tensor], optional): List of tensors containing ground truth segmentation masks. Defaults to
             gt_instance (list[torch.Tensor], optional): List of tensors containing ground truth instance segmentation masks. Defaults to None.
-            gt_centerness (list[torch.Tensor], optional): List of tensors containing ground truth centerness values for occupancy prediction. Defaults to None.
-            gt_offset (list[torch.Tensor], optional): List of tensors containing ground truth offsets for occupancy prediction. Defaults to None.
-            gt_flow (list[torch.Tensor], optional): List of tensors containing ground truth optical flow information. Defaults to None.
-            gt_backward_flow (list[torch.Tensor], optional): List of tensors containing ground truth backward optical flow information. Defaults to None.
-            gt_occ_future_egomotions (list[torch.Tensor], optional): List of tensors containing ground truth future egomotions for occupancy prediction. Defaults to None.
-            gt_occ_has_invalid_frame (list[torch.Tensor], optional): List of tensors containing binary flags indicating whether a frame is invalid for occupancy prediction. Defaults to None.
             gt_occ_img_is_valid (list[torch.Tensor], optional): List of tensors containing binary flags indicating whether an image is valid for occupancy prediction. Defaults to None.
             sdc_planning (list[torch.Tensor], optional): List of tensors containing self-driving car planning information. Defaults to None.
             sdc_planning_mask (list[torch.Tensor], optional): List of tensors containing self-driving car planning masks. Defaults to None.
