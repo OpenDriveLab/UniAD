@@ -1003,13 +1003,11 @@ class PansegformerHead(SegDETRHead):
         return loss_cls, loss_bbox, loss_iou, loss_mask_things, loss_mask_stuff, loss_mask_things_list, loss_mask_stuff_list, loss_iou_list, loss_bbox_list, loss_cls_thing_list, loss_cls_stuff_list, things_ratio, stuff_ratio
     
     def forward_test(self,
-                        pts_feats=None,
-                        gt_lane_labels=None,
-                        gt_lane_bboxes=None,
-                        gt_lane_masks=None,
-                        img_metas=None,
-                        prev_bev=None,
-                        rescale=False):
+                    pts_feats=None,
+                    gt_lane_labels=None,
+                    gt_lane_masks=None,
+                    img_metas=None,
+                    rescale=False):
         bbox_list = [dict() for i in range(len(img_metas))]
 
         pred_seg_dict = self(pts_feats)

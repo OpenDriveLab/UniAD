@@ -178,8 +178,6 @@ class TemporalSelfAttention(BaseModule):
             bs, len_bev, c = query.shape
             value = torch.stack([query, query], 1).reshape(bs*2, len_bev, c)
 
-            # value = torch.cat([query, query], 0)
-
         if identity is None:
             identity = query
         if query_pos is not None:
