@@ -97,7 +97,7 @@ model = dict(
         num_outs=4,
         relu_before_extra_convs=True,
     ),
-    freeze_img_modules=True,  # * set fix feats to true can fix the backbone
+    freeze_img_modules=True,  # set fix feats to true can fix the backbone
     score_thresh=0.4,
     filter_score_thresh=0.35,
     qim_args=dict(
@@ -213,7 +213,6 @@ model = dict(
                     ),
                 ),
             ),
-            bev_feat_no_grad=False, # False for with_grad, True for no_grad
         ),
         bbox_coder=dict(
             type="NMSFreeCoder",
