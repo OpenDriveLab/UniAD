@@ -364,7 +364,7 @@ class UniADTrack(MVXTwoStageDetector):
         return bev_embed, bev_pos
 
     @auto_fp16(apply_to=("img", "prev_bev"))
-    def _forward_single(
+    def _forward_single_frame(
         self,
         img,
         img_metas,
@@ -560,7 +560,7 @@ class UniADTrack(MVXTwoStageDetector):
             all_matched_idxes = []
             all_instances_pred_logits = []
             all_instances_pred_boxes = []
-            frame_res = self._forward_single(
+            frame_res = self._forward_single_frame(
                 img_single,
                 img_metas_single,
                 track_instances,
@@ -624,7 +624,7 @@ class UniADTrack(MVXTwoStageDetector):
         return outs_track
 
 
-    def _inference_single(
+    def _inference_single_frame(
         self,
         img,
         img_metas,
@@ -752,7 +752,7 @@ class UniADTrack(MVXTwoStageDetector):
 
         """ predict and update """
         prev_bev = self.prev_bev
-        frame_res = self._inference_single(
+        frame_res = self._inference_single_frame(
             img,
             img_metas,
             track_instances,
