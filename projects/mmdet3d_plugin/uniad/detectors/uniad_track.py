@@ -361,7 +361,7 @@ class UniADTrack(MVXTwoStageDetector):
             bev_embed = bev_embed.permute(1, 0, 2)
         
         assert bev_embed.shape[0] == self.bev_h * self.bev_w
-        return bev_embed, bev_pos, prev_bev
+        return bev_embed, bev_pos
 
     @auto_fp16(apply_to=("img", "prev_bev"))
     def _forward_single(
@@ -390,8 +390,8 @@ class UniADTrack(MVXTwoStageDetector):
                 it means this frame is the end of the training clip,
                 so no need to call velocity update
         """
-        # NOTE: You can replace BEVFormer with other BEV encoder and generate bev_embed here
-        bev_embed, bev_pos, _ = self.get_bevs(
+        # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
+        bev_embed, bev_pos = self.get_bevs(
             img, img_metas,
             prev_img=prev_img, prev_img_metas=prev_img_metas,
         )
@@ -657,8 +657,8 @@ class UniADTrack(MVXTwoStageDetector):
 
         track_instances = Instances.cat([other_inst, active_inst])
 
-        # NOTE: You can replace BEVFormer with other BEV encoder and generate bev_embed here
-        bev_embed, bev_pos, _ = self.get_bevs(img, img_metas, prev_bev=prev_bev)
+        # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
+        bev_embed, bev_pos = self.get_bevs(img, img_metas, prev_bev=prev_bev)
         det_output = self.pts_bbox_head.get_detections(
             bev_embed, 
             object_query_embeds=track_instances.query,
