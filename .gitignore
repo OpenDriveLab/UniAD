@@ -134,19 +134,16 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# output
+# output & ckpts
 output/
 test/
+ckpts/
 
 # work_dirs
 **/work_dirs
 
 batchscript*
 phoenix*
-
-# config
-#projects/configs/
-
 
 debug/
 *projs/
