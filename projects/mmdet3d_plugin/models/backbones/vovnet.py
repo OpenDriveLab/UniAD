@@ -339,16 +339,17 @@ class VoVNet(BaseModule):
                 nn.init.kaiming_normal_(m.weight)
 
     def forward(self, x):
-        outputs = {}
-        x = self.stem(x)
-        if "stem" in self._out_features:
-            outputs["stem"] = x
-        for name in self.stage_names:
-            x = getattr(self, name)(x)
-            if name in self._out_features:
-                outputs[name] = x
+        with torch.profiler.record_function("VoVNet(Backbone)"):
+            outputs = {}
+            x = self.stem(x)
+            if "stem" in self._out_features:
+                outputs["stem"] = x
+            for name in self.stage_names:
+                x = getattr(self, name)(x)
+                if name in self._out_features:
+                    outputs[name] = x
 
-        return outputs
+            return outputs
 
     def _freeze_stages(self):
         if self.frozen_stages >= 0:

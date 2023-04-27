@@ -204,77 +204,80 @@ class PansegformerHead(SegDETRHead):
                 as_two_stage is True it would be returned, otherwise \
                 `None` would be returned.
         """
-        _, bs, _ = bev_embed.shape
 
-        mlvl_feats = [torch.reshape(bev_embed, (bs, self.bev_h, self.bev_w ,-1)).permute(0, 3, 1, 2)]
-        img_masks = mlvl_feats[0].new_zeros((bs, self.bev_h, self.bev_w))
+        with torch.profiler.record_function("PansegformerHead"):
 
-        hw_lvl = [feat_lvl.shape[-2:] for feat_lvl in mlvl_feats]
-        mlvl_masks = []
-        mlvl_positional_encodings = []
-        for feat in mlvl_feats:
-            mlvl_masks.append(
-                F.interpolate(img_masks[None],
-                              size=feat.shape[-2:]).to(torch.bool).squeeze(0))
-            mlvl_positional_encodings.append(
-                self.positional_encoding(mlvl_masks[-1]))
+            _, bs, _ = bev_embed.shape
 
-        query_embeds = None
-        if not self.as_two_stage:
-            query_embeds = self.query_embedding.weight
-        (memory, memory_pos, memory_mask, query_pos), hs, init_reference, inter_references, \
-        enc_outputs_class, enc_outputs_coord = self.transformer(
-            mlvl_feats,
-            mlvl_masks,
-            query_embeds,
-            mlvl_positional_encodings,
-            reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
-            cls_branches=self.cls_branches if self.as_two_stage else None  # noqa:E501
-        )
+            mlvl_feats = [torch.reshape(bev_embed, (bs, self.bev_h, self.bev_w ,-1)).permute(0, 3, 1, 2)]
+            img_masks = mlvl_feats[0].new_zeros((bs, self.bev_h, self.bev_w))
 
-        memory = memory.permute(1, 0, 2)
-        query = hs[-1].permute(1, 0, 2)
-        query_pos = query_pos.permute(1, 0, 2)
-        memory_pos = memory_pos.permute(1, 0, 2)
+            hw_lvl = [feat_lvl.shape[-2:] for feat_lvl in mlvl_feats]
+            mlvl_masks = []
+            mlvl_positional_encodings = []
+            for feat in mlvl_feats:
+                mlvl_masks.append(
+                    F.interpolate(img_masks[None],
+                                  size=feat.shape[-2:]).to(torch.bool).squeeze(0))
+                mlvl_positional_encodings.append(
+                    self.positional_encoding(mlvl_masks[-1]))
 
-        # we should feed these to mask deocder.
-        args_tuple = [memory, memory_mask, memory_pos, query, None, query_pos, hw_lvl]
+            query_embeds = None
+            if not self.as_two_stage:
+                query_embeds = self.query_embedding.weight
+            (memory, memory_pos, memory_mask, query_pos), hs, init_reference, inter_references, \
+            enc_outputs_class, enc_outputs_coord = self.transformer(
+                mlvl_feats,
+                mlvl_masks,
+                query_embeds,
+                mlvl_positional_encodings,
+                reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
+                cls_branches=self.cls_branches if self.as_two_stage else None  # noqa:E501
+            )
 
-        hs = hs.permute(0, 2, 1, 3)
-        outputs_classes = []
-        outputs_coords = []
-        for lvl in range(hs.shape[0]):
-            if lvl == 0:
-                reference = init_reference
-            else:
-                reference = inter_references[lvl - 1]
-            reference = inverse_sigmoid(reference)
-            outputs_class = self.cls_branches[lvl](hs[lvl])
-            tmp = self.reg_branches[lvl](hs[lvl])
+            memory = memory.permute(1, 0, 2)
+            query = hs[-1].permute(1, 0, 2)
+            query_pos = query_pos.permute(1, 0, 2)
+            memory_pos = memory_pos.permute(1, 0, 2)
 
-            if reference.shape[-1] == 4:
-                tmp += reference
-            else:
-                assert reference.shape[-1] == 2
-                tmp[..., :2] += reference
-            outputs_coord = tmp.sigmoid()
-            outputs_classes.append(outputs_class)
-            outputs_coords.append(outputs_coord)
+            # we should feed these to mask deocder.
+            args_tuple = [memory, memory_mask, memory_pos, query, None, query_pos, hw_lvl]
 
-        outputs_classes = torch.stack(outputs_classes)
-        outputs_coords = torch.stack(outputs_coords)
+            hs = hs.permute(0, 2, 1, 3)
+            outputs_classes = []
+            outputs_coords = []
+            for lvl in range(hs.shape[0]):
+                if lvl == 0:
+                    reference = init_reference
+                else:
+                    reference = inter_references[lvl - 1]
+                reference = inverse_sigmoid(reference)
+                outputs_class = self.cls_branches[lvl](hs[lvl])
+                tmp = self.reg_branches[lvl](hs[lvl])
 
-        outs = {
-                'bev_embed': None if self.as_two_stage else bev_embed,
-                'outputs_classes': outputs_classes,
-                'outputs_coords': outputs_coords,
-                'enc_outputs_class': enc_outputs_class if self.as_two_stage else None,
-                'enc_outputs_coord': enc_outputs_coord.sigmoid() if self.as_two_stage else None,
-                'args_tuple': args_tuple,
-                'reference': reference,
-            }
-        
-        return outs
+                if reference.shape[-1] == 4:
+                    tmp += reference
+                else:
+                    assert reference.shape[-1] == 2
+                    tmp[..., :2] += reference
+                outputs_coord = tmp.sigmoid()
+                outputs_classes.append(outputs_class)
+                outputs_coords.append(outputs_coord)
+
+            outputs_classes = torch.stack(outputs_classes)
+            outputs_coords = torch.stack(outputs_coords)
+
+            outs = {
+                    'bev_embed': None if self.as_two_stage else bev_embed,
+                    'outputs_classes': outputs_classes,
+                    'outputs_coords': outputs_coords,
+                    'enc_outputs_class': enc_outputs_class if self.as_two_stage else None,
+                    'enc_outputs_coord': enc_outputs_coord.sigmoid() if self.as_two_stage else None,
+                    'args_tuple': args_tuple,
+                    'reference': reference,
+                }
+
+            return outs
 
     @force_fp32(apply_to=('all_cls_scores_list', 'all_bbox_preds_list',
                           'args_tuple', 'reference'))
@@ -1010,56 +1013,59 @@ class PansegformerHead(SegDETRHead):
                         img_metas=None,
                         prev_bev=None,
                         rescale=False):
-        bbox_list = [dict() for i in range(len(img_metas))]
 
-        pred_seg_dict = self(pts_feats)
-        results = self.get_bboxes(pred_seg_dict['outputs_classes'],
-                                           pred_seg_dict['outputs_coords'],
-                                           pred_seg_dict['enc_outputs_class'],
-                                           pred_seg_dict['enc_outputs_coord'],
-                                           pred_seg_dict['args_tuple'],
-                                           pred_seg_dict['reference'],
-                                           img_metas,
-                                           rescale=rescale)
+        with torch.profiler.record_function("PansegformerHead_test"):
 
-        with torch.no_grad():
-            drivable_pred = results[0]['drivable']
-            drivable_gt = gt_lane_masks[0][0, -1]
-            drivable_iou, drivable_intersection, drivable_union = IOU(drivable_pred.view(1, -1), drivable_gt.view(1, -1))
+            bbox_list = [dict() for i in range(len(img_metas))]
 
-            lane_pred = results[0]['lane']
-            lanes_pred = (results[0]['lane'].sum(0) > 0).int()
-            lanes_gt = (gt_lane_masks[0][0][:-1].sum(0) > 0).int()
-            lanes_iou, lanes_intersection, lanes_union = IOU(lanes_pred.view(1, -1), lanes_gt.view(1, -1))
+            pred_seg_dict = self(pts_feats)
+            results = self.get_bboxes(pred_seg_dict['outputs_classes'],
+                                               pred_seg_dict['outputs_coords'],
+                                               pred_seg_dict['enc_outputs_class'],
+                                               pred_seg_dict['enc_outputs_coord'],
+                                               pred_seg_dict['args_tuple'],
+                                               pred_seg_dict['reference'],
+                                               img_metas,
+                                               rescale=rescale)
 
-            divider_gt = (gt_lane_masks[0][0][gt_lane_labels[0][0] == 0].sum(0) > 0).int()
-            crossing_gt = (gt_lane_masks[0][0][gt_lane_labels[0][0] == 1].sum(0) > 0).int()
-            contour_gt = (gt_lane_masks[0][0][gt_lane_labels[0][0] == 2].sum(0) > 0).int()
-            divider_iou, divider_intersection, divider_union = IOU(lane_pred[0].view(1, -1), divider_gt.view(1, -1))
-            crossing_iou, crossing_intersection, crossing_union = IOU(lane_pred[1].view(1, -1), crossing_gt.view(1, -1))
-            contour_iou, contour_intersection, contour_union = IOU(lane_pred[2].view(1, -1), contour_gt.view(1, -1))
+            with torch.no_grad():
+                drivable_pred = results[0]['drivable']
+                drivable_gt = gt_lane_masks[0][0, -1]
+                drivable_iou, drivable_intersection, drivable_union = IOU(drivable_pred.view(1, -1), drivable_gt.view(1, -1))
+
+                lane_pred = results[0]['lane']
+                lanes_pred = (results[0]['lane'].sum(0) > 0).int()
+                lanes_gt = (gt_lane_masks[0][0][:-1].sum(0) > 0).int()
+                lanes_iou, lanes_intersection, lanes_union = IOU(lanes_pred.view(1, -1), lanes_gt.view(1, -1))
+
+                divider_gt = (gt_lane_masks[0][0][gt_lane_labels[0][0] == 0].sum(0) > 0).int()
+                crossing_gt = (gt_lane_masks[0][0][gt_lane_labels[0][0] == 1].sum(0) > 0).int()
+                contour_gt = (gt_lane_masks[0][0][gt_lane_labels[0][0] == 2].sum(0) > 0).int()
+                divider_iou, divider_intersection, divider_union = IOU(lane_pred[0].view(1, -1), divider_gt.view(1, -1))
+                crossing_iou, crossing_intersection, crossing_union = IOU(lane_pred[1].view(1, -1), crossing_gt.view(1, -1))
+                contour_iou, contour_intersection, contour_union = IOU(lane_pred[2].view(1, -1), contour_gt.view(1, -1))
 
 
-            ret_iou = {'drivable_intersection': drivable_intersection,
-                       'drivable_union': drivable_union,
-                       'lanes_intersection': lanes_intersection,
-                       'lanes_union': lanes_union,
-                       'divider_intersection': divider_intersection,
-                       'divider_union': divider_union,
-                       'crossing_intersection': crossing_intersection,
-                       'crossing_union': crossing_union,
-                       'contour_intersection': contour_intersection,
-                       'contour_union': contour_union,
-                       'drivable_iou': drivable_iou,
-                       'lanes_iou': lanes_iou,
-                       'divider_iou': divider_iou,
-                       'crossing_iou': crossing_iou,
-                       'contour_iou': contour_iou}
-        for result_dict, pts_bbox in zip(bbox_list, results):
-            result_dict['pts_bbox'] = pts_bbox
-            result_dict['ret_iou'] = ret_iou
-            result_dict['args_tuple'] = pred_seg_dict['args_tuple']
-        return bbox_list
+                ret_iou = {'drivable_intersection': drivable_intersection,
+                           'drivable_union': drivable_union,
+                           'lanes_intersection': lanes_intersection,
+                           'lanes_union': lanes_union,
+                           'divider_intersection': divider_intersection,
+                           'divider_union': divider_union,
+                           'crossing_intersection': crossing_intersection,
+                           'crossing_union': crossing_union,
+                           'contour_intersection': contour_intersection,
+                           'contour_union': contour_union,
+                           'drivable_iou': drivable_iou,
+                           'lanes_iou': lanes_iou,
+                           'divider_iou': divider_iou,
+                           'crossing_iou': crossing_iou,
+                           'contour_iou': contour_iou}
+            for result_dict, pts_bbox in zip(bbox_list, results):
+                result_dict['pts_bbox'] = pts_bbox
+                result_dict['ret_iou'] = ret_iou
+                result_dict['args_tuple'] = pred_seg_dict['args_tuple']
+            return bbox_list
 
 
     @auto_fp16(apply_to=("bev_feat", "prev_bev"))
@@ -1086,20 +1092,23 @@ class PansegformerHead(SegDETRHead):
                 - losses_seg (torch.Tensor): Total segmentation loss.
                 - pred_seg_dict (dict): Dictionary of predicted segmentation outputs.
         """
-        pred_seg_dict = self(bev_feat)
-        loss_inputs = [
-            pred_seg_dict['outputs_classes'],
-            pred_seg_dict['outputs_coords'],
-            pred_seg_dict['enc_outputs_class'],
-            pred_seg_dict['enc_outputs_coord'],
-            pred_seg_dict['args_tuple'],
-            pred_seg_dict['reference'],
-            gt_lane_labels,
-            gt_lane_bboxes,
-            gt_lane_masks
-        ]
-        losses_seg = self.loss(*loss_inputs, img_metas=img_metas)
-        return losses_seg, pred_seg_dict
+
+        with torch.profiler.record_function("PansegformerHead_train"):
+
+            pred_seg_dict = self(bev_feat)
+            loss_inputs = [
+                pred_seg_dict['outputs_classes'],
+                pred_seg_dict['outputs_coords'],
+                pred_seg_dict['enc_outputs_class'],
+                pred_seg_dict['enc_outputs_coord'],
+                pred_seg_dict['args_tuple'],
+                pred_seg_dict['reference'],
+                gt_lane_labels,
+                gt_lane_bboxes,
+                gt_lane_masks
+            ]
+            losses_seg = self.loss(*loss_inputs, img_metas=img_metas)
+            return losses_seg, pred_seg_dict
 
     def _get_bboxes_single(self,
                            cls_score,

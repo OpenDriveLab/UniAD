@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from .track_instance import Instances
+from torch.profiler import record_function
 
 # MemoryBank
 class MemoryBank(nn.Module):
@@ -83,10 +84,11 @@ class MemoryBank(nn.Module):
         return self._forward_temporal_attn(track_instances)
 
     def forward(self, track_instances: Instances, update_bank=True) -> Instances:
-        track_instances = self._forward_temporal_attn(track_instances)
-        if update_bank:
-            self.update(track_instances)
-        return track_instances
+        with record_function("Memory Bank"):
+            track_instances = self._forward_temporal_attn(track_instances)
+            if update_bank:
+                self.update(track_instances)
+            return track_instances
 
 
 # QIM
@@ -245,10 +247,11 @@ class QueryInteractionModule(QueryInteractionBase):
         return active_track_instances
 
     def forward(self, data) -> Instances:
-        active_track_instances = self._select_active_tracks(data)
-        active_track_instances = self._update_track_embedding(
-            active_track_instances)
-        init_track_instances: Instances = data["init_track_instances"]
-        merged_track_instances = Instances.cat(
-            [init_track_instances, active_track_instances])
-        return merged_track_instances
+        with record_function("QIM"):
+            active_track_instances = self._select_active_tracks(data)
+            active_track_instances = self._update_track_embedding(
+                active_track_instances)
+            init_track_instances: Instances = data["init_track_instances"]
+            merged_track_instances = Instances.cat(
+                [init_track_instances, active_track_instances])
+            return merged_track_instances

@@ -156,106 +156,108 @@ class BEVFormerTrackHead(DETRHead):
                 Shape [nb_dec, bs, num_query, 9].
         """
 
-        bs, num_cam, _, _, _ = mlvl_feats[0].shape
-        dtype = mlvl_feats[0].dtype
-        # object_query_embeds = self.query_embedding.weight.to(dtype)
-        bev_queries = self.bev_embedding.weight.to(dtype)
+        with torch.profiler.record_function("BEVFormerTrackHead"):
 
-        bev_mask = torch.zeros((bs, self.bev_h, self.bev_w),
-                               device=bev_queries.device).to(dtype)
-        bev_pos = self.positional_encoding(bev_mask).to(dtype)
+            bs, num_cam, _, _, _ = mlvl_feats[0].shape
+            dtype = mlvl_feats[0].dtype
+            # object_query_embeds = self.query_embedding.weight.to(dtype)
+            bev_queries = self.bev_embedding.weight.to(dtype)
 
-        if only_bev:  # only use encoder to obtain BEV features, TODO: refine the workaround
-            return self.transformer.get_bev_features(
-                mlvl_feats,
-                bev_queries,
-                self.bev_h,
-                self.bev_w,
-                grid_length=(self.real_h / self.bev_h,
-                             self.real_w / self.bev_w),
-                bev_pos=bev_pos,
-                img_metas=img_metas,
-                prev_bev=prev_bev,
-            )
-        else:
-            outputs = self.transformer(
-                mlvl_feats,
-                bev_queries,
-                object_query_embeds,
-                self.bev_h,
-                self.bev_w,
-                grid_length=(self.real_h / self.bev_h,
-                             self.real_w / self.bev_w),
-                bev_pos=bev_pos,
-                reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
-                cls_branches=self.cls_branches if self.as_two_stage else None,
-                img_metas=img_metas,
-                prev_bev=prev_bev,
-                reference_points=ref_points,
-            )
+            bev_mask = torch.zeros((bs, self.bev_h, self.bev_w),
+                                   device=bev_queries.device).to(dtype)
+            bev_pos = self.positional_encoding(bev_mask).to(dtype)
 
-        bev_embed, hs, init_reference, inter_references = outputs
-        hs = hs.permute(0, 2, 1, 3)
-        outputs_classes = []
-        outputs_coords = []
-        outputs_trajs = []
-        for lvl in range(hs.shape[0]):
-            if lvl == 0:
-                # reference = init_reference
-                reference = ref_points.sigmoid()
+            if only_bev:  # only use encoder to obtain BEV features, TODO: refine the workaround
+                return self.transformer.get_bev_features(
+                    mlvl_feats,
+                    bev_queries,
+                    self.bev_h,
+                    self.bev_w,
+                    grid_length=(self.real_h / self.bev_h,
+                                 self.real_w / self.bev_w),
+                    bev_pos=bev_pos,
+                    img_metas=img_metas,
+                    prev_bev=prev_bev,
+                )
             else:
-                reference = inter_references[lvl - 1]
-                # ref_size_base = inter_box_sizes[lvl - 1]
-            reference = inverse_sigmoid(reference)
-            outputs_class = self.cls_branches[lvl](hs[lvl])
-            tmp = self.reg_branches[lvl](hs[lvl])  # xydxdyxdz
-            outputs_past_traj = self.past_traj_reg_branches[lvl](hs[lvl]).view(
-                tmp.shape[0], -1, self.past_steps + self.fut_steps, 2)
+                outputs = self.transformer(
+                    mlvl_feats,
+                    bev_queries,
+                    object_query_embeds,
+                    self.bev_h,
+                    self.bev_w,
+                    grid_length=(self.real_h / self.bev_h,
+                                 self.real_w / self.bev_w),
+                    bev_pos=bev_pos,
+                    reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
+                    cls_branches=self.cls_branches if self.as_two_stage else None,
+                    img_metas=img_metas,
+                    prev_bev=prev_bev,
+                    reference_points=ref_points,
+                )
 
-            # TODO: check the shape of reference
-            assert reference.shape[-1] == 3
-            tmp[..., 0:2] += reference[..., 0:2]
-            tmp[..., 0:2] = tmp[..., 0:2].sigmoid()
-            tmp[..., 4:5] += reference[..., 2:3]
-            tmp[..., 4:5] = tmp[..., 4:5].sigmoid()
+            bev_embed, hs, init_reference, inter_references = outputs
+            hs = hs.permute(0, 2, 1, 3)
+            outputs_classes = []
+            outputs_coords = []
+            outputs_trajs = []
+            for lvl in range(hs.shape[0]):
+                if lvl == 0:
+                    # reference = init_reference
+                    reference = ref_points.sigmoid()
+                else:
+                    reference = inter_references[lvl - 1]
+                    # ref_size_base = inter_box_sizes[lvl - 1]
+                reference = inverse_sigmoid(reference)
+                outputs_class = self.cls_branches[lvl](hs[lvl])
+                tmp = self.reg_branches[lvl](hs[lvl])  # xydxdyxdz
+                outputs_past_traj = self.past_traj_reg_branches[lvl](hs[lvl]).view(
+                    tmp.shape[0], -1, self.past_steps + self.fut_steps, 2)
 
-            last_ref_points = torch.cat(
-                [tmp[..., 0:2], tmp[..., 4:5]], dim=-1,
-            )
+                # TODO: check the shape of reference
+                assert reference.shape[-1] == 3
+                tmp[..., 0:2] += reference[..., 0:2]
+                tmp[..., 0:2] = tmp[..., 0:2].sigmoid()
+                tmp[..., 4:5] += reference[..., 2:3]
+                tmp[..., 4:5] = tmp[..., 4:5].sigmoid()
 
-            tmp[..., 0:1] = (tmp[..., 0:1] * (self.pc_range[3] -
-                             self.pc_range[0]) + self.pc_range[0])
-            tmp[..., 1:2] = (tmp[..., 1:2] * (self.pc_range[4] -
-                             self.pc_range[1]) + self.pc_range[1])
-            tmp[..., 4:5] = (tmp[..., 4:5] * (self.pc_range[5] -
-                             self.pc_range[2]) + self.pc_range[2])
+                last_ref_points = torch.cat(
+                    [tmp[..., 0:2], tmp[..., 4:5]], dim=-1,
+                )
 
-            # tmp[..., 2:4] = tmp[..., 2:4] + ref_size_basse[..., 0:2]
-            # tmp[..., 5:6] = tmp[..., 5:6] + ref_size_basse[..., 2:3]
+                tmp[..., 0:1] = (tmp[..., 0:1] * (self.pc_range[3] -
+                                 self.pc_range[0]) + self.pc_range[0])
+                tmp[..., 1:2] = (tmp[..., 1:2] * (self.pc_range[4] -
+                                 self.pc_range[1]) + self.pc_range[1])
+                tmp[..., 4:5] = (tmp[..., 4:5] * (self.pc_range[5] -
+                                 self.pc_range[2]) + self.pc_range[2])
 
-            # TODO: check if using sigmoid
-            outputs_coord = tmp
-            outputs_classes.append(outputs_class)
-            outputs_coords.append(outputs_coord)
-            outputs_trajs.append(outputs_past_traj)
+                # tmp[..., 2:4] = tmp[..., 2:4] + ref_size_basse[..., 0:2]
+                # tmp[..., 5:6] = tmp[..., 5:6] + ref_size_basse[..., 2:3]
 
-        outputs_classes = torch.stack(outputs_classes)
-        outputs_coords = torch.stack(outputs_coords)
-        outputs_trajs = torch.stack(outputs_trajs)
-        last_ref_points = inverse_sigmoid(last_ref_points)
+                # TODO: check if using sigmoid
+                outputs_coord = tmp
+                outputs_classes.append(outputs_class)
+                outputs_coords.append(outputs_coord)
+                outputs_trajs.append(outputs_past_traj)
 
-        outs = {
-            'bev_embed': bev_embed,
-            'bev_pos': bev_pos,
-            'all_cls_scores': outputs_classes,
-            'all_bbox_preds': outputs_coords,
-            'all_past_traj_preds': outputs_trajs,
-            'enc_cls_scores': None,
-            'enc_bbox_preds': None,
-            'last_ref_points': last_ref_points,
-            'query_feats': hs,
-        }
-        return outs
+            outputs_classes = torch.stack(outputs_classes)
+            outputs_coords = torch.stack(outputs_coords)
+            outputs_trajs = torch.stack(outputs_trajs)
+            last_ref_points = inverse_sigmoid(last_ref_points)
+
+            outs = {
+                'bev_embed': bev_embed,
+                'bev_pos': bev_pos,
+                'all_cls_scores': outputs_classes,
+                'all_bbox_preds': outputs_coords,
+                'all_past_traj_preds': outputs_trajs,
+                'enc_cls_scores': None,
+                'enc_bbox_preds': None,
+                'last_ref_points': last_ref_points,
+                'query_feats': hs,
+            }
+            return outs
 
     def _get_target_single(self,
                            cls_score,

@@ -257,48 +257,50 @@ class PerceptionTransformer(BaseModule):
                     be returned when `as_two_stage` is True, \
                     otherwise None.
         """
-        # Beautify the following codes, warp it to make it clean
-        bev_embed = forward_with_grad_control(
-            self,
-            self.get_bev_features,
-            mlvl_feats,
-            bev_queries,
-            bev_h,
-            bev_w,
-            with_grad=not self.bev_feat_no_grad,
-            grid_length=grid_length,
-            bev_pos=bev_pos,
-            prev_bev=prev_bev,
-            **kwargs)
 
-        bs = mlvl_feats[0].size(0)
-        query_pos, query = torch.split(
-            object_query_embed, self.embed_dims, dim=1)
-        query_pos = query_pos.unsqueeze(0).expand(bs, -1, -1)
-        query = query.unsqueeze(0).expand(bs, -1, -1)
-        if reference_points is not None:
-            reference_points = reference_points.unsqueeze(0).expand(bs, -1, -1)
-        else:
-            reference_points = self.reference_points(query_pos)
-        reference_points = reference_points.sigmoid()
-        init_reference_out = reference_points
+        with torch.profiler.record_function("PerceptionTransformer(Detr3D)"):
+            # Beautify the following codes, warp it to make it clean
+            bev_embed = forward_with_grad_control(
+                self,
+                self.get_bev_features,
+                mlvl_feats,
+                bev_queries,
+                bev_h,
+                bev_w,
+                with_grad=not self.bev_feat_no_grad,
+                grid_length=grid_length,
+                bev_pos=bev_pos,
+                prev_bev=prev_bev,
+                **kwargs)
 
-        query = query.permute(1, 0, 2)
-        query_pos = query_pos.permute(1, 0, 2)
-        bev_embed = bev_embed.permute(1, 0, 2)
+            bs = mlvl_feats[0].size(0)
+            query_pos, query = torch.split(
+                object_query_embed, self.embed_dims, dim=1)
+            query_pos = query_pos.unsqueeze(0).expand(bs, -1, -1)
+            query = query.unsqueeze(0).expand(bs, -1, -1)
+            if reference_points is not None:
+                reference_points = reference_points.unsqueeze(0).expand(bs, -1, -1)
+            else:
+                reference_points = self.reference_points(query_pos)
+            reference_points = reference_points.sigmoid()
+            init_reference_out = reference_points
 
-        inter_states, inter_references = self.decoder(
-            query=query,
-            key=None,
-            value=bev_embed,
-            query_pos=query_pos,
-            reference_points=reference_points,
-            reg_branches=reg_branches,
-            cls_branches=cls_branches,
-            spatial_shapes=torch.tensor([[bev_h, bev_w]], device=query.device),
-            level_start_index=torch.tensor([0], device=query.device),
-            **kwargs)
+            query = query.permute(1, 0, 2)
+            query_pos = query_pos.permute(1, 0, 2)
+            bev_embed = bev_embed.permute(1, 0, 2)
 
-        inter_references_out = inter_references
+            inter_states, inter_references = self.decoder(
+                query=query,
+                key=None,
+                value=bev_embed,
+                query_pos=query_pos,
+                reference_points=reference_points,
+                reg_branches=reg_branches,
+                cls_branches=cls_branches,
+                spatial_shapes=torch.tensor([[bev_h, bev_w]], device=query.device),
+                level_start_index=torch.tensor([0], device=query.device),
+                **kwargs)
 
-        return bev_embed, inter_states, init_reference_out, inter_references_out
+            inter_references_out = inter_references
+
+            return bev_embed, inter_states, init_reference_out, inter_references_out

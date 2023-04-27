@@ -119,59 +119,61 @@ class SpatialCrossAttention(BaseModule):
              Tensor: forwarded results with shape [num_query, bs, embed_dims].
         """
 
-        if key is None:
-            key = query
-        if value is None:
-            value = key
+        with torch.profiler.record_function("SpatialCrossAttention"):
 
-        if residual is None:
-            inp_residual = query
-            slots = torch.zeros_like(query)
-        if query_pos is not None:
-            query = query + query_pos
+            if key is None:
+                key = query
+            if value is None:
+                value = key
 
-        bs, num_query, _ = query.size()
+            if residual is None:
+                inp_residual = query
+                slots = torch.zeros_like(query)
+            if query_pos is not None:
+                query = query + query_pos
 
-        D = reference_points_cam.size(3)
-        indexes = []
-        for i, mask_per_img in enumerate(bev_mask):
-            index_query_per_img = mask_per_img[0].sum(-1).nonzero().squeeze(-1)
-            indexes.append(index_query_per_img)
-        max_len = max([len(each) for each in indexes])
+            bs, num_query, _ = query.size()
 
-        # each camera only interacts with its corresponding BEV queries. This step can  greatly save GPU memory.
-        queries_rebatch = query.new_zeros(
-            [bs, self.num_cams, max_len, self.embed_dims])
-        reference_points_rebatch = reference_points_cam.new_zeros(
-            [bs, self.num_cams, max_len, D, 2])
-        
-        for j in range(bs):
-            for i, reference_points_per_img in enumerate(reference_points_cam):   
-                index_query_per_img = indexes[i]
-                queries_rebatch[j, i, :len(index_query_per_img)] = query[j, index_query_per_img]
-                reference_points_rebatch[j, i, :len(index_query_per_img)] = reference_points_per_img[j, index_query_per_img]
+            D = reference_points_cam.size(3)
+            indexes = []
+            for i, mask_per_img in enumerate(bev_mask):
+                index_query_per_img = mask_per_img[0].sum(-1).nonzero().squeeze(-1)
+                indexes.append(index_query_per_img)
+            max_len = max([len(each) for each in indexes])
 
-        num_cams, l, bs, embed_dims = key.shape
+            # each camera only interacts with its corresponding BEV queries. This step can  greatly save GPU memory.
+            queries_rebatch = query.new_zeros(
+                [bs, self.num_cams, max_len, self.embed_dims])
+            reference_points_rebatch = reference_points_cam.new_zeros(
+                [bs, self.num_cams, max_len, D, 2])
 
-        key = key.permute(2, 0, 1, 3).reshape(
-            bs * self.num_cams, l, self.embed_dims)
-        value = value.permute(2, 0, 1, 3).reshape(
-            bs * self.num_cams, l, self.embed_dims)
+            for j in range(bs):
+                for i, reference_points_per_img in enumerate(reference_points_cam):
+                    index_query_per_img = indexes[i]
+                    queries_rebatch[j, i, :len(index_query_per_img)] = query[j, index_query_per_img]
+                    reference_points_rebatch[j, i, :len(index_query_per_img)] = reference_points_per_img[j, index_query_per_img]
 
-        queries = self.deformable_attention(query=queries_rebatch.view(bs*self.num_cams, max_len, self.embed_dims), key=key, value=value,
-                                            reference_points=reference_points_rebatch.view(bs*self.num_cams, max_len, D, 2), spatial_shapes=spatial_shapes,
-                                            level_start_index=level_start_index).view(bs, self.num_cams, max_len, self.embed_dims)
-        for j in range(bs):
-            for i, index_query_per_img in enumerate(indexes):
-                slots[j, index_query_per_img] += queries[j, i, :len(index_query_per_img)]
+            num_cams, l, bs, embed_dims = key.shape
 
-        count = bev_mask.sum(-1) > 0
-        count = count.permute(1, 2, 0).sum(-1)
-        count = torch.clamp(count, min=1.0)
-        slots = slots / count[..., None]
-        slots = self.output_proj(slots)
+            key = key.permute(2, 0, 1, 3).reshape(
+                bs * self.num_cams, l, self.embed_dims)
+            value = value.permute(2, 0, 1, 3).reshape(
+                bs * self.num_cams, l, self.embed_dims)
 
-        return self.dropout(slots) + inp_residual
+            queries = self.deformable_attention(query=queries_rebatch.view(bs*self.num_cams, max_len, self.embed_dims), key=key, value=value,
+                                                reference_points=reference_points_rebatch.view(bs*self.num_cams, max_len, D, 2), spatial_shapes=spatial_shapes,
+                                                level_start_index=level_start_index).view(bs, self.num_cams, max_len, self.embed_dims)
+            for j in range(bs):
+                for i, index_query_per_img in enumerate(indexes):
+                    slots[j, index_query_per_img] += queries[j, i, :len(index_query_per_img)]
+
+            count = bev_mask.sum(-1) > 0
+            count = count.permute(1, 2, 0).sum(-1)
+            count = torch.clamp(count, min=1.0)
+            slots = slots / count[..., None]
+            slots = self.output_proj(slots)
+
+            return self.dropout(slots) + inp_residual
 
 
 @ATTENTION.register_module()
@@ -314,85 +316,87 @@ class MSDeformableAttention3D(BaseModule):
              Tensor: forwarded results with shape [num_query, bs, embed_dims].
         """
 
-        if value is None:
-            value = query
-        if identity is None:
-            identity = query
-        if query_pos is not None:
-            query = query + query_pos
+        with torch.profiler.record_function("MSDeformableAttention3D"):
 
-        if not self.batch_first:
-            # change to (bs, num_query ,embed_dims)
-            query = query.permute(1, 0, 2)
-            value = value.permute(1, 0, 2)
+            if value is None:
+                value = query
+            if identity is None:
+                identity = query
+            if query_pos is not None:
+                query = query + query_pos
 
-        bs, num_query, _ = query.shape
-        bs, num_value, _ = value.shape
-        assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
+            if not self.batch_first:
+                # change to (bs, num_query ,embed_dims)
+                query = query.permute(1, 0, 2)
+                value = value.permute(1, 0, 2)
 
-        value = self.value_proj(value)
-        if key_padding_mask is not None:
-            value = value.masked_fill(key_padding_mask[..., None], 0.0)
-        value = value.view(bs, num_value, self.num_heads, -1)
-        sampling_offsets = self.sampling_offsets(query).view(
-            bs, num_query, self.num_heads, self.num_levels, self.num_points, 2)
-        attention_weights = self.attention_weights(query).view(
-            bs, num_query, self.num_heads, self.num_levels * self.num_points)
+            bs, num_query, _ = query.shape
+            bs, num_value, _ = value.shape
+            assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
 
-        attention_weights = attention_weights.softmax(-1)
+            value = self.value_proj(value)
+            if key_padding_mask is not None:
+                value = value.masked_fill(key_padding_mask[..., None], 0.0)
+            value = value.view(bs, num_value, self.num_heads, -1)
+            sampling_offsets = self.sampling_offsets(query).view(
+                bs, num_query, self.num_heads, self.num_levels, self.num_points, 2)
+            attention_weights = self.attention_weights(query).view(
+                bs, num_query, self.num_heads, self.num_levels * self.num_points)
 
-        attention_weights = attention_weights.view(bs, num_query,
-                                                   self.num_heads,
-                                                   self.num_levels,
-                                                   self.num_points)
+            attention_weights = attention_weights.softmax(-1)
 
-        if reference_points.shape[-1] == 2:
-            """
-            For each BEV query, it owns `num_Z_anchors` in 3D space that having different heights.
-            After proejcting, each BEV query has `num_Z_anchors` reference points in each 2D image.
-            For each referent point, we sample `num_points` sampling points.
-            For `num_Z_anchors` reference points,  it has overall `num_points * num_Z_anchors` sampling points.
-            """
-            offset_normalizer = torch.stack(
-                [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
+            attention_weights = attention_weights.view(bs, num_query,
+                                                       self.num_heads,
+                                                       self.num_levels,
+                                                       self.num_points)
 
-            bs, num_query, num_Z_anchors, xy = reference_points.shape
-            reference_points = reference_points[:, :, None, None, None, :, :]
-            sampling_offsets = sampling_offsets / \
-                offset_normalizer[None, None, None, :, None, :]
-            bs, num_query, num_heads, num_levels, num_all_points, xy = sampling_offsets.shape
-            sampling_offsets = sampling_offsets.view(
-                bs, num_query, num_heads, num_levels, num_all_points // num_Z_anchors, num_Z_anchors, xy)
-            sampling_locations = reference_points + sampling_offsets
-            bs, num_query, num_heads, num_levels, num_points, num_Z_anchors, xy = sampling_locations.shape
-            assert num_all_points == num_points * num_Z_anchors
+            if reference_points.shape[-1] == 2:
+                """
+                For each BEV query, it owns `num_Z_anchors` in 3D space that having different heights.
+                After proejcting, each BEV query has `num_Z_anchors` reference points in each 2D image.
+                For each referent point, we sample `num_points` sampling points.
+                For `num_Z_anchors` reference points,  it has overall `num_points * num_Z_anchors` sampling points.
+                """
+                offset_normalizer = torch.stack(
+                    [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
 
-            sampling_locations = sampling_locations.view(
-                bs, num_query, num_heads, num_levels, num_all_points, xy)
+                bs, num_query, num_Z_anchors, xy = reference_points.shape
+                reference_points = reference_points[:, :, None, None, None, :, :]
+                sampling_offsets = sampling_offsets / \
+                    offset_normalizer[None, None, None, :, None, :]
+                bs, num_query, num_heads, num_levels, num_all_points, xy = sampling_offsets.shape
+                sampling_offsets = sampling_offsets.view(
+                    bs, num_query, num_heads, num_levels, num_all_points // num_Z_anchors, num_Z_anchors, xy)
+                sampling_locations = reference_points + sampling_offsets
+                bs, num_query, num_heads, num_levels, num_points, num_Z_anchors, xy = sampling_locations.shape
+                assert num_all_points == num_points * num_Z_anchors
 
-        elif reference_points.shape[-1] == 4:
-            assert False
-        else:
-            raise ValueError(
-                f'Last dim of reference_points must be'
-                f' 2 or 4, but get {reference_points.shape[-1]} instead.')
+                sampling_locations = sampling_locations.view(
+                    bs, num_query, num_heads, num_levels, num_all_points, xy)
 
-        #  sampling_locations.shape: bs, num_query, num_heads, num_levels, num_all_points, 2
-        #  attention_weights.shape: bs, num_query, num_heads, num_levels, num_all_points
-        #
-
-        if torch.cuda.is_available() and value.is_cuda:
-            if value.dtype == torch.float16:
-                MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+            elif reference_points.shape[-1] == 4:
+                assert False
             else:
-                MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
-            output = MultiScaleDeformableAttnFunction.apply(
-                value, spatial_shapes, level_start_index, sampling_locations,
-                attention_weights, self.im2col_step)
-        else:
-            output = multi_scale_deformable_attn_pytorch(
-                value, spatial_shapes, sampling_locations, attention_weights)
-        if not self.batch_first:
-            output = output.permute(1, 0, 2)
+                raise ValueError(
+                    f'Last dim of reference_points must be'
+                    f' 2 or 4, but get {reference_points.shape[-1]} instead.')
 
-        return output
+            #  sampling_locations.shape: bs, num_query, num_heads, num_levels, num_all_points, 2
+            #  attention_weights.shape: bs, num_query, num_heads, num_levels, num_all_points
+            #
+
+            if torch.cuda.is_available() and value.is_cuda:
+                if value.dtype == torch.float16:
+                    MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+                else:
+                    MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+                output = MultiScaleDeformableAttnFunction.apply(
+                    value, spatial_shapes, level_start_index, sampling_locations,
+                    attention_weights, self.im2col_step)
+            else:
+                output = multi_scale_deformable_attn_pytorch(
+                    value, spatial_shapes, sampling_locations, attention_weights)
+            if not self.batch_first:
+                output = output.permute(1, 0, 2)
+
+            return output
