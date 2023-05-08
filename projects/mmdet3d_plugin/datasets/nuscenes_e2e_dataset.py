@@ -1079,17 +1079,6 @@ class NuScenesE2EDataset(NuScenesDataset):
                                  'crossing_iou': float(crossing_intersection / crossing_union),
                                  'contour_iou': float(contour_intersection / contour_union)})
 
-            key_list = ['drivable_iou', 'lanes_iou',
-                        'divider_iou', 'crossing_iou', 'contour_iou']
-            for key in key_list:
-                results_dict[key + '_mean'] = 0
-            for i in range(len(results)):
-                for key in key_list:
-                    value = results[i]['ret_iou'][key]
-                    results_dict[key + '_mean'] += float(value.numpy()[0])
-            for key in key_list:
-                value = results_dict[key + '_mean']
-                results_dict[key + '_mean'] = value / len(results)
             print(results_dict)
 
         if tmp_dir is not None:
