@@ -100,6 +100,7 @@ Pre-trained models and results under main metrics are provided below. We refer y
 The overall pipeline of UniAD is controlled by [uniad_e2e.py](projects/mmdet3d_plugin/uniad/detectors/uniad_e2e.py) which coordinates all the task modules in `UniAD/projects/mmdet3d_plugin/uniad/dense_heads`. If you are interested in the implementation of a specific task module, please refer to its corresponding file, e.g., [motion_head](projects/mmdet3d_plugin/uniad/dense_heads/motion_head.py).
 
 ## TODO List <a name="todos"></a>
+- [ ] Fix bug: Unable to reproduce the results of stage1 track-map model when training from scratch. [Ref: https://github.com/OpenDriveLab/UniAD/issues/21]
 - [ ] Support larger batch size [Est. 2023/04]
 - [ ] (Long-term) Improve flexibility for future extensions
 - [ ] All configs & checkpoints
