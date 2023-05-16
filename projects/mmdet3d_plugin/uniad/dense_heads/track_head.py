@@ -137,66 +137,48 @@ class BEVFormerTrackHead(DETRHead):
             bias_init = bias_init_with_prob(0.01)
             for m in self.cls_branches:
                 nn.init.constant_(m[-1].bias, bias_init)
-
-    @auto_fp16(apply_to=('mlvl_feats'))
-    def forward(self, mlvl_feats, img_metas, object_query_embeds=None, ref_points=None, ref_size=None, prev_bev=None,  only_bev=False):
-        """Forward function.
-        Args:
-            mlvl_feats (tuple[Tensor]): Features from the upstream
-                network, each is a 5D-tensor with shape
-                (B, N, C, H, W).
-            prev_bev: previous bev featues
-            only_bev: only compute BEV features with encoder. 
-        Returns:
-            all_cls_scores (Tensor): Outputs from the classification head, \
-                shape [nb_dec, bs, num_query, cls_out_channels]. Note \
-                cls_out_channels should includes background.
-            all_bbox_preds (Tensor): Sigmoid outputs from the regression \
-                head with normalized coordinate format (cx, cy, w, l, cz, h, theta, vx, vy). \
-                Shape [nb_dec, bs, num_query, 9].
-        """
-
-        with torch.profiler.record_function("BEVFormerTrackHead"):
-
+    
+    def get_bev_features(self, mlvl_feats, img_metas, prev_bev=None):
+        with torch.profiler.record_function("BEVFormerTrackHead(Head of Detr3D)-get_bev_features"):
             bs, num_cam, _, _, _ = mlvl_feats[0].shape
             dtype = mlvl_feats[0].dtype
-            # object_query_embeds = self.query_embedding.weight.to(dtype)
             bev_queries = self.bev_embedding.weight.to(dtype)
 
             bev_mask = torch.zeros((bs, self.bev_h, self.bev_w),
-                                   device=bev_queries.device).to(dtype)
+                                device=bev_queries.device).to(dtype)
             bev_pos = self.positional_encoding(bev_mask).to(dtype)
+            bev_embed = self.transformer.get_bev_features(
+                mlvl_feats,
+                bev_queries,
+                self.bev_h,
+                self.bev_w,
+                grid_length=(self.real_h / self.bev_h,
+                            self.real_w / self.bev_w),
+                bev_pos=bev_pos,
+                prev_bev=prev_bev,
+                img_metas=img_metas,
+            )
+            return bev_embed, bev_pos
 
-            if only_bev:  # only use encoder to obtain BEV features, TODO: refine the workaround
-                return self.transformer.get_bev_features(
-                    mlvl_feats,
-                    bev_queries,
-                    self.bev_h,
-                    self.bev_w,
-                    grid_length=(self.real_h / self.bev_h,
-                                 self.real_w / self.bev_w),
-                    bev_pos=bev_pos,
-                    img_metas=img_metas,
-                    prev_bev=prev_bev,
-                )
-            else:
-                outputs = self.transformer(
-                    mlvl_feats,
-                    bev_queries,
-                    object_query_embeds,
-                    self.bev_h,
-                    self.bev_w,
-                    grid_length=(self.real_h / self.bev_h,
-                                 self.real_w / self.bev_w),
-                    bev_pos=bev_pos,
-                    reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
-                    cls_branches=self.cls_branches if self.as_two_stage else None,
-                    img_metas=img_metas,
-                    prev_bev=prev_bev,
-                    reference_points=ref_points,
-                )
-
-            bev_embed, hs, init_reference, inter_references = outputs
+    def get_detections(
+        self, 
+        bev_embed,
+        object_query_embeds=None,
+        ref_points=None,
+        img_metas=None,
+    ):
+        with torch.profiler.record_function("BEVFormerTrackHead(Head of Detr3D)-get_detections"):
+            assert bev_embed.shape[0] == self.bev_h * self.bev_w
+            hs, init_reference, inter_references = self.transformer.get_states_and_refs(
+                bev_embed,
+                object_query_embeds,
+                self.bev_h,
+                self.bev_w,
+                reference_points=ref_points,
+                reg_branches=self.reg_branches if self.with_box_refine else None,
+                cls_branches=self.cls_branches if self.as_two_stage else None,
+                img_metas=img_metas,
+            )
             hs = hs.permute(0, 2, 1, 3)
             outputs_classes = []
             outputs_coords = []
@@ -213,7 +195,6 @@ class BEVFormerTrackHead(DETRHead):
                 tmp = self.reg_branches[lvl](hs[lvl])  # xydxdyxdz
                 outputs_past_traj = self.past_traj_reg_branches[lvl](hs[lvl]).view(
                     tmp.shape[0], -1, self.past_steps + self.fut_steps, 2)
-
                 # TODO: check the shape of reference
                 assert reference.shape[-1] == 3
                 tmp[..., 0:2] += reference[..., 0:2]
@@ -226,11 +207,11 @@ class BEVFormerTrackHead(DETRHead):
                 )
 
                 tmp[..., 0:1] = (tmp[..., 0:1] * (self.pc_range[3] -
-                                 self.pc_range[0]) + self.pc_range[0])
+                                self.pc_range[0]) + self.pc_range[0])
                 tmp[..., 1:2] = (tmp[..., 1:2] * (self.pc_range[4] -
-                                 self.pc_range[1]) + self.pc_range[1])
+                                self.pc_range[1]) + self.pc_range[1])
                 tmp[..., 4:5] = (tmp[..., 4:5] * (self.pc_range[5] -
-                                 self.pc_range[2]) + self.pc_range[2])
+                                self.pc_range[2]) + self.pc_range[2])
 
                 # tmp[..., 2:4] = tmp[..., 2:4] + ref_size_basse[..., 0:2]
                 # tmp[..., 5:6] = tmp[..., 5:6] + ref_size_basse[..., 2:3]
@@ -240,15 +221,11 @@ class BEVFormerTrackHead(DETRHead):
                 outputs_classes.append(outputs_class)
                 outputs_coords.append(outputs_coord)
                 outputs_trajs.append(outputs_past_traj)
-
             outputs_classes = torch.stack(outputs_classes)
             outputs_coords = torch.stack(outputs_coords)
             outputs_trajs = torch.stack(outputs_trajs)
             last_ref_points = inverse_sigmoid(last_ref_points)
-
             outs = {
-                'bev_embed': bev_embed,
-                'bev_pos': bev_pos,
                 'all_cls_scores': outputs_classes,
                 'all_bbox_preds': outputs_coords,
                 'all_past_traj_preds': outputs_trajs,
@@ -258,7 +235,7 @@ class BEVFormerTrackHead(DETRHead):
                 'query_feats': hs,
             }
             return outs
-
+        
     def _get_target_single(self,
                            cls_score,
                            bbox_pred,
@@ -289,34 +266,35 @@ class BEVFormerTrackHead(DETRHead):
                 - neg_inds (Tensor): Sampled negative indices for each image.
         """
 
-        num_bboxes = bbox_pred.size(0)
-        # assigner and sampler
-        gt_c = gt_bboxes.shape[-1]
+        with torch.profiler.record_function("BEVFormerTrackHead(Head of Detr3D)-get_target_single"):
+            num_bboxes = bbox_pred.size(0)
+            # assigner and sampler
+            gt_c = gt_bboxes.shape[-1]
 
-        assign_result = self.assigner.assign(bbox_pred, cls_score, gt_bboxes,
-                                             gt_labels, gt_bboxes_ignore)
+            assign_result = self.assigner.assign(bbox_pred, cls_score, gt_bboxes,
+                                                gt_labels, gt_bboxes_ignore)
 
-        sampling_result = self.sampler.sample(assign_result, bbox_pred,
-                                              gt_bboxes)
-        pos_inds = sampling_result.pos_inds
-        neg_inds = sampling_result.neg_inds
+            sampling_result = self.sampler.sample(assign_result, bbox_pred,
+                                                gt_bboxes)
+            pos_inds = sampling_result.pos_inds
+            neg_inds = sampling_result.neg_inds
 
-        # label targets
-        labels = gt_bboxes.new_full((num_bboxes,),
-                                    self.num_classes,
-                                    dtype=torch.long)
-        labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
-        label_weights = gt_bboxes.new_ones(num_bboxes)
+            # label targets
+            labels = gt_bboxes.new_full((num_bboxes,),
+                                        self.num_classes,
+                                        dtype=torch.long)
+            labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
+            label_weights = gt_bboxes.new_ones(num_bboxes)
 
-        # bbox targets
-        bbox_targets = torch.zeros_like(bbox_pred)[..., :gt_c]
-        bbox_weights = torch.zeros_like(bbox_pred)
-        bbox_weights[pos_inds] = 1.0
+            # bbox targets
+            bbox_targets = torch.zeros_like(bbox_pred)[..., :gt_c]
+            bbox_weights = torch.zeros_like(bbox_pred)
+            bbox_weights[pos_inds] = 1.0
 
-        # DETR
-        bbox_targets[pos_inds] = sampling_result.pos_gt_bboxes
-        return (labels, label_weights, bbox_targets, bbox_weights,
-                pos_inds, neg_inds)
+            # DETR
+            bbox_targets[pos_inds] = sampling_result.pos_gt_bboxes
+            return (labels, label_weights, bbox_targets, bbox_weights,
+                    pos_inds, neg_inds)
 
     def get_targets(self,
                     cls_scores_list,
@@ -353,21 +331,23 @@ class BEVFormerTrackHead(DETRHead):
                 - num_total_neg (int): Number of negative samples in all \
                     images.
         """
-        assert gt_bboxes_ignore_list is None, \
-            'Only supports for gt_bboxes_ignore setting to None.'
-        num_imgs = len(cls_scores_list)
-        gt_bboxes_ignore_list = [
-            gt_bboxes_ignore_list for _ in range(num_imgs)
-        ]
 
-        (labels_list, label_weights_list, bbox_targets_list,
-         bbox_weights_list, pos_inds_list, neg_inds_list) = multi_apply(
-            self._get_target_single, cls_scores_list, bbox_preds_list,
-            gt_labels_list, gt_bboxes_list, gt_bboxes_ignore_list)
-        num_total_pos = sum((inds.numel() for inds in pos_inds_list))
-        num_total_neg = sum((inds.numel() for inds in neg_inds_list))
-        return (labels_list, label_weights_list, bbox_targets_list,
-                bbox_weights_list, num_total_pos, num_total_neg)
+        with torch.profiler.record_function("BEVFormerTrackHead(Head of Detr3D)-get_targets"):
+            assert gt_bboxes_ignore_list is None, \
+                'Only supports for gt_bboxes_ignore setting to None.'
+            num_imgs = len(cls_scores_list)
+            gt_bboxes_ignore_list = [
+                gt_bboxes_ignore_list for _ in range(num_imgs)
+            ]
+
+            (labels_list, label_weights_list, bbox_targets_list,
+            bbox_weights_list, pos_inds_list, neg_inds_list) = multi_apply(
+                self._get_target_single, cls_scores_list, bbox_preds_list,
+                gt_labels_list, gt_bboxes_list, gt_bboxes_ignore_list)
+            num_total_pos = sum((inds.numel() for inds in pos_inds_list))
+            num_total_neg = sum((inds.numel() for inds in neg_inds_list))
+            return (labels_list, label_weights_list, bbox_targets_list,
+                    bbox_weights_list, num_total_pos, num_total_neg)
 
     def loss_single(self,
                     cls_scores,
@@ -535,23 +515,25 @@ class BEVFormerTrackHead(DETRHead):
             list[dict]: Decoded bbox, scores and labels after nms.
         """
 
-        preds_dicts = self.bbox_coder.decode(preds_dicts)
+        with torch.profiler.record_function("BEVFormerTrackHead(Head of Detr3D)-get_bboxes"):
 
-        num_samples = len(preds_dicts)
-        ret_list = []
-        for i in range(num_samples):
-            preds = preds_dicts[i]
-            bboxes = preds['bboxes']
+            preds_dicts = self.bbox_coder.decode(preds_dicts)
 
-            bboxes[:, 2] = bboxes[:, 2] - bboxes[:, 5] * 0.5
+            num_samples = len(preds_dicts)
+            ret_list = []
+            for i in range(num_samples):
+                preds = preds_dicts[i]
+                bboxes = preds['bboxes']
 
-            code_size = bboxes.shape[-1]
-            bboxes = img_metas[i]['box_type_3d'](bboxes, code_size)
-            scores = preds['scores']
-            labels = preds['labels']
-            bbox_index = preds['bbox_index']
-            mask = preds['mask']
+                bboxes[:, 2] = bboxes[:, 2] - bboxes[:, 5] * 0.5
 
-            ret_list.append([bboxes, scores, labels, bbox_index, mask])
+                code_size = bboxes.shape[-1]
+                bboxes = img_metas[i]['box_type_3d'](bboxes, code_size)
+                scores = preds['scores']
+                labels = preds['labels']
+                bbox_index = preds['bbox_index']
+                mask = preds['mask']
 
-        return ret_list
+                ret_list.append([bboxes, scores, labels, bbox_index, mask])
+
+            return ret_list

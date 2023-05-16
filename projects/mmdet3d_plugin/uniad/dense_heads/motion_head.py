@@ -78,8 +78,8 @@ class MotionHead(BaseMotionHead):
         self.pc_range = pc_range
         self.predict_steps = predict_steps
         self.vehicle_id_list = vehicle_id_list
-        self.use_nonlinear_optimizer = use_nonlinear_optimizer
         
+        self.use_nonlinear_optimizer = use_nonlinear_optimizer
         self._load_anchors(anchor_info_path)
         self._build_loss(loss_traj)
         self._build_layers(transformerlayers, det_layer_num)
@@ -89,7 +89,6 @@ class MotionHead(BaseMotionHead):
                       bev_embed,
                       gt_bboxes_3d,
                       gt_labels_3d,
-                      img_metas,
                       gt_fut_traj=None,
                       gt_fut_traj_mask=None,
                       gt_sdc_fut_traj=None, 
@@ -119,7 +118,6 @@ class MotionHead(BaseMotionHead):
         track_boxes = outs_track['track_bbox_results']
         
         # cat sdc query/gt to the last
-        # TODO: make it more general
         sdc_match_index = torch.zeros((1,), dtype=all_matched_idxes[0].dtype, device=all_matched_idxes[0].device)
         sdc_match_index[0] = gt_fut_traj[0].shape[0]
         all_matched_idxes = [torch.cat([all_matched_idxes[0], sdc_match_index], dim=0)]
@@ -136,9 +134,8 @@ class MotionHead(BaseMotionHead):
 
         outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
         loss_inputs = [gt_bboxes_3d, gt_fut_traj, gt_fut_traj_mask, outs_motion, all_matched_idxes, track_boxes]
-        losses = self.loss(*loss_inputs, img_metas=img_metas)
+        losses = self.loss(*loss_inputs)
 
-        # TODO: make it more general
         def filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, vehicle_id_list):
             query_label = gt_labels_3d[0][-1][all_matched_idxes[0]]
             # select vehicle query according to vehicle_id_list
@@ -151,8 +148,6 @@ class MotionHead(BaseMotionHead):
             all_matched_idxes[0] = all_matched_idxes[0][vehicle_mask>0]
             return outs_motion, all_matched_idxes
 
-        # occflow not support sdc query, filter it out!
-        # TODO: make it more general
         all_matched_idxes[0] = all_matched_idxes[0][:-1]
         outs_motion['sdc_traj_query'] = outs_motion['traj_query'][:, :, -1]         # [3, 1, 6, 256]     [n_dec, b, n_mode, d]
         outs_motion['sdc_track_query'] = outs_motion['track_query'][:, -1]          # [1, 256]           [b, d]
@@ -160,37 +155,29 @@ class MotionHead(BaseMotionHead):
         outs_motion['traj_query'] = outs_motion['traj_query'][:, :, :-1]            # [3, 1, 3, 6, 256]  [n_dec, b, nq, n_mode, d]
         outs_motion['track_query'] = outs_motion['track_query'][:, :-1]             # [1, 3, 256]        [b, nq, d]   
         outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, :-1]     # [1, 3, 256]        [b, nq, d]  
-        
+
         
         outs_motion, all_matched_idxes = filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, self.vehicle_id_list)
         outs_motion['all_matched_idxes'] = all_matched_idxes
-        outs_motion['lane_query'] = lane_query
-        outs_motion['lane_query_pos'] = lane_query_pos
 
         ret_dict = dict(losses=losses, outs_motion=outs_motion, track_boxes=track_boxes)
         return ret_dict
 
-    def forward_test(self, img_metas, outs_pts={}, outs_track={}, outs_seg={}, 
-                           future_states=None, no_query=False):
+    def forward_test(self, bev_embed, outs_track={}, outs_seg={}):
         """Test function"""
-        if no_query:
-            return [{'traj': torch.zeros((0, 6, 12, 5)), 'traj_scores': torch.zeros((0, 6))}], {}
-        bev_embed = future_states if future_states is not None else outs_track['bev_embed']
-
         track_query = outs_track['track_query_embeddings'][None, None, ...]
         track_boxes = outs_track['track_bbox_results']
         
         track_query = torch.cat([track_query, outs_track['sdc_embedding'][None, None, None, :]], dim=2)
         sdc_track_boxes = outs_track['sdc_track_bbox_results']
 
-        # TODO: fix it, append sdc box 
         track_boxes[0][0].tensor = torch.cat([track_boxes[0][0].tensor, sdc_track_boxes[0][0].tensor], dim=0)
         track_boxes[0][1] = torch.cat([track_boxes[0][1], sdc_track_boxes[0][1]], dim=0)
         track_boxes[0][2] = torch.cat([track_boxes[0][2], sdc_track_boxes[0][2]], dim=0)
         track_boxes[0][3] = torch.cat([track_boxes[0][3], sdc_track_boxes[0][3]], dim=0)      
         memory, memory_mask, memory_pos, lane_query, _, lane_query_pos, hw_lvl = outs_seg['args_tuple']
         outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
-        traj_results = self.get_trajs(outs_motion, track_boxes, img_metas)
+        traj_results = self.get_trajs(outs_motion, track_boxes)
         bboxes, scores, labels, bbox_index, mask = track_boxes[0]
         outs_motion['track_scores'] = scores[None, :]
         labels[-1] = 0
@@ -218,8 +205,7 @@ class MotionHead(BaseMotionHead):
         outs_motion['track_query'] = outs_motion['track_query'][:, :-1]
         outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, :-1]
         outs_motion['track_scores'] = outs_motion['track_scores'][:, :-1]
-        outs_motion['lane_query'] = lane_query
-        outs_motion['lane_query_pos'] = lane_query_pos
+
         return traj_results, outs_motion
 
     @auto_fp16(apply_to=('bev_embed', 'track_query', 'lane_query', 'lane_query_pos', 'lane_query_embed', 'prev_bev'))
@@ -353,7 +339,6 @@ class MotionHead(BaseMotionHead):
         outputs_trajs = torch.stack(outputs_trajs)
 
         B, A_track, D = track_query.shape
-        
         valid_traj_masks = track_query.new_ones((B, A_track)) > 0
         outs = {
             'all_traj_scores': outputs_traj_scores,
@@ -368,7 +353,7 @@ class MotionHead(BaseMotionHead):
 
     def group_mode_query_pos(self, bbox_results, mode_query_pos):
         """
-        groups mode query positions based on the input bounding box results.
+        Group mode query positions based on the input bounding box results.
         
         Args:
             bbox_results (List[Tuple[torch.Tensor]]): A list of tuples containing the bounding box results for each image in the batch.
@@ -381,7 +366,6 @@ class MotionHead(BaseMotionHead):
         agent_num = mode_query_pos.shape[1]
         batched_mode_query_pos = []
         self.cls2group = self.cls2group.to(mode_query_pos.device)
-        
         # TODO: vectorize this
         # group the embeddings based on the class
         for i in range(batch_size):
@@ -402,8 +386,7 @@ class MotionHead(BaseMotionHead):
              gt_fut_traj_mask,
              preds_dicts_motion,
              all_matched_idxes,
-             track_bbox_results,
-             img_metas=None):
+             track_bbox_results):
         """
         Computes the loss function for the given ground truth and prediction dictionaries.
         
@@ -414,7 +397,6 @@ class MotionHead(BaseMotionHead):
             preds_dicts_motion (Dict[str, torch.Tensor]): A dictionary containing motion-related prediction tensors.
             all_matched_idxes (List[torch.Tensor]): A list of tensors containing the matched ground truth indices for each image in the batch.
             track_bbox_results (List[Tuple[torch.Tensor]]): A list of tuples containing the tracking bounding box results for each image in the batch.
-            img_metas (List[dict], optional): A list of dictionaries containing point cloud and image metadata. Default is None.
 
         Returns:
             dict[str, torch.Tensor]: A dictionary of loss components.

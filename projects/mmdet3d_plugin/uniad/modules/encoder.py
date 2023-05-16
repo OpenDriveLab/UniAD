@@ -157,6 +157,7 @@ class BEVFormerEncoder(TransformerLayerSequence):
                 valid_ratios=None,
                 prev_bev=None,
                 shift=0.,
+                img_metas=None,
                 **kwargs):
         """Forward function for `TransformerDecoder`.
         Args:
@@ -176,8 +177,7 @@ class BEVFormerEncoder(TransformerLayerSequence):
                 return_intermediate is `False`, otherwise it has shape
                 [num_layers, num_query, bs, embed_dims].
         """
-
-        with torch.profiler.record_function("BEVFormerEncoder"):
+        with torch.profiler.record_function("BEVFormerEncoder(TransformerDecoder)"):
             output = bev_query
             intermediate = []
 
@@ -187,7 +187,7 @@ class BEVFormerEncoder(TransformerLayerSequence):
                 bev_h, bev_w, dim='2d', bs=bev_query.size(1), device=bev_query.device, dtype=bev_query.dtype)
 
             reference_points_cam, bev_mask = self.point_sampling(
-                ref_3d, self.pc_range, kwargs['img_metas'])
+                ref_3d, self.pc_range, img_metas)
 
             # bug: this code should be 'shift_ref_2d = ref_2d.clone()', we keep this bug for reproducing our results in paper.
             shift_ref_2d = ref_2d  # .clone()
@@ -207,32 +207,14 @@ class BEVFormerEncoder(TransformerLayerSequence):
                 hybird_ref_2d = torch.stack([ref_2d, ref_2d], 1).reshape(
                     bs*2, len_bev, num_bev_level, 2)
 
-            for lid, layer in enumerate(self.layers):
-                output = layer(
-                    bev_query,
-                    key,
-                    value,
-                    *args,
-                    bev_pos=bev_pos,
-                    ref_2d=hybird_ref_2d,
-                    ref_3d=ref_3d,
-                    bev_h=bev_h,
-                    bev_w=bev_w,
-                    spatial_shapes=spatial_shapes,
-                    level_start_index=level_start_index,
-                    reference_points_cam=reference_points_cam,
-                    bev_mask=bev_mask,
-                    prev_bev=prev_bev,
-                    **kwargs)
+                    bev_query = output
+                    if self.return_intermediate:
+                        intermediate.append(output)
 
-                bev_query = output
                 if self.return_intermediate:
-                    intermediate.append(output)
+                    return torch.stack(intermediate)
 
-            if self.return_intermediate:
-                return torch.stack(intermediate)
-
-            return output
+                return output
 
 
 @TRANSFORMER_LAYER.register_module()
@@ -249,12 +231,12 @@ class BEVFormerLayer(MyCustomBaseTransformerLayer):
             in ffn. Default 0.0.
         operation_order (tuple[str]): The execution order of operation
             in transformer. Such as ('self_attn', 'norm', 'ffn', 'norm').
-            Default：None
+            Default: None
         act_cfg (dict): The activation config for FFNs. Default: `LN`
         norm_cfg (dict): Config dict for normalization layer.
             Default: `LN`.
         ffn_num_fcs (int): The number of fully-connected layers in FFNs.
-            Default：2.
+            Default: 2.
     """
 
     def __init__(self,
@@ -331,7 +313,7 @@ class BEVFormerLayer(MyCustomBaseTransformerLayer):
             Tensor: forwarded results with shape [num_queries, bs, embed_dims].
         """
 
-        with torch.profiler.record_function("BEVFormerLayer"):
+        with torch.profiler.record_function("BEVFormerLayer(TransformerDecoderLayer)"):
 
             norm_index = 0
             attn_index = 0

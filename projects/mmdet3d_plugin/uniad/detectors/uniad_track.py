@@ -68,6 +68,7 @@ class UniADTrack(MVXTwoStageDetector):
         gt_iou_threshold=0.0,
 
         freeze_img_modules=False,   # * Remember to use it
+        freeze_bev_encoder=False,
         queue_length=3,
     ):
         super(UniADTrack, self).__init__(
@@ -97,6 +98,8 @@ class UniADTrack(MVXTwoStageDetector):
 
         # temporal
         self.video_test_mode = video_test_mode
+        assert self.video_test_mode
+
         self.prev_frame_info = {
             "prev_bev": None,
             "scene_token": None,
@@ -138,46 +141,42 @@ class UniADTrack(MVXTwoStageDetector):
         self.l2g_r_mat = None
         self.l2g_t = None
         self.gt_iou_threshold = gt_iou_threshold
+        self.bev_h, self.bev_w = self.pts_bbox_head.bev_h, self.pts_bbox_head.bev_w
+        self.freeze_bev_encoder = freeze_bev_encoder
 
-    def extract_img_feat(self, img, img_metas, len_queue=None):
+    def extract_img_feat(self, img, len_queue=None):
         """Extract features of images."""
-        B = img.size(0)
-        if img is not None:
-            if img.dim() == 5 and img.size(0) == 1:
-                img.squeeze_()
-            elif img.dim() == 5 and img.size(0) > 1:
-                B, N, C, H, W = img.size()
-                img = img.reshape(B * N, C, H, W)
-            if self.use_grid_mask:
-                img = self.grid_mask(img)
-
-            img_feats = self.img_backbone(img)
-            if isinstance(img_feats, dict):
-                img_feats = list(img_feats.values())
-        else:
+        if img is None:
             return None
+        assert img.dim() == 5
+        B, N, C, H, W = img.size()
+        img = img.reshape(B * N, C, H, W)
+        if self.use_grid_mask:
+            img = self.grid_mask(img)
+        img_feats = self.img_backbone(img)
+        if isinstance(img_feats, dict):
+            img_feats = list(img_feats.values())
         if self.with_img_neck:
             img_feats = self.img_neck(img_feats)
 
         img_feats_reshaped = []
         for img_feat in img_feats:
-            BN, C, H, W = img_feat.size()
+            _, c, h, w = img_feat.size()
             if len_queue is not None:
-                img_feats_reshaped.append(
-                    img_feat.view(int(B / len_queue), len_queue, int(BN / B), C, H, W)
-                )
+                img_feat_reshaped = img_feat.view(B//len_queue, len_queue, N, c, h, w)
             else:
-                img_feats_reshaped.append(img_feat.view(B, int(BN / B), C, H, W))
+                img_feat_reshaped = img_feat.view(B, N, c, h, w)
+            img_feats_reshaped.append(img_feat_reshaped)
         return img_feats_reshaped
 
     @auto_fp16(apply_to=("img"))
-    def extract_feat(self, img, img_metas=None, len_queue=None):
+    def extract_feat(self, img, len_queue=None):
         """Extract features from images and points."""
         if self.freeze_img_modules:
             with torch.no_grad():
-                img_feats = self.extract_img_feat(img, img_metas, len_queue=len_queue)
+                img_feats = self.extract_img_feat(img, len_queue=len_queue)
         else:
-            img_feats = self.extract_img_feat(img, img_metas, len_queue=len_queue)
+            img_feats = self.extract_img_feat(img, len_queue=len_queue)
         return img_feats
 
     def _generate_empty_tracks(self):
@@ -323,9 +322,9 @@ class UniADTrack(MVXTwoStageDetector):
         track_instances.save_period = copy.deepcopy(tgt_instances.save_period)
         return track_instances.to(device)
 
-    def obtain_history_bev(self, imgs_queue, img_metas_list):
+    def get_history_bev(self, imgs_queue, img_metas_list):
         """
-        Obtain history BEV features iteratively. To save GPU memory, gradients are not calculated.
+        Get history BEV features iteratively. To save GPU memory, gradients are not calculated.
         """
         self.eval()
         with torch.no_grad():
@@ -335,23 +334,43 @@ class UniADTrack(MVXTwoStageDetector):
             img_feats_list = self.extract_feat(img=imgs_queue, len_queue=len_queue)
             for i in range(len_queue):
                 img_metas = [each[i] for each in img_metas_list]
-                # img_feats = self.extract_feat(img=img, img_metas=img_metas)
                 img_feats = [each_scale[:, i] for each_scale in img_feats_list]
-                prev_bev = self.pts_bbox_head(
-                    mlvl_feats=img_feats,
-                    img_metas=img_metas,
-                    prev_bev=prev_bev,
-                    only_bev=True)
+                prev_bev, _ = self.pts_bbox_head.get_bev_features(
+                    mlvl_feats=img_feats, 
+                    img_metas=img_metas, 
+                    prev_bev=prev_bev)
         self.train()
         return prev_bev
 
+    # Generate bev using bev_encoder in BEVFormer
+    def get_bevs(self, imgs, img_metas, prev_img=None, prev_img_metas=None, prev_bev=None):
+        if prev_img is not None and prev_img_metas is not None:
+            assert prev_bev is None
+            prev_bev = self.get_history_bev(prev_img, prev_img_metas)
+
+        img_feats = self.extract_feat(img=imgs)
+        if self.freeze_bev_encoder:
+            with torch.no_grad():
+                bev_embed, bev_pos = self.pts_bbox_head.get_bev_features(
+                    mlvl_feats=img_feats, img_metas=img_metas, prev_bev=prev_bev)
+        else:
+            bev_embed, bev_pos = self.pts_bbox_head.get_bev_features(
+                    mlvl_feats=img_feats, img_metas=img_metas, prev_bev=prev_bev)
+        
+        if bev_embed.shape[1] == self.bev_h * self.bev_w:
+            bev_embed = bev_embed.permute(1, 0, 2)
+        
+        assert bev_embed.shape[0] == self.bev_h * self.bev_w
+        return bev_embed, bev_pos
+
     @auto_fp16(apply_to=("img", "prev_bev"))
-    def _forward_single(
+    def _forward_single_frame(
         self,
         img,
         img_metas,
         track_instances,
-        prev_bev,
+        prev_img,
+        prev_img_metas,
         l2g_r1=None,
         l2g_t1=None,
         l2g_r2=None,
@@ -371,28 +390,24 @@ class UniADTrack(MVXTwoStageDetector):
                 it means this frame is the end of the training clip,
                 so no need to call velocity update
         """
-
-        B, num_cam, _, H, W = img.shape
-
-        # img.size(): [6, 3, 928, 1600]
-        img_feats = self.extract_feat(img=img, img_metas=img_metas)
-        ref_box_sizes = torch.cat(
-            [track_instances.pred_boxes[:, 2:4], track_instances.pred_boxes[:, 5:6]],
-            dim=1,
+        # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
+        bev_embed, bev_pos = self.get_bevs(
+            img, img_metas,
+            prev_img=prev_img, prev_img_metas=prev_img_metas,
         )
-        output = self.pts_bbox_head(
-            mlvl_feats=img_feats,
-            img_metas=img_metas,
+
+        det_output = self.pts_bbox_head.get_detections(
+            bev_embed,
             object_query_embeds=track_instances.query,
             ref_points=track_instances.ref_pts,
-            prev_bev=prev_bev,
+            img_metas=img_metas,
         )
-        output_classes = output["all_cls_scores"]
-        output_coords = output["all_bbox_preds"]
-        output_past_trajs = output["all_past_traj_preds"]
-        last_ref_pts = output["last_ref_points"]
-        query_feats = output["query_feats"]
-        bev_embed = output["bev_embed"]
+
+        output_classes = det_output["all_cls_scores"]
+        output_coords = det_output["all_bbox_preds"]
+        output_past_trajs = det_output["all_past_traj_preds"]
+        last_ref_pts = det_output["last_ref_points"]
+        query_feats = det_output["query_feats"]
 
         out = {
             "pred_logits": output_classes[-1],
@@ -400,7 +415,7 @@ class UniADTrack(MVXTwoStageDetector):
             "pred_past_trajs": output_past_trajs[-1],
             "ref_pts": last_ref_pts,
             "bev_embed": bev_embed,
-            "bev_pos": output['bev_pos']
+            "bev_pos": bev_pos
         }
         with torch.no_grad():
             track_scores = output_classes[-1, 0, :].sigmoid().max(dim=-1).values
@@ -436,7 +451,6 @@ class UniADTrack(MVXTwoStageDetector):
         
         for i in range(nb_dec):
             track_instances = track_instances_list[i]
-            # track_scores = output_classes[i, 0, :].sigmoid().max(dim=-1).values
 
             track_instances.scores = track_scores
             track_instances.pred_logits = output_classes[i, 0]  # [300, num_cls]
@@ -466,7 +480,6 @@ class UniADTrack(MVXTwoStageDetector):
         tmp["track_instances"] = track_instances
         out_track_instances = self.query_interact(tmp)
         out["track_instances"] = out_track_instances
-        out["prev_bev"] = prev_bev
         return out
 
     def select_active_track_query(self, track_instances, active_index, img_metas, with_mask=True):
@@ -484,37 +497,6 @@ class UniADTrack(MVXTwoStageDetector):
         out["sdc_track_bbox_results"] = result_dict['track_bbox_results']
         out["sdc_embedding"] = sdc_instance.output_embedding[0]
         return out
-
-    def forward_pts_train(self,
-                          pts_feats,
-                          gt_bboxes_3d,
-                          gt_labels_3d,
-                          img_metas,
-                          gt_bboxes_ignore=None,
-                          prev_bev=None):
-        """Forward function'
-        Args:
-            pts_feats (list[torch.Tensor]): Features of point cloud branch
-            gt_bboxes_3d (list[:obj:`BaseInstance3DBoxes`]): Ground truth
-                boxes for each sample.
-            gt_labels_3d (list[torch.Tensor]): Ground truth labels for
-                boxes of each sampole
-            img_metas (list[dict]): Meta information of samples.
-            gt_bboxes_ignore (list[torch.Tensor], optional): Ground truth
-                boxes to be ignored. Defaults to None.
-            prev_bev (torch.Tensor, optional): BEV features of previous frame.
-        Returns:
-            dict: Losses of each branch.
-        """
-
-        outs = self.pts_bbox_head(
-            pts_feats, img_metas, prev_bev)
-        loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs]
-        losses = self.pts_bbox_head.loss(*loss_inputs, img_metas=img_metas)
-
-        ret_dict = dict(losses=losses, outs=outs)
-
-        return ret_dict
 
     @auto_fp16(apply_to=("img", "points"))
     def forward_track_train(self,
@@ -562,7 +544,7 @@ class UniADTrack(MVXTwoStageDetector):
         for i in range(num_frame):
             prev_img = img[:, :i, ...] if i != 0 else img[:, :1, ...]
             prev_img_metas = copy.deepcopy(img_metas)
-            prev_bev = self.obtain_history_bev(prev_img, prev_img_metas)
+            # TODO: Generate prev_bev in an RNN way.
 
             img_single = torch.stack([img_[i] for img_ in img], dim=0)
             img_metas_single = [copy.deepcopy(img_metas[0][i])]
@@ -578,11 +560,12 @@ class UniADTrack(MVXTwoStageDetector):
             all_matched_idxes = []
             all_instances_pred_logits = []
             all_instances_pred_boxes = []
-            frame_res = self._forward_single(
+            frame_res = self._forward_single_frame(
                 img_single,
                 img_metas_single,
                 track_instances,
-                prev_bev,
+                prev_img,
+                prev_img_metas,
                 l2g_r_mat[0][i],
                 l2g_t[0][i],
                 l2g_r2,
@@ -641,29 +624,12 @@ class UniADTrack(MVXTwoStageDetector):
         return outs_track
 
 
-    def simple_test_pts(self, x, img_metas, prev_bev=None, rescale=False):
-        """Test function"""
-        outs_pts = self.pts_bbox_head(x, img_metas, prev_bev=prev_bev)
-
-        bbox_list = self.pts_bbox_head.get_bboxes(
-            outs_pts, img_metas, rescale=rescale)
-        bbox_results = []
-        i = 0
-        for bboxes, scores, labels, bbox_index, mask in bbox_list:
-            res_dict = bbox3d2result(bboxes, scores, labels)
-            res_dict['bbox_index'] = bbox_index.cpu()
-            res_dict['mask'] = mask.cpu()
-            res_dict['token'] = img_metas[i]['sample_idx']
-            i += 1
-            bbox_results.append(res_dict)
-        return bbox_results, outs_pts
-
-    def _inference_single(
+    def _inference_single_frame(
         self,
         img,
         img_metas,
         track_instances,
-        prev_bev,
+        prev_bev=None,
         l2g_r1=None,
         l2g_t1=None,
         l2g_r2=None,
@@ -691,23 +657,18 @@ class UniADTrack(MVXTwoStageDetector):
 
         track_instances = Instances.cat([other_inst, active_inst])
 
-        """ extract feature """
-        img_feats = self.extract_feat(img=img, img_metas=img_metas)
-
-        """ forward new results """
-        output = self.pts_bbox_head(
-            mlvl_feats=img_feats,
-            img_metas=img_metas,
+        # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
+        bev_embed, bev_pos = self.get_bevs(img, img_metas, prev_bev=prev_bev)
+        det_output = self.pts_bbox_head.get_detections(
+            bev_embed, 
             object_query_embeds=track_instances.query,
             ref_points=track_instances.ref_pts,
-            prev_bev=prev_bev,
+            img_metas=img_metas,
         )
-        output_classes = output["all_cls_scores"]
-        output_coords = output["all_bbox_preds"]
-        last_ref_pts = output["last_ref_points"]
-        query_feats = output["query_feats"]
-        bev_embed = output["bev_embed"]
-        bev_pos = output["bev_pos"]
+        output_classes = det_output["all_cls_scores"]
+        output_coords = det_output["all_bbox_preds"]
+        last_ref_pts = det_output["last_ref_points"]
+        query_feats = det_output["query_feats"]
 
         out = {
             "pred_logits": output_classes,
@@ -715,7 +676,7 @@ class UniADTrack(MVXTwoStageDetector):
             "ref_pts": last_ref_pts,
             "bev_embed": bev_embed,
             "query_embeddings": query_feats,
-            "all_past_traj_preds": output["all_past_traj_preds"],
+            "all_past_traj_preds": det_output["all_past_traj_preds"],
             "bev_pos": bev_pos,
         }
 
@@ -758,7 +719,6 @@ class UniADTrack(MVXTwoStageDetector):
         l2g_r_mat=None,
         img_metas=None,
         timestamp=None,
-        **kwargs,
     ):
         """only support bs=1 and sequential input"""
 
@@ -775,8 +735,6 @@ class UniADTrack(MVXTwoStageDetector):
             self.prev_bev = None
             track_instances = self._generate_empty_tracks()
             time_delta, l2g_r1, l2g_t1, l2g_r2, l2g_t2 = None, None, None, None, None
-            self.prev_images_list = [copy.deepcopy(img)]
-            self.prev_img_metas = [copy.deepcopy(img_metas[0])]
             
         else:
             track_instances = self.test_track_instances
@@ -785,14 +743,6 @@ class UniADTrack(MVXTwoStageDetector):
             l2g_t1 = self.l2g_t
             l2g_r2 = l2g_r_mat
             l2g_t2 = l2g_t
-            if len(self.prev_images_list)==self.queue_length:
-                self.prev_images_list.pop(0)
-                self.prev_img_metas.pop(0)
-                self.prev_images_list.append(copy.deepcopy(img))
-                self.prev_img_metas.append(copy.deepcopy(img_metas[0]))
-            else:
-                self.prev_images_list.append(copy.deepcopy(img))
-                self.prev_img_metas.append(copy.deepcopy(img_metas[0]))
         
         """ get time_delta and l2g r/t infos """
         """ update frame info for next frame"""
@@ -801,9 +751,8 @@ class UniADTrack(MVXTwoStageDetector):
         self.l2g_r_mat = l2g_r_mat
 
         """ predict and update """
-        assert self.video_test_mode
         prev_bev = self.prev_bev
-        frame_res = self._inference_single(
+        frame_res = self._inference_single_frame(
             img,
             img_metas,
             track_instances,
@@ -819,9 +768,6 @@ class UniADTrack(MVXTwoStageDetector):
         track_instances = frame_res["track_instances"]
         track_instances_fordet = frame_res["track_instances_fordet"]
 
-        active_instances = self.query_interact._select_active_tracks(
-            dict(track_instances=track_instances)
-        )
         self.test_track_instances = track_instances
         results = [dict()]
         get_keys = ["bev_embed", "bev_pos", 
@@ -830,7 +776,7 @@ class UniADTrack(MVXTwoStageDetector):
         if self.with_motion_head:
             get_keys += ["sdc_boxes_3d", "sdc_scores_3d", "sdc_track_scores", "sdc_track_bbox_results", "sdc_embedding"]
         results[0].update({k: frame_res[k] for k in get_keys})
-        results = self._instances2results_det(track_instances_fordet, results, img_metas)
+        results = self._det_instances2results(track_instances_fordet, results, img_metas)
         return results
     
     def _track_instances2results(self, track_instances, img_metas, with_mask=True):
@@ -863,7 +809,7 @@ class UniADTrack(MVXTwoStageDetector):
         )
         return result_dict
 
-    def _instances2results_det(self, instances, results, img_metas):
+    def _det_instances2results(self, instances, results, img_metas):
         """
         Outs:
         active_instances. keys:

@@ -109,12 +109,6 @@ class UniAD(UniADTrack):
                       # Occ_gt
                       gt_segmentation=None,
                       gt_instance=None, 
-                      gt_centerness=None, 
-                      gt_offset=None, 
-                      gt_flow=None,
-                      gt_backward_flow=None,
-                      gt_occ_future_egomotions=None,
-                      gt_occ_has_invalid_frame=None,
                       gt_occ_img_is_valid=None,
                       
                       #planning
@@ -151,12 +145,6 @@ class UniAD(UniADTrack):
             gt_sdc_fut_traj_mask (list[torch.Tensor], optional): List of tensors containing ground truth self-driving car future trajectory masks. Defaults to None.
             gt_segmentation (list[torch.Tensor], optional): List of tensors containing ground truth segmentation masks. Defaults to
             gt_instance (list[torch.Tensor], optional): List of tensors containing ground truth instance segmentation masks. Defaults to None.
-            gt_centerness (list[torch.Tensor], optional): List of tensors containing ground truth centerness values for occupancy prediction. Defaults to None.
-            gt_offset (list[torch.Tensor], optional): List of tensors containing ground truth offsets for occupancy prediction. Defaults to None.
-            gt_flow (list[torch.Tensor], optional): List of tensors containing ground truth optical flow information. Defaults to None.
-            gt_backward_flow (list[torch.Tensor], optional): List of tensors containing ground truth backward optical flow information. Defaults to None.
-            gt_occ_future_egomotions (list[torch.Tensor], optional): List of tensors containing ground truth future egomotions for occupancy prediction. Defaults to None.
-            gt_occ_has_invalid_frame (list[torch.Tensor], optional): List of tensors containing binary flags indicating whether a frame is invalid for occupancy prediction. Defaults to None.
             gt_occ_img_is_valid (list[torch.Tensor], optional): List of tensors containing binary flags indicating whether an image is valid for occupancy prediction. Defaults to None.
             sdc_planning (list[torch.Tensor], optional): List of tensors containing self-driving car planning information. Defaults to None.
             sdc_planning_mask (list[torch.Tensor], optional): List of tensors containing self-driving car planning masks. Defaults to None.
@@ -186,7 +174,6 @@ class UniAD(UniADTrack):
         img_metas = [each[len_queue-1] for each in img_metas]
 
         outs_seg = dict()
-        # Forward Map Segmentation Head
         if self.with_seg_head:          
             losses_seg, outs_seg = self.seg_head.forward_train(bev_embed, img_metas,
                                                           gt_lane_labels, gt_lane_bboxes, gt_lane_masks)
@@ -199,71 +186,47 @@ class UniAD(UniADTrack):
         if self.with_motion_head:
             ret_dict_motion = self.motion_head.forward_train(bev_embed,
                                                         gt_bboxes_3d, gt_labels_3d, 
-                                                        img_metas,
                                                         gt_fut_traj, gt_fut_traj_mask, 
                                                         gt_sdc_fut_traj, gt_sdc_fut_traj_mask, 
                                                         outs_track=outs_track, outs_seg=outs_seg
                                                     )
             losses_motion = ret_dict_motion["losses"]
             outs_motion = ret_dict_motion["outs_motion"]
-            outs_motion['bev_pos'] = bev_pos  # [1, 256, 200, 200]
+            outs_motion['bev_pos'] = bev_pos
             losses_motion = self.loss_weighted_and_prefixed(losses_motion, prefix='motion')
             losses.update(losses_motion)
 
         # Forward Occ Head
-        outs_occflow = dict()
         if self.with_occ_head:
-            occ_gt = dict(
-                segmentation=gt_segmentation,
-                instance=gt_instance, 
-                centerness=gt_centerness, 
-                offset=gt_offset,
-                flow=gt_flow,
-                backward_flow=gt_backward_flow,
-                future_egomotion=gt_occ_future_egomotions,
-                has_invalid_frame=gt_occ_has_invalid_frame,
-                img_is_valid=gt_occ_img_is_valid
-            )
-            # TODO: fix the no active track query condition
             if outs_motion['track_query'].shape[1] == 0:
-                outs_motion['track_query'] = torch.zeros((1, 1, 256)).to(bev_embed.dtype).to(bev_embed.device)
-                outs_motion['track_query_pos'] = torch.zeros((1,1, 256)).to(bev_embed.dtype).to(bev_embed.device)
-                outs_motion['traj_query'] = torch.zeros((3, 1, 1, 6, 256)).to(bev_embed.dtype).to(bev_embed.device)
+                outs_motion['track_query'] = torch.zeros((1, 1, 256)).to(bev_embed)
+                outs_motion['track_query_pos'] = torch.zeros((1,1, 256)).to(bev_embed)
+                outs_motion['traj_query'] = torch.zeros((3, 1, 1, 6, 256)).to(bev_embed)
                 outs_motion['all_matched_idxes'] = [[-1]]
-            losses_occ, outs_occflow =  \
-                self.occ_head.forward_train(
-                    bev_embed, 
-                    occ_gt, 
-                    outs_motion, 
-                    gt_inds_list=gt_inds,
-                )
+            losses_occ = self.occ_head.forward_train(
+                            bev_embed, 
+                            outs_motion, 
+                            gt_inds_list=gt_inds,
+                            gt_segmentation=gt_segmentation,
+                            gt_instance=gt_instance,
+                            gt_img_is_valid=gt_occ_img_is_valid,
+                        )
             losses_occ = self.loss_weighted_and_prefixed(losses_occ, prefix='occ')
             losses.update(losses_occ)
         
+
         # Forward Plan Head
         if self.with_planning_head:
-            outs_planning = self.planning_head.forward_train(bev_embed, outs_motion, outs_occflow, sdc_planning, sdc_planning_mask, command, gt_future_boxes)
+            outs_planning = self.planning_head.forward_train(bev_embed, outs_motion, sdc_planning, sdc_planning_mask, command, gt_future_boxes)
             losses_planning = outs_planning['losses']
             losses_planning = self.loss_weighted_and_prefixed(losses_planning, prefix='planning')
             losses.update(losses_planning)
+        
         for k,v in losses.items():
             losses[k] = torch.nan_to_num(v)
         return losses
     
     def loss_weighted_and_prefixed(self, loss_dict, prefix=''):
-        """
-        Add a prefix to each key in the input loss dictionary and apply a corresponding loss factor.
-
-        Args:
-            loss_dict (dict): Dictionary of loss values.
-            prefix (str): Prefix to be added to the keys in the dictionary.
-
-        Returns:
-            dict: Dictionary of loss values with prefixed keys and corresponding loss factors applied.
-            
-        Raises:
-            NotImplementedError: If an unsupported prefix is provided.
-        """
         loss_factor = self.task_loss_weight[prefix]
         loss_dict = {f"{prefix}.{k}" : v*loss_factor for k, v in loss_dict.items()}
         return loss_dict
@@ -275,9 +238,8 @@ class UniAD(UniADTrack):
                      l2g_r_mat=None,
                      timestamp=None,
                      gt_lane_labels=None,
-                     gt_lane_bboxes=None,
                      gt_lane_masks=None,
-
+                     rescale=False,
                      # planning gt(for evaluation only)
                      sdc_planning=None,
                      sdc_planning_mask=None,
@@ -286,12 +248,6 @@ class UniAD(UniADTrack):
                      # Occ_gt (for evaluation only)
                      gt_segmentation=None,
                      gt_instance=None, 
-                     gt_centerness=None, 
-                     gt_offset=None, 
-                     gt_flow=None,
-                     gt_backward_flow=None,
-                     gt_occ_future_egomotions=None,
-                     gt_occ_has_invalid_frame=None,
                      gt_occ_img_is_valid=None,
                      **kwargs
                     ):
@@ -340,40 +296,24 @@ class UniAD(UniADTrack):
         bev_embed = result_track[0]["bev_embed"]
 
         if self.with_seg_head:
-            result_seg =  self.seg_head.forward_test(bev_embed, gt_lane_labels, gt_lane_bboxes,
-                                                gt_lane_masks, img_metas, **kwargs)
-
-        future_states = None
-
-        no_query = result_track[0]['track_query_embeddings'].shape[0] == 0
+            result_seg =  self.seg_head.forward_test(bev_embed, gt_lane_labels, gt_lane_masks, img_metas, rescale)
 
         if self.with_motion_head:
-            result_motion, outs_motion = self.motion_head.forward_test(img_metas, outs_track=result_track[0], outs_seg=result_seg[0],
-                                                                    future_states=future_states, no_query=no_query)
+            result_motion, outs_motion = self.motion_head.forward_test(bev_embed, outs_track=result_track[0], outs_seg=result_seg[0])
             outs_motion['bev_pos'] = result_track[0]['bev_pos']
 
-        outs_occflow = dict()
+        outs_occ = dict()
         if self.with_occ_head:
-            occ_gt = dict(
-                segmentation=gt_segmentation,
-                instance=gt_instance, 
-                centerness=gt_centerness, 
-                offset=gt_offset,
-                flow=gt_flow,
-                backward_flow=gt_backward_flow,
-                future_egomotion=gt_occ_future_egomotions,
-                has_invalid_frame=gt_occ_has_invalid_frame,
-                img_is_valid=gt_occ_img_is_valid
-            )
-            # bev_feat = self.prev_bev
-            outs_occflow = self.occ_head.forward_test(
+            occ_no_query = outs_motion['track_query'].shape[1] == 0
+            outs_occ = self.occ_head.forward_test(
                 bev_embed, 
-                occ_gt, 
                 outs_motion,
-                no_query = outs_motion['traj_query'].shape[2]==0,
+                no_query = occ_no_query,
+                gt_segmentation=gt_segmentation,
+                gt_instance=gt_instance,
+                gt_img_is_valid=gt_occ_img_is_valid,
             )
-            result[0]['occ'] = dict()
-            result[0]['occ'].update(outs_occflow)
+            result[0]['occ'] = outs_occ
         
         if self.with_planning_head:
             planning_gt=dict(
@@ -382,7 +322,7 @@ class UniAD(UniADTrack):
                 sdc_planning_mask=sdc_planning_mask,
                 command=command
             )
-            result_planning = self.planning_head.forward_test(bev_embed, outs_motion, outs_occflow, command)
+            result_planning = self.planning_head.forward_test(bev_embed, outs_motion, outs_occ, command)
             result[0]['planning'] = dict(
                 planning_gt=planning_gt,
                 result_planning=result_planning,
@@ -392,16 +332,15 @@ class UniAD(UniADTrack):
             del result_seg[0]['args_tuple']
         
         pop_track_list = ['prev_bev', 'bev_pos', 'bev_embed', 'track_query_embeddings', 'sdc_embedding']
-        result_track[0] = self.pop_keys_in_result(result_track[0], pop_track_list)
+        result_track[0] = pop_elem_in_result(result_track[0], pop_track_list)
 
         if self.with_seg_head:
-            result_seg[0] = self.pop_keys_in_result(result_seg[0])
-            del result_seg[0]['pts_bbox']   # NOTE: Uncomment here
+            result_seg[0] = pop_elem_in_result(result_seg[0], pop_list=['pts_bbox'])
         if self.with_motion_head:
-            result_motion[0] = self.pop_keys_in_result(result_motion[0])
+            result_motion[0] = pop_elem_in_result(result_motion[0])
         if self.with_occ_head:
-            result[0]['occ'] = self.pop_keys_in_result(result[0]['occ'],  \
-                pop_list=['seg_out_mask', 'flow_out', 'future_states_occ', 'pred_ins_masks', 'pred_ins_flows', 'pred_raw_occ'])
+            result[0]['occ'] = pop_elem_in_result(result[0]['occ'],  \
+                pop_list=['seg_out_mask', 'flow_out', 'future_states_occ', 'pred_ins_masks', 'pred_raw_occ', 'pred_ins_logits', 'pred_ins_sigmoid'])
         
         for i, res in enumerate(result):
             res['token'] = img_metas[i]['sample_idx']
@@ -413,30 +352,14 @@ class UniAD(UniADTrack):
 
         return result
 
-    def pop_keys_in_result(self, result_task:dict, pop_list:list=None):
-        """
-        Removes specific keys from a given dictionary.
 
-        This function iterates through the keys in the provided dictionary (result_task),
-        and removes the keys that end with 'query', 'query_pos', or 'embedding'.
-        Additionally, if a list of keys (pop_list) is provided, those keys are also removed.
-
-        Args:
-            result_task (dict): The input dictionary from which keys are to be removed.
-            pop_list (list, optional): A list of additional keys to remove from the dictionary. Default is None.
-
-        Returns:
-            dict: The updated dictionary with specified keys removed.
-        """
-        all_keys = list(result_task.keys())
-        for k in all_keys:
-            if k.endswith('query') or k.endswith('query_pos') or k.endswith('embedding'):
-                result_task.pop(k)
-        
-        if pop_list is not None:
-            for pop_k in pop_list:
-                result_task.pop(pop_k, None)
-        return result_task
-
-if __name__ == "__main__":
-    model = UniAD()
+def pop_elem_in_result(task_result:dict, pop_list:list=None):
+    all_keys = list(task_result.keys())
+    for k in all_keys:
+        if k.endswith('query') or k.endswith('query_pos') or k.endswith('embedding'):
+            task_result.pop(k)
+    
+    if pop_list is not None:
+        for pop_k in pop_list:
+            task_result.pop(pop_k, None)
+    return task_result

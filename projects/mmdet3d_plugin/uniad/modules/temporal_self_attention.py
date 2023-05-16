@@ -172,15 +172,11 @@ class TemporalSelfAttention(BaseModule):
         Returns:
              Tensor: forwarded results with shape [num_query, bs, embed_dims].
         """
-
-        with torch.profiler.record_function("TemporalSelfAttention"):
-
+        with torch.profiler.record_function("MultiScaleDeformAttention"):
             if value is None:
                 assert self.batch_first
                 bs, len_bev, c = query.shape
                 value = torch.stack([query, query], 1).reshape(bs*2, len_bev, c)
-
-                # value = torch.cat([query, query], 0)
 
             if identity is None:
                 identity = query
@@ -202,7 +198,7 @@ class TemporalSelfAttention(BaseModule):
                 value = value.masked_fill(key_padding_mask[..., None], 0.0)
 
             value = value.reshape(bs*self.num_bev_queue,
-                                  num_value, self.num_heads, -1)
+                                num_value, self.num_heads, -1)
 
             sampling_offsets = self.sampling_offsets(query)
             sampling_offsets = sampling_offsets.view(
@@ -212,10 +208,10 @@ class TemporalSelfAttention(BaseModule):
             attention_weights = attention_weights.softmax(-1)
 
             attention_weights = attention_weights.view(bs, num_query,
-                                                       self.num_heads,
-                                                       self.num_bev_queue,
-                                                       self.num_levels,
-                                                       self.num_points)
+                                                    self.num_heads,
+                                                    self.num_bev_queue,
+                                                    self.num_levels,
+                                                    self.num_points)
 
             attention_weights = attention_weights.permute(0, 3, 1, 2, 4, 5)\
                 .reshape(bs*self.num_bev_queue, num_query, self.num_heads, self.num_levels, self.num_points).contiguous()
@@ -244,30 +240,25 @@ class TemporalSelfAttention(BaseModule):
                 if value.dtype == torch.float16:
                     MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
                 else:
-                    MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
-                output = MultiScaleDeformableAttnFunction.apply(
-                    value, spatial_shapes, level_start_index, sampling_locations,
-                    attention_weights, self.im2col_step)
-            else:
 
-                output = multi_scale_deformable_attn_pytorch(
-                    value, spatial_shapes, sampling_locations, attention_weights)
+                    output = multi_scale_deformable_attn_pytorch(
+                        value, spatial_shapes, sampling_locations, attention_weights)
 
-            # output shape (bs*num_bev_queue, num_query, embed_dims)
-            # (bs*num_bev_queue, num_query, embed_dims)-> (num_query, embed_dims, bs*num_bev_queue)
-            output = output.permute(1, 2, 0)
+                # output shape (bs*num_bev_queue, num_query, embed_dims)
+                # (bs*num_bev_queue, num_query, embed_dims)-> (num_query, embed_dims, bs*num_bev_queue)
+                output = output.permute(1, 2, 0)
 
-            # fuse history value and current value
-            # (num_query, embed_dims, bs*num_bev_queue)-> (num_query, embed_dims, bs, num_bev_queue)
-            output = output.view(num_query, embed_dims, bs, self.num_bev_queue)
-            output = output.mean(-1)
+                # fuse history value and current value
+                # (num_query, embed_dims, bs*num_bev_queue)-> (num_query, embed_dims, bs, num_bev_queue)
+                output = output.view(num_query, embed_dims, bs, self.num_bev_queue)
+                output = output.mean(-1)
 
-            # (num_query, embed_dims, bs)-> (bs, num_query, embed_dims)
-            output = output.permute(2, 0, 1)
+                # (num_query, embed_dims, bs)-> (bs, num_query, embed_dims)
+                output = output.permute(2, 0, 1)
 
-            output = self.output_proj(output)
+                output = self.output_proj(output)
 
-            if not self.batch_first:
-                output = output.permute(1, 0, 2)
+                if not self.batch_first:
+                    output = output.permute(1, 0, 2)
 
-            return self.dropout(output) + identity
+                return self.dropout(output) + identity
