@@ -113,100 +113,104 @@ class MotionHead(BaseMotionHead):
         Returns:
             dict: Losses of each branch.
         """
-        track_query = outs_track['track_query_embeddings'][None, None, ...] # num_dec, B, A_track, D
-        all_matched_idxes = [outs_track['track_query_matched_idxes']] #BxN
-        track_boxes = outs_track['track_bbox_results']
-        
-        # cat sdc query/gt to the last
-        sdc_match_index = torch.zeros((1,), dtype=all_matched_idxes[0].dtype, device=all_matched_idxes[0].device)
-        sdc_match_index[0] = gt_fut_traj[0].shape[0]
-        all_matched_idxes = [torch.cat([all_matched_idxes[0], sdc_match_index], dim=0)]
-        gt_fut_traj[0] = torch.cat([gt_fut_traj[0], gt_sdc_fut_traj[0]], dim=0)
-        gt_fut_traj_mask[0] = torch.cat([gt_fut_traj_mask[0], gt_sdc_fut_traj_mask[0]], dim=0)
-        track_query = torch.cat([track_query, outs_track['sdc_embedding'][None, None, None, :]], dim=2)
-        sdc_track_boxes = outs_track['sdc_track_bbox_results']
-        track_boxes[0][0].tensor = torch.cat([track_boxes[0][0].tensor, sdc_track_boxes[0][0].tensor], dim=0)
-        track_boxes[0][1] = torch.cat([track_boxes[0][1], sdc_track_boxes[0][1]], dim=0)
-        track_boxes[0][2] = torch.cat([track_boxes[0][2], sdc_track_boxes[0][2]], dim=0)
-        track_boxes[0][3] = torch.cat([track_boxes[0][3], sdc_track_boxes[0][3]], dim=0)
-        
-        memory, memory_mask, memory_pos, lane_query, _, lane_query_pos, hw_lvl = outs_seg['args_tuple']
 
-        outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
-        loss_inputs = [gt_bboxes_3d, gt_fut_traj, gt_fut_traj_mask, outs_motion, all_matched_idxes, track_boxes]
-        losses = self.loss(*loss_inputs)
+        with torch.profiler.record_function("MotionHead-forward_train"):
+            track_query = outs_track['track_query_embeddings'][None, None, ...] # num_dec, B, A_track, D
+            all_matched_idxes = [outs_track['track_query_matched_idxes']] #BxN
+            track_boxes = outs_track['track_bbox_results']
+            
+            # cat sdc query/gt to the last
+            sdc_match_index = torch.zeros((1,), dtype=all_matched_idxes[0].dtype, device=all_matched_idxes[0].device)
+            sdc_match_index[0] = gt_fut_traj[0].shape[0]
+            all_matched_idxes = [torch.cat([all_matched_idxes[0], sdc_match_index], dim=0)]
+            gt_fut_traj[0] = torch.cat([gt_fut_traj[0], gt_sdc_fut_traj[0]], dim=0)
+            gt_fut_traj_mask[0] = torch.cat([gt_fut_traj_mask[0], gt_sdc_fut_traj_mask[0]], dim=0)
+            track_query = torch.cat([track_query, outs_track['sdc_embedding'][None, None, None, :]], dim=2)
+            sdc_track_boxes = outs_track['sdc_track_bbox_results']
+            track_boxes[0][0].tensor = torch.cat([track_boxes[0][0].tensor, sdc_track_boxes[0][0].tensor], dim=0)
+            track_boxes[0][1] = torch.cat([track_boxes[0][1], sdc_track_boxes[0][1]], dim=0)
+            track_boxes[0][2] = torch.cat([track_boxes[0][2], sdc_track_boxes[0][2]], dim=0)
+            track_boxes[0][3] = torch.cat([track_boxes[0][3], sdc_track_boxes[0][3]], dim=0)
+            
+            memory, memory_mask, memory_pos, lane_query, _, lane_query_pos, hw_lvl = outs_seg['args_tuple']
 
-        def filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, vehicle_id_list):
-            query_label = gt_labels_3d[0][-1][all_matched_idxes[0]]
-            # select vehicle query according to vehicle_id_list
-            vehicle_mask = torch.zeros_like(query_label)
-            for veh_id in vehicle_id_list:
-                vehicle_mask |=  query_label == veh_id
-            outs_motion['traj_query'] = outs_motion['traj_query'][:, :, vehicle_mask>0]
-            outs_motion['track_query'] = outs_motion['track_query'][:, vehicle_mask>0]
-            outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, vehicle_mask>0]
-            all_matched_idxes[0] = all_matched_idxes[0][vehicle_mask>0]
-            return outs_motion, all_matched_idxes
+            outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
+            loss_inputs = [gt_bboxes_3d, gt_fut_traj, gt_fut_traj_mask, outs_motion, all_matched_idxes, track_boxes]
+            losses = self.loss(*loss_inputs)
 
-        all_matched_idxes[0] = all_matched_idxes[0][:-1]
-        outs_motion['sdc_traj_query'] = outs_motion['traj_query'][:, :, -1]         # [3, 1, 6, 256]     [n_dec, b, n_mode, d]
-        outs_motion['sdc_track_query'] = outs_motion['track_query'][:, -1]          # [1, 256]           [b, d]
-        outs_motion['sdc_track_query_pos'] = outs_motion['track_query_pos'][:, -1]  # [1, 256]           [b, d]
-        outs_motion['traj_query'] = outs_motion['traj_query'][:, :, :-1]            # [3, 1, 3, 6, 256]  [n_dec, b, nq, n_mode, d]
-        outs_motion['track_query'] = outs_motion['track_query'][:, :-1]             # [1, 3, 256]        [b, nq, d]   
-        outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, :-1]     # [1, 3, 256]        [b, nq, d]  
+            def filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, vehicle_id_list):
+                query_label = gt_labels_3d[0][-1][all_matched_idxes[0]]
+                # select vehicle query according to vehicle_id_list
+                vehicle_mask = torch.zeros_like(query_label)
+                for veh_id in vehicle_id_list:
+                    vehicle_mask |=  query_label == veh_id
+                outs_motion['traj_query'] = outs_motion['traj_query'][:, :, vehicle_mask>0]
+                outs_motion['track_query'] = outs_motion['track_query'][:, vehicle_mask>0]
+                outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, vehicle_mask>0]
+                all_matched_idxes[0] = all_matched_idxes[0][vehicle_mask>0]
+                return outs_motion, all_matched_idxes
 
-        
-        outs_motion, all_matched_idxes = filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, self.vehicle_id_list)
-        outs_motion['all_matched_idxes'] = all_matched_idxes
+            all_matched_idxes[0] = all_matched_idxes[0][:-1]
+            outs_motion['sdc_traj_query'] = outs_motion['traj_query'][:, :, -1]         # [3, 1, 6, 256]     [n_dec, b, n_mode, d]
+            outs_motion['sdc_track_query'] = outs_motion['track_query'][:, -1]          # [1, 256]           [b, d]
+            outs_motion['sdc_track_query_pos'] = outs_motion['track_query_pos'][:, -1]  # [1, 256]           [b, d]
+            outs_motion['traj_query'] = outs_motion['traj_query'][:, :, :-1]            # [3, 1, 3, 6, 256]  [n_dec, b, nq, n_mode, d]
+            outs_motion['track_query'] = outs_motion['track_query'][:, :-1]             # [1, 3, 256]        [b, nq, d]   
+            outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, :-1]     # [1, 3, 256]        [b, nq, d]  
 
-        ret_dict = dict(losses=losses, outs_motion=outs_motion, track_boxes=track_boxes)
-        return ret_dict
+            
+            outs_motion, all_matched_idxes = filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, self.vehicle_id_list)
+            outs_motion['all_matched_idxes'] = all_matched_idxes
+
+            ret_dict = dict(losses=losses, outs_motion=outs_motion, track_boxes=track_boxes)
+            return ret_dict
 
     def forward_test(self, bev_embed, outs_track={}, outs_seg={}):
         """Test function"""
-        track_query = outs_track['track_query_embeddings'][None, None, ...]
-        track_boxes = outs_track['track_bbox_results']
-        
-        track_query = torch.cat([track_query, outs_track['sdc_embedding'][None, None, None, :]], dim=2)
-        sdc_track_boxes = outs_track['sdc_track_bbox_results']
 
-        track_boxes[0][0].tensor = torch.cat([track_boxes[0][0].tensor, sdc_track_boxes[0][0].tensor], dim=0)
-        track_boxes[0][1] = torch.cat([track_boxes[0][1], sdc_track_boxes[0][1]], dim=0)
-        track_boxes[0][2] = torch.cat([track_boxes[0][2], sdc_track_boxes[0][2]], dim=0)
-        track_boxes[0][3] = torch.cat([track_boxes[0][3], sdc_track_boxes[0][3]], dim=0)      
-        memory, memory_mask, memory_pos, lane_query, _, lane_query_pos, hw_lvl = outs_seg['args_tuple']
-        outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
-        traj_results = self.get_trajs(outs_motion, track_boxes)
-        bboxes, scores, labels, bbox_index, mask = track_boxes[0]
-        outs_motion['track_scores'] = scores[None, :]
-        labels[-1] = 0
-        def filter_vehicle_query(outs_motion, labels, vehicle_id_list):
-            if len(labels) < 1:  # No other obj query except sdc query.
-                return None
+        with torch.profiler.record_function("MotionHead-forward_test"):
+            track_query = outs_track['track_query_embeddings'][None, None, ...]
+            track_boxes = outs_track['track_bbox_results']
+            
+            track_query = torch.cat([track_query, outs_track['sdc_embedding'][None, None, None, :]], dim=2)
+            sdc_track_boxes = outs_track['sdc_track_bbox_results']
 
-            # select vehicle query according to vehicle_id_list
-            vehicle_mask = torch.zeros_like(labels)
-            for veh_id in vehicle_id_list:
-                vehicle_mask |=  labels == veh_id
-            outs_motion['traj_query'] = outs_motion['traj_query'][:, :, vehicle_mask>0]
-            outs_motion['track_query'] = outs_motion['track_query'][:, vehicle_mask>0]
-            outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, vehicle_mask>0]
-            outs_motion['track_scores'] = outs_motion['track_scores'][:, vehicle_mask>0]
-            return outs_motion
-        
-        outs_motion = filter_vehicle_query(outs_motion, labels, self.vehicle_id_list)
-        
-        # filter sdc query
-        outs_motion['sdc_traj_query'] = outs_motion['traj_query'][:, :, -1]
-        outs_motion['sdc_track_query'] = outs_motion['track_query'][:, -1]
-        outs_motion['sdc_track_query_pos'] = outs_motion['track_query_pos'][:, -1]
-        outs_motion['traj_query'] = outs_motion['traj_query'][:, :, :-1]
-        outs_motion['track_query'] = outs_motion['track_query'][:, :-1]
-        outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, :-1]
-        outs_motion['track_scores'] = outs_motion['track_scores'][:, :-1]
+            track_boxes[0][0].tensor = torch.cat([track_boxes[0][0].tensor, sdc_track_boxes[0][0].tensor], dim=0)
+            track_boxes[0][1] = torch.cat([track_boxes[0][1], sdc_track_boxes[0][1]], dim=0)
+            track_boxes[0][2] = torch.cat([track_boxes[0][2], sdc_track_boxes[0][2]], dim=0)
+            track_boxes[0][3] = torch.cat([track_boxes[0][3], sdc_track_boxes[0][3]], dim=0)      
+            memory, memory_mask, memory_pos, lane_query, _, lane_query_pos, hw_lvl = outs_seg['args_tuple']
+            outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
+            traj_results = self.get_trajs(outs_motion, track_boxes)
+            bboxes, scores, labels, bbox_index, mask = track_boxes[0]
+            outs_motion['track_scores'] = scores[None, :]
+            labels[-1] = 0
+            def filter_vehicle_query(outs_motion, labels, vehicle_id_list):
+                if len(labels) < 1:  # No other obj query except sdc query.
+                    return None
 
-        return traj_results, outs_motion
+                # select vehicle query according to vehicle_id_list
+                vehicle_mask = torch.zeros_like(labels)
+                for veh_id in vehicle_id_list:
+                    vehicle_mask |=  labels == veh_id
+                outs_motion['traj_query'] = outs_motion['traj_query'][:, :, vehicle_mask>0]
+                outs_motion['track_query'] = outs_motion['track_query'][:, vehicle_mask>0]
+                outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, vehicle_mask>0]
+                outs_motion['track_scores'] = outs_motion['track_scores'][:, vehicle_mask>0]
+                return outs_motion
+            
+            outs_motion = filter_vehicle_query(outs_motion, labels, self.vehicle_id_list)
+            
+            # filter sdc query
+            outs_motion['sdc_traj_query'] = outs_motion['traj_query'][:, :, -1]
+            outs_motion['sdc_track_query'] = outs_motion['track_query'][:, -1]
+            outs_motion['sdc_track_query_pos'] = outs_motion['track_query_pos'][:, -1]
+            outs_motion['traj_query'] = outs_motion['traj_query'][:, :, :-1]
+            outs_motion['track_query'] = outs_motion['track_query'][:, :-1]
+            outs_motion['track_query_pos'] = outs_motion['track_query_pos'][:, :-1]
+            outs_motion['track_scores'] = outs_motion['track_scores'][:, :-1]
+
+            return traj_results, outs_motion
 
     @auto_fp16(apply_to=('bev_embed', 'track_query', 'lane_query', 'lane_query_pos', 'lane_query_embed', 'prev_bev'))
     def forward(self, 
@@ -235,121 +239,123 @@ class MotionHead(BaseMotionHead):
         - 'track_query_pos': A tensor containing the positional embeddings of the track queries.
         """
         
-        dtype = track_query.dtype
-        device = track_query.device
-        num_groups = self.kmeans_anchors.shape[0]
+        with torch.profiler.record_function("MotionHead-forward"):
 
-        # extract the last frame of the track query
-        track_query = track_query[:, -1]
-        
-        # encode the center point of the track query
-        reference_points_track = self._extract_tracking_centers(
-            track_bbox_results, self.pc_range)
-        track_query_pos = self.boxes_query_embedding_layer(pos2posemb2d(reference_points_track.to(device)))  # B, A, D
-        
-        # construct the learnable query postional embedding
-        # split and stack according to groups
-        learnable_query_pos = self.learnable_motion_query_embedding.weight.to(dtype)  # latent anchor (P*G, D)
-        learnable_query_pos = torch.stack(torch.split(learnable_query_pos, self.num_anchor, dim=0))
+            dtype = track_query.dtype
+            device = track_query.device
+            num_groups = self.kmeans_anchors.shape[0]
 
-        # construct the agent level/scene-level query positional embedding 
-        # (num_groups, num_anchor, 12, 2)
-        # to incorporate the information of different groups and coordinates, and embed the headding and location information
-        agent_level_anchors = self.kmeans_anchors.to(dtype).to(device).view(num_groups, self.num_anchor, self.predict_steps, 2).detach()
-        scene_level_ego_anchors = anchor_coordinate_transform(agent_level_anchors, track_bbox_results, with_translation_transform=True)  # B, A, G, P ,12 ,2
-        scene_level_offset_anchors = anchor_coordinate_transform(agent_level_anchors, track_bbox_results, with_translation_transform=False)  # B, A, G, P ,12 ,2
-
-        agent_level_norm = norm_points(agent_level_anchors, self.pc_range)
-        scene_level_ego_norm = norm_points(scene_level_ego_anchors, self.pc_range)
-        scene_level_offset_norm = norm_points(scene_level_offset_anchors, self.pc_range)
-
-        # we only use the last point of the anchor
-        agent_level_embedding = self.agent_level_embedding_layer(
-            pos2posemb2d(agent_level_norm[..., -1, :]))  # G, P, D
-        scene_level_ego_embedding = self.scene_level_ego_embedding_layer(
-            pos2posemb2d(scene_level_ego_norm[..., -1, :]))  # B, A, G, P , D
-        scene_level_offset_embedding = self.scene_level_offset_embedding_layer(
-            pos2posemb2d(scene_level_offset_norm[..., -1, :]))  # B, A, G, P , D
-
-        batch_size, num_agents = scene_level_ego_embedding.shape[:2]
-        agent_level_embedding = agent_level_embedding[None,None, ...].expand(batch_size, num_agents, -1, -1, -1)
-        learnable_embed = learnable_query_pos[None, None, ...].expand(batch_size, num_agents, -1, -1, -1)
-
-        
-        # save for latter, anchors
-        # B, A, G, P ,12 ,2 -> B, A, P ,12 ,2
-        scene_level_offset_anchors = self.group_mode_query_pos(track_bbox_results, scene_level_offset_anchors)  
-
-        # select class embedding
-        # B, A, G, P , D-> B, A, P , D
-        agent_level_embedding = self.group_mode_query_pos(
-            track_bbox_results, agent_level_embedding)  
-        scene_level_ego_embedding = self.group_mode_query_pos(
-            track_bbox_results, scene_level_ego_embedding)  # B, A, G, P , D-> B, A, P , D
-        
-        # B, A, G, P , D -> B, A, P , D
-        scene_level_offset_embedding = self.group_mode_query_pos(
-            track_bbox_results, scene_level_offset_embedding)  
-        learnable_embed = self.group_mode_query_pos(
-            track_bbox_results, learnable_embed)  
-
-        init_reference = scene_level_offset_anchors.detach()
-
-        outputs_traj_scores = []
-        outputs_trajs = []
-
-        inter_states, inter_references = self.motionformer(
-            track_query,  # B, A_track, D
-            lane_query,  # B, M, D
-            track_query_pos=track_query_pos,
-            lane_query_pos=lane_query_pos,
-            track_bbox_results=track_bbox_results,
-            bev_embed=bev_embed,
-            reference_trajs=init_reference,
-            traj_reg_branches=self.traj_reg_branches,
-            traj_cls_branches=self.traj_cls_branches,
-            # anchor embeddings 
-            agent_level_embedding=agent_level_embedding,
-            scene_level_ego_embedding=scene_level_ego_embedding,
-            scene_level_offset_embedding=scene_level_offset_embedding,
-            learnable_embed=learnable_embed,
-            # anchor positional embeddings layers
-            agent_level_embedding_layer=self.agent_level_embedding_layer,
-            scene_level_ego_embedding_layer=self.scene_level_ego_embedding_layer,
-            scene_level_offset_embedding_layer=self.scene_level_offset_embedding_layer,
-            spatial_shapes=torch.tensor(
-                [[self.bev_h, self.bev_w]], device=device),
-            level_start_index=torch.tensor([0], device=device))
-
-        for lvl in range(inter_states.shape[0]):
-            outputs_class = self.traj_cls_branches[lvl](inter_states[lvl])
-            tmp = self.traj_reg_branches[lvl](inter_states[lvl])
-            tmp = self.unflatten_traj(tmp)
+            # extract the last frame of the track query
+            track_query = track_query[:, -1]
             
-            # we use cumsum trick here to get the trajectory 
-            tmp[..., :2] = torch.cumsum(tmp[..., :2], dim=3)
+            # encode the center point of the track query
+            reference_points_track = self._extract_tracking_centers(
+                track_bbox_results, self.pc_range)
+            track_query_pos = self.boxes_query_embedding_layer(pos2posemb2d(reference_points_track.to(device)))  # B, A, D
+            
+            # construct the learnable query postional embedding
+            # split and stack according to groups
+            learnable_query_pos = self.learnable_motion_query_embedding.weight.to(dtype)  # latent anchor (P*G, D)
+            learnable_query_pos = torch.stack(torch.split(learnable_query_pos, self.num_anchor, dim=0))
 
-            outputs_class = self.log_softmax(outputs_class.squeeze(3))
-            outputs_traj_scores.append(outputs_class)
+            # construct the agent level/scene-level query positional embedding 
+            # (num_groups, num_anchor, 12, 2)
+            # to incorporate the information of different groups and coordinates, and embed the headding and location information
+            agent_level_anchors = self.kmeans_anchors.to(dtype).to(device).view(num_groups, self.num_anchor, self.predict_steps, 2).detach()
+            scene_level_ego_anchors = anchor_coordinate_transform(agent_level_anchors, track_bbox_results, with_translation_transform=True)  # B, A, G, P ,12 ,2
+            scene_level_offset_anchors = anchor_coordinate_transform(agent_level_anchors, track_bbox_results, with_translation_transform=False)  # B, A, G, P ,12 ,2
 
-            for bs in range(tmp.shape[0]):
-                tmp[bs] = bivariate_gaussian_activation(tmp[bs])
-            outputs_trajs.append(tmp)
-        outputs_traj_scores = torch.stack(outputs_traj_scores)
-        outputs_trajs = torch.stack(outputs_trajs)
+            agent_level_norm = norm_points(agent_level_anchors, self.pc_range)
+            scene_level_ego_norm = norm_points(scene_level_ego_anchors, self.pc_range)
+            scene_level_offset_norm = norm_points(scene_level_offset_anchors, self.pc_range)
 
-        B, A_track, D = track_query.shape
-        valid_traj_masks = track_query.new_ones((B, A_track)) > 0
-        outs = {
-            'all_traj_scores': outputs_traj_scores,
-            'all_traj_preds': outputs_trajs,
-            'valid_traj_masks': valid_traj_masks,
-            'traj_query': inter_states,
-            'track_query': track_query,
-            'track_query_pos': track_query_pos,
-        }
+            # we only use the last point of the anchor
+            agent_level_embedding = self.agent_level_embedding_layer(
+                pos2posemb2d(agent_level_norm[..., -1, :]))  # G, P, D
+            scene_level_ego_embedding = self.scene_level_ego_embedding_layer(
+                pos2posemb2d(scene_level_ego_norm[..., -1, :]))  # B, A, G, P , D
+            scene_level_offset_embedding = self.scene_level_offset_embedding_layer(
+                pos2posemb2d(scene_level_offset_norm[..., -1, :]))  # B, A, G, P , D
 
-        return outs
+            batch_size, num_agents = scene_level_ego_embedding.shape[:2]
+            agent_level_embedding = agent_level_embedding[None,None, ...].expand(batch_size, num_agents, -1, -1, -1)
+            learnable_embed = learnable_query_pos[None, None, ...].expand(batch_size, num_agents, -1, -1, -1)
+
+            
+            # save for latter, anchors
+            # B, A, G, P ,12 ,2 -> B, A, P ,12 ,2
+            scene_level_offset_anchors = self.group_mode_query_pos(track_bbox_results, scene_level_offset_anchors)  
+
+            # select class embedding
+            # B, A, G, P , D-> B, A, P , D
+            agent_level_embedding = self.group_mode_query_pos(
+                track_bbox_results, agent_level_embedding)  
+            scene_level_ego_embedding = self.group_mode_query_pos(
+                track_bbox_results, scene_level_ego_embedding)  # B, A, G, P , D-> B, A, P , D
+            
+            # B, A, G, P , D -> B, A, P , D
+            scene_level_offset_embedding = self.group_mode_query_pos(
+                track_bbox_results, scene_level_offset_embedding)  
+            learnable_embed = self.group_mode_query_pos(
+                track_bbox_results, learnable_embed)  
+
+            init_reference = scene_level_offset_anchors.detach()
+
+            outputs_traj_scores = []
+            outputs_trajs = []
+
+            inter_states, inter_references = self.motionformer(
+                track_query,  # B, A_track, D
+                lane_query,  # B, M, D
+                track_query_pos=track_query_pos,
+                lane_query_pos=lane_query_pos,
+                track_bbox_results=track_bbox_results,
+                bev_embed=bev_embed,
+                reference_trajs=init_reference,
+                traj_reg_branches=self.traj_reg_branches,
+                traj_cls_branches=self.traj_cls_branches,
+                # anchor embeddings 
+                agent_level_embedding=agent_level_embedding,
+                scene_level_ego_embedding=scene_level_ego_embedding,
+                scene_level_offset_embedding=scene_level_offset_embedding,
+                learnable_embed=learnable_embed,
+                # anchor positional embeddings layers
+                agent_level_embedding_layer=self.agent_level_embedding_layer,
+                scene_level_ego_embedding_layer=self.scene_level_ego_embedding_layer,
+                scene_level_offset_embedding_layer=self.scene_level_offset_embedding_layer,
+                spatial_shapes=torch.tensor(
+                    [[self.bev_h, self.bev_w]], device=device),
+                level_start_index=torch.tensor([0], device=device))
+
+            for lvl in range(inter_states.shape[0]):
+                outputs_class = self.traj_cls_branches[lvl](inter_states[lvl])
+                tmp = self.traj_reg_branches[lvl](inter_states[lvl])
+                tmp = self.unflatten_traj(tmp)
+                
+                # we use cumsum trick here to get the trajectory 
+                tmp[..., :2] = torch.cumsum(tmp[..., :2], dim=3)
+
+                outputs_class = self.log_softmax(outputs_class.squeeze(3))
+                outputs_traj_scores.append(outputs_class)
+
+                for bs in range(tmp.shape[0]):
+                    tmp[bs] = bivariate_gaussian_activation(tmp[bs])
+                outputs_trajs.append(tmp)
+            outputs_traj_scores = torch.stack(outputs_traj_scores)
+            outputs_trajs = torch.stack(outputs_trajs)
+
+            B, A_track, D = track_query.shape
+            valid_traj_masks = track_query.new_ones((B, A_track)) > 0
+            outs = {
+                'all_traj_scores': outputs_traj_scores,
+                'all_traj_preds': outputs_trajs,
+                'valid_traj_masks': valid_traj_masks,
+                'traj_query': inter_states,
+                'track_query': track_query,
+                'track_query_pos': track_query_pos,
+            }
+
+            return outs
 
     def group_mode_query_pos(self, bbox_results, mode_query_pos):
         """

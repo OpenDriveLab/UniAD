@@ -180,64 +180,65 @@ class MotionTransformerAttentionLayer(BaseModule):
             Tensor: forwarded results with shape [num_queries, bs, embed_dims].
         """
 
-        norm_index = 0
-        attn_index = 0
-        ffn_index = 0
-        identity = query
-        if attn_masks is None:
-            attn_masks = [None for _ in range(self.num_attn)]
-        elif isinstance(attn_masks, torch.Tensor):
-            attn_masks = [
-                copy.deepcopy(attn_masks) for _ in range(self.num_attn)
-            ]
-            warnings.warn(f'Use same attn_mask in all attentions in '
-                          f'{self.__class__.__name__} ')
-        else:
-            assert len(attn_masks) == self.num_attn, f'The length of ' \
-                        f'attn_masks {len(attn_masks)} must be equal ' \
-                        f'to the number of attention in ' \
-                        f'operation_order {self.num_attn}'
+        with torch.profiler.record_function("MotionTransformerAttention"):
+            norm_index = 0
+            attn_index = 0
+            ffn_index = 0
+            identity = query
+            if attn_masks is None:
+                attn_masks = [None for _ in range(self.num_attn)]
+            elif isinstance(attn_masks, torch.Tensor):
+                attn_masks = [
+                    copy.deepcopy(attn_masks) for _ in range(self.num_attn)
+                ]
+                warnings.warn(f'Use same attn_mask in all attentions in '
+                            f'{self.__class__.__name__} ')
+            else:
+                assert len(attn_masks) == self.num_attn, f'The length of ' \
+                            f'attn_masks {len(attn_masks)} must be equal ' \
+                            f'to the number of attention in ' \
+                            f'operation_order {self.num_attn}'
 
-        for layer in self.operation_order:
-            if layer == 'self_attn':
-                temp_key = temp_value = query
-                query = self.attentions[attn_index](
-                    query,
-                    temp_key,
-                    temp_value,
-                    identity if self.pre_norm else None,
-                    query_pos=query_pos,
-                    key_pos=query_pos,
-                    attn_mask=attn_masks[attn_index],
-                    key_padding_mask=query_key_padding_mask,
-                    **kwargs)
-                attn_index += 1
-                identity = query
+            for layer in self.operation_order:
+                if layer == 'self_attn':
+                    temp_key = temp_value = query
+                    query = self.attentions[attn_index](
+                        query,
+                        temp_key,
+                        temp_value,
+                        identity if self.pre_norm else None,
+                        query_pos=query_pos,
+                        key_pos=query_pos,
+                        attn_mask=attn_masks[attn_index],
+                        key_padding_mask=query_key_padding_mask,
+                        **kwargs)
+                    attn_index += 1
+                    identity = query
 
-            elif layer == 'norm':
-                query = self.norms[norm_index](query)
-                norm_index += 1
+                elif layer == 'norm':
+                    query = self.norms[norm_index](query)
+                    norm_index += 1
 
-            elif layer == 'cross_attn':
-                query = self.attentions[attn_index](
-                    query,
-                    key,
-                    value,
-                    identity if self.pre_norm else None,
-                    query_pos=query_pos,
-                    key_pos=key_pos,
-                    attn_mask=attn_masks[attn_index],
-                    key_padding_mask=key_padding_mask,
-                    **kwargs)
-                attn_index += 1
-                identity = query
+                elif layer == 'cross_attn':
+                    query = self.attentions[attn_index](
+                        query,
+                        key,
+                        value,
+                        identity if self.pre_norm else None,
+                        query_pos=query_pos,
+                        key_pos=key_pos,
+                        attn_mask=attn_masks[attn_index],
+                        key_padding_mask=key_padding_mask,
+                        **kwargs)
+                    attn_index += 1
+                    identity = query
 
-            elif layer == 'ffn':
-                query = self.ffns[ffn_index](
-                    query, identity if self.pre_norm else None)
-                ffn_index += 1
+                elif layer == 'ffn':
+                    query = self.ffns[ffn_index](
+                        query, identity if self.pre_norm else None)
+                    ffn_index += 1
 
-        return query
+            return query
 
 @ATTENTION.register_module()
 class MotionDeformableAttention(BaseModule):
@@ -396,79 +397,80 @@ class MotionDeformableAttention(BaseModule):
         Returns:
              Tensor: forwarded results with shape [num_query, bs, embed_dims].
         """
-        bs, num_agent, num_mode, _ = query.shape
-        num_query = num_agent * num_mode
-        if value is None:
-            value = query
-        if identity is None:
-            identity = query
-        if query_pos is not None:
-            query = query + query_pos
-        query = torch.flatten(query, start_dim=1, end_dim=2)
-        
-        value = value.permute(1, 0, 2)
-        bs, num_value, _ = value.shape
-        assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
+        with torch.profiler.record_function("MotionDeformableAttention-forward"):
+            bs, num_agent, num_mode, _ = query.shape
+            num_query = num_agent * num_mode
+            if value is None:
+                value = query
+            if identity is None:
+                identity = query
+            if query_pos is not None:
+                query = query + query_pos
+            query = torch.flatten(query, start_dim=1, end_dim=2)
+            
+            value = value.permute(1, 0, 2)
+            bs, num_value, _ = value.shape
+            assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
 
-        value = self.value_proj(value)
-        if key_padding_mask is not None:
-            value = value.masked_fill(key_padding_mask[..., None], 0.0)
-        value = value.view(bs, num_value, self.num_heads, -1)
-        sampling_offsets = self.sampling_offsets(query).view(
-            bs, num_query, self.num_heads, self.num_steps, self.num_levels, self.num_points, 2)
-        attention_weights = self.attention_weights(query).view(
-            bs, num_query, self.num_heads, self.num_steps, self.num_levels * self.num_points)
-        attention_weights = attention_weights.softmax(-1)
+            value = self.value_proj(value)
+            if key_padding_mask is not None:
+                value = value.masked_fill(key_padding_mask[..., None], 0.0)
+            value = value.view(bs, num_value, self.num_heads, -1)
+            sampling_offsets = self.sampling_offsets(query).view(
+                bs, num_query, self.num_heads, self.num_steps, self.num_levels, self.num_points, 2)
+            attention_weights = self.attention_weights(query).view(
+                bs, num_query, self.num_heads, self.num_steps, self.num_levels * self.num_points)
+            attention_weights = attention_weights.softmax(-1)
 
-        attention_weights = attention_weights.view(bs, num_query,
-                                                   self.num_heads,
-                                                   self.num_steps,
-                                                   self.num_levels,
-                                                   self.num_points)
-        # bs, n_query, n_head, n_steps, N_level, N_points, 2
-        # BS NUM_AGENT NUM_MODE 12 NUM_LEVEL  2
-        if reference_trajs.shape[-1] == 2:
-            reference_trajs = reference_trajs[:, :, :, [self.sample_index], :, :]
-            reference_trajs_ego = self.agent_coords_to_ego_coords(copy.deepcopy(reference_trajs), bbox_results).detach()
-            reference_trajs_ego = torch.flatten(reference_trajs_ego, start_dim=1, end_dim=2)
-            reference_trajs_ego = reference_trajs_ego[:, :, None, :, :, None, :]
-            reference_trajs_ego[..., 0] -= self.bev_range[0]
-            reference_trajs_ego[..., 1] -= self.bev_range[1]
-            reference_trajs_ego[..., 0] /= (self.bev_range[3] - self.bev_range[0])
-            reference_trajs_ego[..., 1] /= (self.bev_range[4] - self.bev_range[1])
-            offset_normalizer = torch.stack(
-                [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
-            sampling_locations = reference_trajs_ego \
-                + sampling_offsets \
-                / offset_normalizer[None, None, None, None, :, None, :]
+            attention_weights = attention_weights.view(bs, num_query,
+                                                    self.num_heads,
+                                                    self.num_steps,
+                                                    self.num_levels,
+                                                    self.num_points)
+            # bs, n_query, n_head, n_steps, N_level, N_points, 2
+            # BS NUM_AGENT NUM_MODE 12 NUM_LEVEL  2
+            if reference_trajs.shape[-1] == 2:
+                reference_trajs = reference_trajs[:, :, :, [self.sample_index], :, :]
+                reference_trajs_ego = self.agent_coords_to_ego_coords(copy.deepcopy(reference_trajs), bbox_results).detach()
+                reference_trajs_ego = torch.flatten(reference_trajs_ego, start_dim=1, end_dim=2)
+                reference_trajs_ego = reference_trajs_ego[:, :, None, :, :, None, :]
+                reference_trajs_ego[..., 0] -= self.bev_range[0]
+                reference_trajs_ego[..., 1] -= self.bev_range[1]
+                reference_trajs_ego[..., 0] /= (self.bev_range[3] - self.bev_range[0])
+                reference_trajs_ego[..., 1] /= (self.bev_range[4] - self.bev_range[1])
+                offset_normalizer = torch.stack(
+                    [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
+                sampling_locations = reference_trajs_ego \
+                    + sampling_offsets \
+                    / offset_normalizer[None, None, None, None, :, None, :]
 
-            sampling_locations = rearrange(sampling_locations, 'bs nq nh ns nl np c -> bs nq ns nh nl np c') # permute([0,1,3,2,4,5,6])
-            attention_weights = rearrange(attention_weights, 'bs nq nh ns nl np -> bs nq ns nh nl np') #.permute([0,1,3,2,4,5])
-            sampling_locations = sampling_locations.reshape(bs, num_query*self.num_steps, self.num_heads, self.num_levels, self.num_points, 2)
-            attention_weights = attention_weights.reshape(bs, num_query*self.num_steps, self.num_heads, self.num_levels, self.num_points)
+                sampling_locations = rearrange(sampling_locations, 'bs nq nh ns nl np c -> bs nq ns nh nl np c') # permute([0,1,3,2,4,5,6])
+                attention_weights = rearrange(attention_weights, 'bs nq nh ns nl np -> bs nq ns nh nl np') #.permute([0,1,3,2,4,5])
+                sampling_locations = sampling_locations.reshape(bs, num_query*self.num_steps, self.num_heads, self.num_levels, self.num_points, 2)
+                attention_weights = attention_weights.reshape(bs, num_query*self.num_steps, self.num_heads, self.num_levels, self.num_points)
 
-        else:
-            raise ValueError(
-                f'Last dim of reference_trajs must be'
-                f' 2 or 4, but get {reference_trajs.shape[-1]} instead.')
-        if torch.cuda.is_available() and value.is_cuda:
-
-            # using fp16 deformable attention is unstable because it performs many sum operations
-            if value.dtype == torch.float16:
-                MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
             else:
-                MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
-            output = MultiScaleDeformableAttnFunction.apply(
-                value, spatial_shapes, level_start_index, sampling_locations,
-                attention_weights, self.im2col_step)
-        else:
-            output = multi_scale_deformable_attn_pytorch(
-                value, spatial_shapes, sampling_locations, attention_weights)
-        output = output.view(bs, num_query, self.num_steps, -1)
-        output = torch.flatten(output, start_dim=2, end_dim=3)
-        output = self.output_proj(output)
-        output = output.view(bs, num_agent, num_mode, -1)
-        return self.dropout(output) + identity
+                raise ValueError(
+                    f'Last dim of reference_trajs must be'
+                    f' 2 or 4, but get {reference_trajs.shape[-1]} instead.')
+            if torch.cuda.is_available() and value.is_cuda:
+
+                # using fp16 deformable attention is unstable because it performs many sum operations
+                if value.dtype == torch.float16:
+                    MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+                else:
+                    MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+                output = MultiScaleDeformableAttnFunction.apply(
+                    value, spatial_shapes, level_start_index, sampling_locations,
+                    attention_weights, self.im2col_step)
+            else:
+                output = multi_scale_deformable_attn_pytorch(
+                    value, spatial_shapes, sampling_locations, attention_weights)
+            output = output.view(bs, num_query, self.num_steps, -1)
+            output = torch.flatten(output, start_dim=2, end_dim=3)
+            output = self.output_proj(output)
+            output = output.view(bs, num_agent, num_mode, -1)
+            return self.dropout(output) + identity
 
     def agent_coords_to_ego_coords(self, reference_trajs, bbox_results):
         batch_size = len(bbox_results)
@@ -582,51 +584,53 @@ class CustomModeMultiheadAttention(BaseModule):
             if self.batch_first is False, else
             [bs, num_queries embed_dims].
         """
-        query_pos = query_pos.unsqueeze(1)
-        key_pos = key_pos.unsqueeze(1)
-        bs, n_agent, n_query, D = query.shape
-        if key is None:
-            key = query
-        if value is None:
-            value = key
-        if identity is None:
-            identity = query
-        if key_pos is None:
+
+        with torch.profiler.record_function("MotionHeadMultiheadAttention"):
+            query_pos = query_pos.unsqueeze(1)
+            key_pos = key_pos.unsqueeze(1)
+            bs, n_agent, n_query, D = query.shape
+            if key is None:
+                key = query
+            if value is None:
+                value = key
+            if identity is None:
+                identity = query
+            if key_pos is None:
+                if query_pos is not None:
+                    # use query_pos if key_pos is not available
+                    if query_pos.shape == key.shape:
+                        key_pos = query_pos
+                    else:
+                        warnings.warn(f'position encoding of key is'
+                                    f'missing in {self.__class__.__name__}.')
             if query_pos is not None:
-                # use query_pos if key_pos is not available
-                if query_pos.shape == key.shape:
-                    key_pos = query_pos
-                else:
-                    warnings.warn(f'position encoding of key is'
-                                  f'missing in {self.__class__.__name__}.')
-        if query_pos is not None:
-            query = query + query_pos
-        if key_pos is not None:
-            key = key + key_pos
+                query = query + query_pos
+            if key_pos is not None:
+                key = key + key_pos
 
-        # Because the dataflow('key', 'query', 'value') of
-        # ``torch.nn.MultiheadAttention`` is (num_query, batch,
-        # embed_dims), We should adjust the shape of dataflow from
-        # batch_first (batch, num_query, embed_dims) to num_query_first
-        # (num_query ,batch, embed_dims), and recover ``attn_output``
-        # from num_query_first to batch_first.
-        query = torch.flatten(query, start_dim=0, end_dim=1)
-        key = torch.flatten(key, start_dim=0, end_dim=1)
-        value = torch.flatten(value, start_dim=0, end_dim=1)
-        identity = torch.flatten(identity, start_dim=0, end_dim=1)
-        
-        query = query.transpose(0, 1)
-        key = key.transpose(0, 1)
-        value = value.transpose(0, 1)
+            # Because the dataflow('key', 'query', 'value') of
+            # ``torch.nn.MultiheadAttention`` is (num_query, batch,
+            # embed_dims), We should adjust the shape of dataflow from
+            # batch_first (batch, num_query, embed_dims) to num_query_first
+            # (num_query ,batch, embed_dims), and recover ``attn_output``
+            # from num_query_first to batch_first.
+            query = torch.flatten(query, start_dim=0, end_dim=1)
+            key = torch.flatten(key, start_dim=0, end_dim=1)
+            value = torch.flatten(value, start_dim=0, end_dim=1)
+            identity = torch.flatten(identity, start_dim=0, end_dim=1)
+            
+            query = query.transpose(0, 1)
+            key = key.transpose(0, 1)
+            value = value.transpose(0, 1)
 
-        out = self.attn(
-            query=query,
-            key=key,
-            value=value,
-            attn_mask=attn_mask,
-            key_padding_mask=key_padding_mask)[0]
+            out = self.attn(
+                query=query,
+                key=key,
+                value=value,
+                attn_mask=attn_mask,
+                key_padding_mask=key_padding_mask)[0]
 
-        out = out.transpose(0, 1)
-        out = identity + self.dropout_layer(self.proj_drop(out))
+            out = out.transpose(0, 1)
+            out = identity + self.dropout_layer(self.proj_drop(out))
 
-        return out.view(bs, n_agent, n_query, D)
+            return out.view(bs, n_agent, n_query, D)
