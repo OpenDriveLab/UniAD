@@ -641,21 +641,22 @@ class UniADTrack(MVXTwoStageDetector):
         """
 
         """ velo update """
-        active_inst = track_instances[track_instances.obj_idxes >= 0]
-        other_inst = track_instances[track_instances.obj_idxes < 0]
+        with torch.profiler.record_function("Tracker-velocity_update"):
+            active_inst = track_instances[track_instances.obj_idxes >= 0]
+            other_inst = track_instances[track_instances.obj_idxes < 0]
 
-        if l2g_r2 is not None and len(active_inst) > 0 and l2g_r1 is not None:
-            ref_pts = active_inst.ref_pts
-            velo = active_inst.pred_boxes[:, -2:]
-            ref_pts = self.velo_update(
-                ref_pts, velo, l2g_r1, l2g_t1, l2g_r2, l2g_t2, time_delta=time_delta
-            )
-            ref_pts = ref_pts.squeeze(0)
-            dim = active_inst.query.shape[-1]
-            active_inst.ref_pts = self.reference_points(active_inst.query[..., :dim//2])
-            active_inst.ref_pts[...,:2] = ref_pts[...,:2]
+            if l2g_r2 is not None and len(active_inst) > 0 and l2g_r1 is not None:
+                ref_pts = active_inst.ref_pts
+                velo = active_inst.pred_boxes[:, -2:]
+                ref_pts = self.velo_update(
+                    ref_pts, velo, l2g_r1, l2g_t1, l2g_r2, l2g_t2, time_delta=time_delta
+                )
+                ref_pts = ref_pts.squeeze(0)
+                dim = active_inst.query.shape[-1]
+                active_inst.ref_pts = self.reference_points(active_inst.query[..., :dim//2])
+                active_inst.ref_pts[...,:2] = ref_pts[...,:2]
 
-        track_instances = Instances.cat([other_inst, active_inst])
+            track_instances = Instances.cat([other_inst, active_inst])
 
         # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
         bev_embed, bev_pos = self.get_bevs(img, img_metas, prev_bev=prev_bev)

@@ -1,179 +1,3 @@
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 174, in launch
-    run(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-run.py", line 689, in run
-    elastic_launch(
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 116, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 244, in launch_agent
-    raise ChildFailedError(
-torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
-***************************************
-         ./tools/test.py FAILED
-=======================================
-Root Cause:
-[0]:
-  time: 2023-05-18_02:36:07
-  rank: 0 (local_rank: 0)
-  exitcode: 1 (pid: 1486158)
-  error_file: <N/A>
-  msg: "Process failed with exitcode 1"
-=======================================
-Other Failures:
-  <NO_OTHER_FAILURES>
-***************************************
-
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ history | grep "uniad"
-
-  713  wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_track_m
-ap.pth
-  720  conda activate uniad
-  736  conda activate uniad
-  738  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 8
-  789  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 8
-  790  conda avtivate uniad
-  791  conda activate uniad
-  792  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 8
-  815  ps aux | grep "./tools/uniad_dist_eval.sh"
-  829  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 8
-  830  conda activate uniad
-  831  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 8
-  832  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 1
-  833  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 4
-  834  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 1
-  835  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 1
-  836  conda activate uniad
-  837  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 1
-  839  tmux switch -t uniad1
-  840  tmux rename uniad1
-  842  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 1
-  926  tmux attach-session uniad1
-  927  tmux attach-session -t  uniad1
-  931  tmux kill-session -t uniad1
- 1023  tmux attach-sessions -t uniad1
- 1024  tmux attach-session -t uniad1
- 1028  tmux capture-pane -pS - -t uniad1  -J
- 1030  tmux attach-session -t uniad1
- 1032  tmux attach-session -t uniad1
- 1034  tmux attach-session -t uniad1
- 1036  tmux attach-session -t uniad1
- 1038  tmux attach-session -t uniad1
- 1056  tmux attach-session -t uniad1
- 1397  conda activate uniad
- 1403  ./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad
-_base_track_map.pth 1 1
- 1533  tmux attach-session -t uniad
- 1695  conda activate uniad
- 1697  ./tools/uniad_dist_eval.sh ./projects/configs/stage1_track_map/base_track_map.py ./c
-kpts/uniad_base_track_map.pth 1 1
- 1698  history | grep "uniad"
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage1_track_map/base_track_map.py ./ckpts/uniad_base_track_map.pth 1 1
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
-projects.mmdet3d_plugin
-======
-Loading NuScenes tables for version v1.0-trainval...
-23 category,
-8 attribute,
-4 visibility,
-64386 instance,
-12 sensor,
-10200 calibrated_sensor,
-2631083 ego_pose,
-68 log,
-850 scene,
-34149 sample,
-2631083 sample_data,
-1166187 sample_annotation,
-4 map,
-Done loading in 36.643 seconds.
-======
-Reverse indexing ...
-Done reverse indexing in 8.4 seconds.
-======
-load checkpoint from local path: ./ckpts/uniad_base_track_map.pth
-2023-05-18 02:44:03,965 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,970 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,973 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,976 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,980 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,983 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,987 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,990 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,993 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2
- is upgraded to version 2.
-2023-05-18 02:44:03,997 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2
- is upgraded to version 2.
-2023-05-18 02:44:04,000 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,003 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,007 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,010 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,014 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,017 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,021 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,024 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,027 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,031 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,034 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,038 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,041 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv
-2 is upgraded to version 2.
-2023-05-18 02:44:04,045 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2
- is upgraded to version 2.
-2023-05-18 02:44:04,050 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2
- is upgraded to version 2.
-2023-05-18 02:44:04,054 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2
- is upgraded to version 2.
-The model and loaded state dict do not match exactly
-
-unexpected key in source state_dict: occ_head.bev_light_proj.conv_layers.0.conv.weight, occ
-_head.bev_light_proj.conv_layers.0.bn.weight, occ_head.bev_light_proj.conv_layers.0.bn.bias
-, occ_head.bev_light_proj.conv_layers.0.bn.running_mean, occ_head.bev_light_proj.conv_layer
-s.0.bn.running_var, occ_head.bev_light_proj.conv_layers.0.bn.num_batches_tracked, occ_head.
-bev_light_proj.conv_layers.1.conv.weight, occ_head.bev_light_proj.conv_layers.1.bn.weight,
-occ_head.bev_light_proj.conv_layers.1.bn.bias, occ_head.bev_light_proj.conv_layers.1.bn.run
-ning_mean, occ_head.bev_light_proj.conv_layers.1.bn.running_var, occ_head.bev_light_proj.co
-nv_layers.1.bn.num_batches_tracked, occ_head.bev_light_proj.conv_layers.2.conv.weight, occ_
-head.bev_light_proj.conv_layers.2.bn.weight, occ_head.bev_light_proj.conv_layers.2.bn.bias,
- occ_head.bev_light_proj.conv_layers.2.bn.running_mean, occ_head.bev_light_proj.conv_layers
-.2.bn.running_var, occ_head.bev_light_proj.conv_layers.2.bn.num_batches_tracked, occ_head.b
-ev_light_proj.conv_layers.3.weight, occ_head.bev_light_proj.conv_layers.3.bias, occ_head.ba
-se_downscale.0.layers.conv_down_project.weight, occ_head.base_downscale.0.layers.abn_down_p
 roject.0.weight, occ_head.base_downscale.0.layers.abn_down_project.0.bias, occ_head.base_do
 wnscale.0.layers.abn_down_project.0.running_mean, occ_head.base_downscale.0.layers.abn_down
 _project.0.running_var, occ_head.base_downscale.0.layers.abn_down_project.0.num_batches_tra
@@ -1013,4 +837,193 @@ Other Failures:
   <NO_OTHER_FAILURES>
 ***************************************
 
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$
+(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
+igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
+bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
+ed by bash)
+projects.mmdet3d_plugin
+======
+Loading NuScenes tables for version v1.0-trainval...
+23 category,
+8 attribute,
+4 visibility,
+64386 instance,
+12 sensor,
+10200 calibrated_sensor,
+2631083 ego_pose,
+68 log,
+850 scene,
+34149 sample,
+2631083 sample_data,
+1166187 sample_annotation,
+4 map,
+Done loading in 36.238 seconds.
+======
+Reverse indexing ...
+Done reverse indexing in 8.4 seconds.
+======
+load checkpoint from local path: ./ckpts/uniad_base_e2e.pth
+2023-05-18 03:53:29,689 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,693 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,696 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,699 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,702 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,705 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,708 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,710 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,713 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,717 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,721 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,724 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,727 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,730 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,732 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,735 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,738 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,741 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,744 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,747 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,750 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,753 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,755 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv
+2 is upgraded to version 2.
+2023-05-18 03:53:29,759 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,763 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2
+ is upgraded to version 2.
+2023-05-18 03:53:29,766 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2
+ is upgraded to version 2.
+[                                                  ] 0/5, elapsed: 0s, ETA:
+
+from 0 to 5 in rank 0, batch0
+
+
+[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 5/5, 0.5 task/s, elapsed: 11s, ETA:     0s
+
+rank 0 batch 0 done!
+
+
+(batch_size: 1): 1.78 FPS, max mem: 3051527168.00 MB, batch: 0, rank: 0
+Profile Done
+/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
+y:178: FutureWarning: The module torch.distributed.launch is deprecated
+and will be removed in future. Use torch.distributed.run.
+Note that --use_env is set by default in torch.distributed.run.
+If your script expects `--local_rank` argument to be set, please
+change it to read from `os.environ['LOCAL_RANK']` instead. See
+https://pytorch.org/docs/stable/distributed.html#launch-utility for
+further instructions
+
+  warnings.warn(
+(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
+igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
+bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
+ed by bash)
+projects.mmdet3d_plugin
+======
+Loading NuScenes tables for version v1.0-trainval...
+23 category,
+8 attribute,
+4 visibility,
+64386 instance,
+12 sensor,
+10200 calibrated_sensor,
+2631083 ego_pose,
+68 log,
+850 scene,
+34149 sample,
+2631083 sample_data,
+1166187 sample_annotation,
+4 map,
+Done loading in 36.030 seconds.
+======
+Reverse indexing ...
+Done reverse indexing in 8.7 seconds.
+======
+load checkpoint from local path: ./ckpts/uniad_base_e2e.pth
+2023-05-18 04:14:55,589 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,594 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,597 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,601 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,604 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,608 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,611 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,615 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,618 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,621 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,625 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,628 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,632 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,635 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,639 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,642 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,646 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,649 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,652 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,656 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,659 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,663 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,667 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv
+2 is upgraded to version 2.
+2023-05-18 04:14:55,671 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,676 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2
+ is upgraded to version 2.
+2023-05-18 04:14:55,680 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2
+ is upgraded to version 2.
+[                                                  ] 0/5, elapsed: 0s, ETA:
+
+from 0 to 5 in rank 0, batch0
+
+
+[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 5/5, 0.4 task/s, elapsed: 13s, ETA:     0s
+
+rank 0 batch 0 done!
+
+
+(batch_size: 1): 1.76 FPS, max mem: 3051527168.00 MB, batch: 0, rank: 0
+
