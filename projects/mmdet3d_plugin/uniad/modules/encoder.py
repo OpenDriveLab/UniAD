@@ -206,15 +206,33 @@ class BEVFormerEncoder(TransformerLayerSequence):
             else:
                 hybird_ref_2d = torch.stack([ref_2d, ref_2d], 1).reshape(
                     bs*2, len_bev, num_bev_level, 2)
+            
+            for lid, layer in enumerate(self.layers):
+                output = layer(
+                    bev_query,
+                    key,
+                    value,
+                    *args,
+                    bev_pos=bev_pos,
+                    ref_2d=hybird_ref_2d,
+                    ref_3d=ref_3d,
+                    bev_h=bev_h,
+                    bev_w=bev_w,
+                    spatial_shapes=spatial_shapes,
+                    level_start_index=level_start_index,
+                    reference_points_cam=reference_points_cam,
+                    bev_mask=bev_mask,
+                    prev_bev=prev_bev,
+                    **kwargs)
 
-                    bev_query = output
-                    if self.return_intermediate:
-                        intermediate.append(output)
-
+                bev_query = output
                 if self.return_intermediate:
-                    return torch.stack(intermediate)
+                    intermediate.append(output)
 
-                return output
+            if self.return_intermediate:
+                return torch.stack(intermediate)
+
+            return output
 
 
 @TRANSFORMER_LAYER.register_module()
