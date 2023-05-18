@@ -1,5 +1,6 @@
 import cv2
 import torch
+import argparse
 import os
 import glob
 import numpy as np
@@ -282,12 +283,7 @@ class Visualizer:
             out.write(img_array[i])
         out.release()
 
-
-if __name__ == '__main__':
-    predroot = '/mnt/nas20/yihan01.hu/tmp/results.pkl'
-    out_folder = '/mnt/nas20/yihan01.hu/tmp/viz/demo_test/'
-    demo_video = 'mini_val_final.avi'
-    project_to_cam = True
+def main(args):
     render_cfg = dict(
         with_occ_map=False,
         with_map=False,
@@ -302,27 +298,43 @@ if __name__ == '__main__':
         show_legend=True,
         show_sdc_traj=False
     )
-    viser = Visualizer(version='v1.0-mini', predroot=predroot,
-                       dataroot='data/nuscenes', **render_cfg)
-    if not os.path.exists(out_folder):
-        os.makedirs(out_folder)
+
+    viser = Visualizer(version='v1.0-mini', predroot=args.predroot, dataroot='data/nuscenes', **render_cfg)
+
+    if not os.path.exists(args.out_folder):
+        os.makedirs(args.out_folder)
+
     val_splits = splits.val
-    train_splits = splits.mini_train
+
     scene_token_to_name = dict()
     for i in range(len(viser.nusc.scene)):
-        scene_token_to_name[viser.nusc.scene[i]
-                            ['token']] = viser.nusc.scene[i]['name']
+        scene_token_to_name[viser.nusc.scene[i]['token']] = viser.nusc.scene[i]['name']
+
     for i in range(len(viser.nusc.sample)):
         sample_token = viser.nusc.sample[i]['token']
         scene_token = viser.nusc.sample[i]['scene_token']
 
         if scene_token_to_name[scene_token] not in val_splits:
             continue
+
         if sample_token not in viser.token_set:
             print(i, sample_token, 'not in prediction pkl!')
             continue
-        viser.visualize_bev(sample_token, out_folder + str(i).zfill(3))
-        if project_to_cam:
-            viser.visualize_cam(sample_token, out_folder + str(i).zfill(3))
-            viser.combine(out_folder + str(i).zfill(3))
-    viser.to_video(out_folder, demo_video, fps=4, downsample=2)
+
+        viser.visualize_bev(sample_token, os.path.join(args.out_folder, str(i).zfill(3)))
+
+        if args.project_to_cam:
+            viser.visualize_cam(sample_token, os.path.join(args.out_folder, str(i).zfill(3)))
+            viser.combine(os.path.join(args.out_folder, str(i).zfill(3)))
+
+    viser.to_video(args.out_folder, args.demo_video, fps=4, downsample=2)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--predroot', default='/mnt/nas20/yihan01.hu/tmp/results.pkl', help='Path to results.pkl')
+    parser.add_argument('--out_folder', default='/mnt/nas20/yihan01.hu/tmp/viz/demo_test/', help='Output folder path')
+    parser.add_argument('--demo_video', default='mini_val_final.avi', help='Demo video name')
+    parser.add_argument('--project_to_cam', default=True, help='Project to cam (default: True)')
+    args = parser.parse_args()
+    main(args)

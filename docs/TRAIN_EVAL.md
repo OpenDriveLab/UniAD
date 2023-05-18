@@ -70,3 +70,18 @@ The second-stage training takes ~ 17 GB GPU memory, ~ 4 days for 20 epochs on 8 
 # ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/stage1_track_map/base_track_map.py ./path/to/ckpts.pth N_GPUS
 ```
 
+## Visualization <a name="vis"></a>
+
+
+### visualization Command
+
+
+```shell
+# please refer to  ./tools/uniad_vis_result.sh
+python ./tools/analysis_tools/visualize/run.py \
+    --predroot ./path/to/results.pkl \
+    --out_folder ./path/to/output \
+    --demo_video test_demo.avi \
+    --project_to_cam True
+```
+
