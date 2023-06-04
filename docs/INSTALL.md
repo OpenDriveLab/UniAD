@@ -63,7 +63,7 @@ pip install -r requirements.txt
 
 **i. Prepare pretrained weights.**
 ```shell
-mkdir ckpts
+mkdir ckpts && cd ckpts
 
 # Pretrained weights of bevformer
 # Also the initial state of training stage1 model
