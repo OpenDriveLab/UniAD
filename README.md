@@ -139,7 +139,5 @@ Please consider citing our paper if the project helps your research with the fol
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 - [BEVFormer](https://github.com/fundamentalvision/BEVFormer) (:rocket:Ours!)
 - [ST-P3](https://github.com/OpenPerceptionX/ST-P3) (:rocket:Ours!)
-- [mmdet3d](https://github.com/open-mmlab/mmdetection3d)
 - [FIERY](https://github.com/wayveai/fiery)
 - [MOTR](https://github.com/megvii-research/MOTR)
-- [BEVerse](https://github.com/zhangyp15/BEVerse)
