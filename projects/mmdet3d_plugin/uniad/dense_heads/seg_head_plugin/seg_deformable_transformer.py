@@ -23,6 +23,8 @@ from torch import einsum
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
+from torch.profiler import record_funciton
+
 # Copy-paste from defromable detr in mmdet.
 @TRANSFORMER.register_module()
 class SegDeformableTransformer(Transformer):
