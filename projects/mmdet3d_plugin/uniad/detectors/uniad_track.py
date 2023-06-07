@@ -344,11 +344,13 @@ class UniADTrack(MVXTwoStageDetector):
 
     # Generate bev using bev_encoder in BEVFormer
     def get_bevs(self, imgs, img_metas, prev_img=None, prev_img_metas=None, prev_bev=None):
-        if prev_img is not None and prev_img_metas is not None:
-            assert prev_bev is None
-            prev_bev = self.get_history_bev(prev_img, prev_img_metas)
+        with torch.profiler.record_function("get_history_bev"):
+            if prev_img is not None and prev_img_metas is not None:
+                assert prev_bev is None
+                prev_bev = self.get_history_bev(prev_img, prev_img_metas)
 
-        img_feats = self.extract_feat(img=imgs)
+        with torch.profiler.record_function("bev-backbone-neck"):
+            img_feats = self.extract_feat(img=imgs)
         if self.freeze_bev_encoder:
             with torch.no_grad():
                 bev_embed, bev_pos = self.pts_bbox_head.get_bev_features(
