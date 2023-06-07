@@ -68,17 +68,16 @@ def make_instance_seg_consecutive(instance_seg):
     return instance_seg
 
 
-def e2e_predict_instance_segmentation_and_trajectories(
-                                    output, 
+def predict_instance_segmentation_and_trajectories(
+                                    foreground_masks,
+                                    ins_sigmoid,
                                     vehicles_id=1,
                                     ):
-    preds_seg = output['seg_out_mask']
-    preds_seg = preds_seg.squeeze(2)  # [b, t, h, w]
-    foreground_masks = preds_seg == vehicles_id  # [b, t, h, w]  Only these places have foreground id
+    if foreground_masks.dim() == 5 and foreground_masks.shape[2] == 1:
+        foreground_masks = foreground_masks.squeeze(2)  # [b, t, h, w]
+    foreground_masks = foreground_masks == vehicles_id  # [b, t, h, w]  Only these places have foreground id
     
-    topk_query_ins_segs = output['topk_query_ins_segs']  # [b, topk, t, h, w]  # Scores
-
-    argmax_ins = topk_query_ins_segs.argmax(dim=1)  # long, [b, t, h, w], ins_id starts from 0
+    argmax_ins = ins_sigmoid.argmax(dim=1)  # long, [b, t, h, w], ins_id starts from 0
     argmax_ins = argmax_ins + 1 # [b, t, h, w], ins_id starts from 1
     instance_seg = (argmax_ins * foreground_masks.float()).long()  # bg is 0, fg starts with 1
 

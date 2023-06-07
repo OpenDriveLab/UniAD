@@ -221,9 +221,10 @@ class SegDETRHead(
                     normalized coordinate format (cx, cy, w, h) and shape \
                     [nb_dec, bs, num_query, 4].
         """
-        num_levels = len(feats)
-        img_metas_list = [img_metas for _ in range(num_levels)]
-        return multi_apply(self.forward_single, feats, img_metas_list)
+        with torch.profiler.record_function("SegDETRHead"):
+            num_levels = len(feats)
+            img_metas_list = [img_metas for _ in range(num_levels)]
+            return multi_apply(self.forward_single, feats, img_metas_list)
 
     def forward_single(self, x, img_metas):
         """"Forward function for a single feature level.

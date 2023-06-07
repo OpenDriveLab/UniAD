@@ -4,10 +4,6 @@ from mmdet.datasets.builder import PIPELINES
 from einops import rearrange
 from mmdet3d.datasets.pipelines import LoadAnnotations3D
 import os
-try:
-    from petrel_client.client import Client
-except:
-    pass
 
 @PIPELINES.register_module()
 class LoadMultiViewImageFromFilesInCeph(object):

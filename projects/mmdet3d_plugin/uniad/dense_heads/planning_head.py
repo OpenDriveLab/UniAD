@@ -11,6 +11,7 @@ from einops import rearrange
 from projects.mmdet3d_plugin.models.utils.functional import bivariate_gaussian_activation
 from .planning_head_plugin import CollisionNonlinearOptimizer
 import numpy as np
+import copy
 
 @HEADS.register_module()
 class PlanningHeadSingleMode(nn.Module):
@@ -28,6 +29,7 @@ class PlanningHeadSingleMode(nn.Module):
                     sigma=1.0, 
                     alpha_collision=5.0,
                  ),
+                 with_adapter=False,
                 ):
         """
         Single Mode Planning Head for Autonomous Driving.
@@ -72,21 +74,31 @@ class PlanningHeadSingleMode(nn.Module):
         for cfg in loss_collision:
             self.loss_collision.append(build_loss(cfg))
         self.loss_collision = nn.ModuleList(self.loss_collision)
-
-        self.use_col_optim = use_col_optim and (not self.training)
+        
+        self.use_col_optim = use_col_optim
         self.occ_filter_range = col_optim_args['occ_filter_range']
         self.sigma = col_optim_args['sigma']
         self.alpha_collision = col_optim_args['alpha_collision']
 
+        # TODO: reimplement it with down-scaled feature_map
+        self.with_adapter = with_adapter
+        if with_adapter:
+            bev_adapter_block = nn.Sequential(
+                nn.Conv2d(embed_dims, embed_dims // 2, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.Conv2d(embed_dims // 2, embed_dims, kernel_size=1),
+            )
+            N_Blocks = 3
+            bev_adapter = [copy.deepcopy(bev_adapter_block) for _ in range(N_Blocks)]
+            self.bev_adapter = nn.Sequential(*bev_adapter)
+           
     def forward_train(self,
                       bev_embed, 
                       outs_motion={}, 
-                      outs_occflow={},
                       sdc_planning=None, 
                       sdc_planning_mask=None,
                       command=None,
                       gt_future_boxes=None,
-                      img_metas=None,
                       ):
         """
         Perform forward planning training with the given inputs.
@@ -103,31 +115,33 @@ class PlanningHeadSingleMode(nn.Module):
         Returns:
             ret_dict (dict): A dictionary containing the losses and planning outputs.
         """
-        sdc_traj_query = outs_motion['sdc_traj_query']
-        sdc_track_query = outs_motion['sdc_track_query']
-        bev_pos = outs_motion['bev_pos']
 
-        occflow_ins_mask = outs_occflow.get('pred_ins_masks', None)
-        
-        outs_planning = self(bev_embed, occflow_ins_mask, bev_pos, sdc_traj_query, sdc_track_query, command)
-        loss_inputs = [sdc_planning, sdc_planning_mask, outs_planning, gt_future_boxes]
-        losses = self.loss(*loss_inputs, img_metas=img_metas)
-        ret_dict = dict(losses=losses, outs_motion=outs_planning)
-        return ret_dict
+        with torch.profiler.record_function("PlanningHead-forward_train"):
+            sdc_traj_query = outs_motion['sdc_traj_query']
+            sdc_track_query = outs_motion['sdc_track_query']
+            bev_pos = outs_motion['bev_pos']
+
+            occ_mask = None
+            
+            outs_planning = self(bev_embed, occ_mask, bev_pos, sdc_traj_query, sdc_track_query, command)
+            loss_inputs = [sdc_planning, sdc_planning_mask, outs_planning, gt_future_boxes]
+            losses = self.loss(*loss_inputs)
+            ret_dict = dict(losses=losses, outs_motion=outs_planning)
+            return ret_dict
 
     def forward_test(self, bev_embed, outs_motion={}, outs_occflow={}, command=None):
-        sdc_traj_query = outs_motion['sdc_traj_query']
-        sdc_track_query = outs_motion['sdc_track_query']
-        bev_pos = outs_motion['bev_pos']
-        occflow_ins_mask = outs_occflow.get('pred_ins_masks', None)
-        
-        outs_planning = self(bev_embed, occflow_ins_mask, bev_pos, sdc_traj_query, sdc_track_query, 
-                                            command)
-        return outs_planning
+        with torch.profiler.record_function("PlanningHead-forward_test"):
+            sdc_traj_query = outs_motion['sdc_traj_query']
+            sdc_track_query = outs_motion['sdc_track_query']
+            bev_pos = outs_motion['bev_pos']
+            occ_mask = outs_occflow['seg_out']
+            
+            outs_planning = self(bev_embed, occ_mask, bev_pos, sdc_traj_query, sdc_track_query, command)
+            return outs_planning
 
     def forward(self, 
                 bev_embed, 
-                occflow_ins_mask, 
+                occ_mask, 
                 bev_pos, 
                 sdc_traj_query, 
                 sdc_track_query, 
@@ -137,7 +151,7 @@ class PlanningHeadSingleMode(nn.Module):
 
         Args:
             bev_embed (torch.Tensor): Bird's eye view feature embedding.
-            occflow_ins_mask (torch.Tensor): Instance mask for occupancy flow.
+            occ_mask (torch.Tensor): Instance mask for occupancy.
             bev_pos (torch.Tensor): BEV position.
             sdc_traj_query (torch.Tensor): SDC trajectory query.
             sdc_track_query (torch.Tensor): SDC track query.
@@ -146,77 +160,93 @@ class PlanningHeadSingleMode(nn.Module):
         Returns:
             dict: A dictionary containing SDC trajectory and all SDC trajectories.
         """
-        sdc_track_query = sdc_track_query.detach()
-        sdc_traj_query = sdc_traj_query[-1]
-        P = sdc_traj_query.shape[1]
-        sdc_track_query = sdc_track_query[:, None].expand(-1,P,-1)
-        
-        
-        navi_embed = self.navi_embed.weight[command]
-        navi_embed = navi_embed[None].expand(-1,P,-1)
-        plan_query = torch.cat([sdc_traj_query, sdc_track_query, navi_embed], dim=-1)
 
-        plan_query = self.mlp_fuser(plan_query).max(1, keepdim=True)[0]   # expand, then fuse  # [1, 6, 768] -> [1, 1, 256]
-        plan_query = rearrange(plan_query, 'b p c -> p b c')
-        # bev_embed: [40000, 1, 256]
-        
-        bev_pos = rearrange(bev_pos, 'b c h w -> (h w) b c')
-        bev_feat = bev_embed +  bev_pos  # [40000, 1, 256]
-      
-        pos_embed = self.pos_embed.weight
-        plan_query = plan_query + pos_embed[None]  # [1, 1, 256]
-        
-        # plan_query: [1, 1, 256]
-        # bev_feat: [40000, 1, 256]
-        plan_query = self.attn_module(plan_query, bev_feat)   # [1, 1, 256]
-        
-        sdc_traj_all = self.reg_branch(plan_query).view((-1, self.planning_steps, 2))
-        sdc_traj_all[...,:2] = torch.cumsum(sdc_traj_all[...,:2], dim=2)
-        sdc_traj_all[0] = bivariate_gaussian_activation(sdc_traj_all[0])
-        if self.use_col_optim and not self.training:
-            # post process, only used when testing
-            sdc_traj_all = self.collision_optimization(sdc_traj_all, occflow_ins_mask)
-        
-        return dict(
-            sdc_traj=sdc_traj_all,
-            sdc_traj_all=sdc_traj_all,
-        )
+        with torch.profiler.record_function("PlanningHead-forward"):
+            sdc_track_query = sdc_track_query.detach()
+            sdc_traj_query = sdc_traj_query[-1]
+            P = sdc_traj_query.shape[1]
+            sdc_track_query = sdc_track_query[:, None].expand(-1,P,-1)
+            
+            
+            navi_embed = self.navi_embed.weight[command]
+            navi_embed = navi_embed[None].expand(-1,P,-1)
+            plan_query = torch.cat([sdc_traj_query, sdc_track_query, navi_embed], dim=-1)
 
-    def collision_optimization(self, sdc_traj_all, occflow_ins_mask):
+            plan_query = self.mlp_fuser(plan_query).max(1, keepdim=True)[0]   # expand, then fuse  # [1, 6, 768] -> [1, 1, 256]
+            plan_query = rearrange(plan_query, 'b p c -> p b c')
+            
+            bev_pos = rearrange(bev_pos, 'b c h w -> (h w) b c')
+            bev_feat = bev_embed +  bev_pos
+            
+            ##### Plugin adapter #####
+            if self.with_adapter:
+                bev_feat = rearrange(bev_feat, '(h w) b c -> b c h w', h=self.bev_h, w=self.bev_w)
+                bev_feat = bev_feat + self.bev_adapter(bev_feat)  # residual connection
+                bev_feat = rearrange(bev_feat, 'b c h w -> (h w) b c')
+            ##########################
+        
+            pos_embed = self.pos_embed.weight
+            plan_query = plan_query + pos_embed[None]  # [1, 1, 256]
+            
+            # plan_query: [1, 1, 256]
+            # bev_feat: [40000, 1, 256]
+            plan_query = self.attn_module(plan_query, bev_feat)   # [1, 1, 256]
+            
+            sdc_traj_all = self.reg_branch(plan_query).view((-1, self.planning_steps, 2))
+            sdc_traj_all[...,:2] = torch.cumsum(sdc_traj_all[...,:2], dim=2)
+            sdc_traj_all[0] = bivariate_gaussian_activation(sdc_traj_all[0])
+            if self.use_col_optim and not self.training:
+                # post process, only used when testing
+                assert occ_mask is not None
+                sdc_traj_all = self.collision_optimization(sdc_traj_all, occ_mask)
+            
+            return dict(
+                sdc_traj=sdc_traj_all,
+                sdc_traj_all=sdc_traj_all,
+            )
+
+    def collision_optimization(self, sdc_traj_all, occ_mask):
         """
         Optimize SDC trajectory with occupancy instance mask.
 
         Args:
             sdc_traj_all (torch.Tensor): SDC trajectory tensor.
-            occflow_ins_mask (torch.Tensor): Occupancy flow instance mask. 
+            occ_mask (torch.Tensor): Occupancy flow instance mask. 
         Returns:
             torch.Tensor: Optimized SDC trajectory tensor.
         """
-        if occflow_ins_mask is None:
-            return sdc_traj_all
-        occflow_ins_mask = occflow_ins_mask.sigmoid()
-        pos_xy_t = []
-        valid_occupancy_num = 0
-        for t in range(self.planning_steps):  
-            pos_xy = torch.nonzero(occflow_ins_mask[0].sum(0)[min(t+1, 4)] > 0.1, as_tuple=False)
-            pos_xy = pos_xy[:, [1, 0]]
-            pos_xy[:, 0] = (pos_xy[:, 0] - self.bev_h//2) * 0.5 + 0.25
-            pos_xy[:, 1] = (pos_xy[:, 1] - self.bev_w//2) * 0.5 + 0.25
 
-            # filter the occupancy in range
-            keep_index = torch.sum((sdc_traj_all[0, t, :2][None, :] - pos_xy[:, :2])**2, axis=-1) < self.occ_filter_range**2
-            pos_xy_t.append(pos_xy[keep_index].cpu().detach().numpy())
-            valid_occupancy_num += torch.sum(keep_index>0)
-        if valid_occupancy_num == 0:
-            return sdc_traj_all
-        
-        col_optimizer = CollisionNonlinearOptimizer(self.planning_steps, 0.5, self.sigma, self.alpha_collision, pos_xy_t)
-        col_optimizer.set_reference_trajectory(sdc_traj_all[0].cpu().detach().numpy())
-        sol = col_optimizer.solve()
-        sdc_traj_optim = np.stack([sol.value(col_optimizer.position_x), sol.value(col_optimizer.position_y)], axis=-1)
-        return torch.tensor(sdc_traj_optim[None], device=sdc_traj_all.device, dtype=sdc_traj_all.dtype)
+        with torch.profiler.record_function("PlanningHead-collision_optim"):
+
+            pos_xy_t = []
+            valid_occupancy_num = 0
+            
+            if occ_mask.shape[2] == 1:
+                occ_mask = occ_mask.squeeze(2)
+            occ_horizon = occ_mask.shape[1]
+            assert occ_horizon == 5
+
+            for t in range(self.planning_steps):
+                cur_t = min(t+1, occ_horizon-1)
+                pos_xy = torch.nonzero(occ_mask[0][cur_t], as_tuple=False)
+                pos_xy = pos_xy[:, [1, 0]]
+                pos_xy[:, 0] = (pos_xy[:, 0] - self.bev_h//2) * 0.5 + 0.25
+                pos_xy[:, 1] = (pos_xy[:, 1] - self.bev_w//2) * 0.5 + 0.25
+
+                # filter the occupancy in range
+                keep_index = torch.sum((sdc_traj_all[0, t, :2][None, :] - pos_xy[:, :2])**2, axis=-1) < self.occ_filter_range**2
+                pos_xy_t.append(pos_xy[keep_index].cpu().detach().numpy())
+                valid_occupancy_num += torch.sum(keep_index>0)
+            if valid_occupancy_num == 0:
+                return sdc_traj_all
+            
+            col_optimizer = CollisionNonlinearOptimizer(self.planning_steps, 0.5, self.sigma, self.alpha_collision, pos_xy_t)
+            col_optimizer.set_reference_trajectory(sdc_traj_all[0].cpu().detach().numpy())
+            sol = col_optimizer.solve()
+            sdc_traj_optim = np.stack([sol.value(col_optimizer.position_x), sol.value(col_optimizer.position_y)], axis=-1)
+            return torch.tensor(sdc_traj_optim[None], device=sdc_traj_all.device, dtype=sdc_traj_all.dtype)
     
-    def loss(self, sdc_planning, sdc_planning_mask, outs_planning, future_gt_bbox=None, img_metas=None):
+    def loss(self, sdc_planning, sdc_planning_mask, outs_planning, future_gt_bbox=None):
         sdc_traj_all = outs_planning['sdc_traj_all'] # b, p, t, 5
         loss_dict = dict()
         for i in range(len(self.loss_collision)):

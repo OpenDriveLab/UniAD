@@ -9,6 +9,7 @@ import torch.nn as nn
 from mmcv.cnn.bricks.registry import TRANSFORMER_LAYER_SEQUENCE
 from mmcv.cnn.bricks.transformer import build_transformer_layer
 from mmcv.runner.base_module import BaseModule
+
 from projects.mmdet3d_plugin.models.utils.functional import (
     norm_points,
     pos2posemb2d,

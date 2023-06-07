@@ -4,10 +4,10 @@
 Please make sure you have prepared the environment and the nuScenes dataset. You can check it by simply evaluating the pre-trained first-stage(track_map) model as follows:
 ```shell
 cd UniAD
-./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./ckpts/uniad_base_track_map.pth 8
+./tools/uniad_dist_eval.sh ./projects/configs/stage1_track_map/base_track_map.py ./ckpts/uniad_base_track_map.pth 8
 
 # For slurm users:
-# ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/track_map/base_stage1.py ./ckpts/uniad_base_track_map.pth 8
+# ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/stage1_track_map/base_track_map.py ./ckpts/uniad_base_track_map.pth 8
 ```
 If everything is prepared properly, the output results should be:
 
@@ -50,10 +50,10 @@ The second-stage training takes ~ 17 GB GPU memory, ~ 4 days for 20 epochs on 8 
 ### Training Command
 ```shell
 # N_GPUS is the number of GPUs used. Recommended >=8.
-./tools/uniad_dist_train.sh ./projects/configs/track_map/base_stage1.py N_GPUS
+./tools/uniad_dist_train.sh ./projects/configs/stage1_track_map/base_track_map.py N_GPUS
 
 # For slurm users:
-# ./tools/uniad_slurm_train.sh YOUR_PARTITION ./projects/configs/track_map/base_stage1.py N_GPUS
+# ./tools/uniad_slurm_train.sh YOUR_PARTITION ./projects/configs/stage1_track_map/base_track_map.py N_GPUS
 ```
 
 ## Evaluation <a name="eval"></a>
@@ -62,11 +62,11 @@ The second-stage training takes ~ 17 GB GPU memory, ~ 4 days for 20 epochs on 8 
 ### Eval Command
 ```shell
 # N_GPUS is the number of GPUs used.  Recommended =8.
-# Evaluate with different number of GPUs (rather than 8) might slightly jitter the results.
+# If you evaluate with different number of GPUs rather than 8, the results might be slightly different.
 
-./tools/uniad_dist_eval.sh ./projects/configs/track_map/base_stage1.py ./path/to/ckpts.pth N_GPUS
+./tools/uniad_dist_eval.sh ./projects/configs/stage1_track_map/base_track_map.py ./path/to/ckpts.pth N_GPUS
 
 # For slurm users:
-# ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/track_map/base_stage1.py ./path/to/ckpts.pth N_GPUS
+# ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/stage1_track_map/base_track_map.py ./path/to/ckpts.pth N_GPUS
 ```
 

@@ -22,7 +22,8 @@ class_names = [
     "pedestrian",
     "traffic_cone",
 ]
-
+vehicle_id_list = [0, 1, 2, 3, 4, 6, 7]
+group_id_list = [[0,1,2,3,4], [6,7], [8], [5,9]]
 input_modality = dict(
     use_lidar=False, use_camera=True, use_radar=False, use_map=False, use_external=True
 )
@@ -35,9 +36,7 @@ bev_w_ = 200
 _feed_dim_ = _ffn_dim_
 _dim_half_ = _pos_dim_
 canvas_size = (bev_h_, bev_w_)
-
-# NOTE: Change queue_length from 5 to 3 could save GPU memory.
-queue_length = 5  # each sequence contains `queue_length` frames.
+queue_length = 3  # each sequence contains `queue_length` frames.
 
 ### traj prediction args ###
 predict_steps = 12
@@ -48,7 +47,7 @@ use_nonlinear_optimizer = True
 
 ## occflow setting	
 occ_n_future = 4	
-occ_n_future_plan = 6
+occ_n_future_plan = 6	
 occ_n_future_max = max([occ_n_future, occ_n_future_plan])	
 
 ### planning ###
@@ -73,6 +72,7 @@ model = dict(
     video_test_mode=True,
     num_query=900,
     num_classes=10,
+    vehicle_id_list=vehicle_id_list,
     pc_range=point_cloud_range,
     img_backbone=dict(
         type="ResNet",
@@ -97,7 +97,8 @@ model = dict(
         num_outs=4,
         relu_before_extra_convs=True,
     ),
-    freeze_img_modules=True,  # * set fix feats to true can fix the backbone
+    freeze_img_modules=True,  # set fix feats to true can fix the backbone
+    freeze_bev_encoder=True,
     score_thresh=0.4,
     filter_score_thresh=0.35,
     qim_args=dict(
@@ -213,7 +214,6 @@ model = dict(
                     ),
                 ),
             ),
-            bev_feat_no_grad=False, # False for with_grad, True for no_grad
         ),
         bbox_coder=dict(
             type="NMSFreeCoder",
@@ -323,7 +323,128 @@ model = dict(
             sampler_with_mask =dict(type='PseudoSampler_segformer'),
         ),
     ),
- 
+    occ_head=dict(
+        type='OccHead',
+
+        grid_conf=occflow_grid_conf,
+        ignore_index=255,
+
+        bev_proj_dim=256,
+        bev_proj_nlayers=4,
+
+        # Transformer
+        attn_mask_thresh=0.3,
+        transformer_decoder=dict(
+            type='DetrTransformerDecoder',
+            return_intermediate=True,
+            num_layers=5,
+            transformerlayers=dict(
+                type='DetrTransformerDecoderLayer',
+                attn_cfgs=dict(
+                    type='MultiheadAttention',
+                    embed_dims=256,
+                    num_heads=8,
+                    attn_drop=0.0,
+                    proj_drop=0.0,
+                    dropout_layer=None,
+                    batch_first=False),
+                ffn_cfgs=dict(
+                    embed_dims=256,
+                    feedforward_channels=2048,  # change to 512
+                    num_fcs=2,
+                    act_cfg=dict(type='ReLU', inplace=True),
+                    ffn_drop=0.0,
+                    dropout_layer=None,
+                    add_identity=True),
+                feedforward_channels=2048,
+                operation_order=('self_attn', 'norm', 'cross_attn', 'norm',
+                                 'ffn', 'norm')),
+            init_cfg=None),
+        # Query
+        query_dim=256,
+        query_mlp_layers=3,
+
+        aux_loss_weight=1.,
+        loss_mask=dict(
+            type='FieryBinarySegmentationLoss',
+            use_top_k=True,
+            top_k_ratio=0.25,
+            future_discount=0.95,
+            loss_weight=5.0,
+            ignore_index=255,
+        ),
+        loss_dice=dict(
+            type='DiceLossWithMasks',
+            use_sigmoid=True,
+            activate=True,
+            reduction='mean',
+            naive_dice=True,
+            eps=1.0,
+            ignore_index=255,
+            loss_weight=1.0),
+
+        
+        pan_eval=True,
+        test_seg_thresh=0.1,
+        test_with_track_score=True,
+    ),
+    motion_head=dict(
+        type='MotionHead',
+        bev_h=bev_h_,
+        bev_w=bev_w_,
+        num_query=300,
+        num_classes=10,
+        predict_steps=predict_steps,
+        predict_modes=predict_modes,
+        embed_dims=_dim_,
+        loss_traj=dict(type='TrajLoss', 
+            use_variance=True, 
+            cls_loss_weight=0.5, 	
+            nll_loss_weight=0.5, 	
+            loss_weight_minade=0., 	
+            loss_weight_minfde=0.25),
+        num_cls_fcs=3,
+        pc_range=point_cloud_range,
+        group_id_list=group_id_list,
+        num_anchor=6,
+        use_nonlinear_optimizer=use_nonlinear_optimizer,
+        anchor_info_path='data/others/motion_anchor_infos_mode6.pkl',
+        transformerlayers=dict(
+            type='MotionTransformerDecoder',
+            pc_range=point_cloud_range,
+            embed_dims=_dim_,
+            num_layers=3,
+            transformerlayers=dict(
+                type='MotionTransformerAttentionLayer',
+                batch_first=True,
+                attn_cfgs=[
+                    dict(
+                        type='MotionDeformableAttention',
+                        num_steps=predict_steps,
+                        embed_dims=_dim_,
+                        num_levels=1,
+                        num_heads=8,
+                        num_points=4,
+                        sample_index=-1),
+                ],
+
+                feedforward_channels=_ffn_dim_,
+                ffn_dropout=0.1,
+                operation_order=('cross_attn', 'norm', 'ffn', 'norm')),
+        ),
+    ),
+    planning_head=dict(
+        type='PlanningHeadSingleMode',
+        embed_dims=256,
+        planning_steps=planning_steps,
+        loss_planning=dict(type='PlanningLoss'),
+        loss_collision=[dict(type='CollisionLoss', delta=0.0, weight=2.5),
+                        dict(type='CollisionLoss', delta=0.5, weight=1.0),
+                        dict(type='CollisionLoss', delta=1.0, weight=0.25)],
+        use_col_optim=use_col_optim,
+        planning_eval=True,
+        with_adapter=True,
+    ),
     # model training and testing settings
     train_cfg=dict(
         pts=dict(
@@ -402,8 +523,8 @@ train_pipeline = [
             "gt_offset", 
             "gt_flow",
             "gt_backward_flow",
-            "gt_occ_has_invalid_frame",
-            "gt_occ_img_is_valid",
+            "gt_occ_has_invalid_frame",	
+            "gt_occ_img_is_valid",	
             # gt future bbox for plan	
             "gt_future_boxes",	
             "gt_future_labels",	
@@ -420,16 +541,16 @@ test_pipeline = [
     dict(type="NormalizeMultiviewImage", **img_norm_cfg),
     dict(type="PadMultiViewImage", size_divisor=32),
     dict(type='LoadAnnotations3D_E2E', 
-         with_bbox_3d=False,  # NOTE: NO need for gt_bboxes and gt_labels for testing, only need occ_gt for evaluation
+         with_bbox_3d=False,
          with_label_3d=False, 
          with_attr_label=False,
 
-         with_future_anns=True,  # occ_flow gt
-         with_ins_inds_3d=False,  # No need to use matching in test
-         ins_inds_add_1=True,    # ins_inds start from 1
+         with_future_anns=True,
+         with_ins_inds_3d=False,
+         ins_inds_add_1=True, # ins_inds start from 1
          ),
     dict(type='GenerateOccFlowLabels', grid_conf=occflow_grid_conf, ignore_index=255, only_vehicle=True, 
-                                       filter_invisible=False),  # NOTE: Currently vis_token is not in pkl
+                                       filter_invisible=False),
     dict(
         type="MultiScaleFlipAug3D",
         img_scale=(1600, 900),
@@ -454,9 +575,9 @@ test_pipeline = [
                                             "gt_offset", 
                                             "gt_flow",
                                             "gt_backward_flow",
-                                            "gt_occ_has_invalid_frame",
-                                            "gt_occ_img_is_valid",
-                                             # planning	
+                                            "gt_occ_has_invalid_frame",	
+                                            "gt_occ_img_is_valid",	
+                                            # planning	
                                             "sdc_planning",	
                                             "sdc_planning_mask",	
                                             "command",
@@ -490,7 +611,7 @@ data = dict(
         occ_receptive_field=3,
         occ_n_future=occ_n_future_max,
         occ_filter_invalid_sample=False,
-
+        
         # we use box_type_3d='LiDAR' in kitti and nuscenes dataset
         # and box_type_3d='Depth' in sunrgbd and scannet dataset.
         box_type_3d="LiDAR",
@@ -511,7 +632,8 @@ data = dict(
         classes=class_names,
         modality=input_modality,
         samples_per_gpu=1,
-        eval_mod=['det', 'track', 'map'],
+        eval_mod=['det', 'map', 'track','motion'],
+        
 
         occ_receptive_field=3,
         occ_n_future=occ_n_future_max,
@@ -534,7 +656,7 @@ data = dict(
         use_nonlinear_optimizer=use_nonlinear_optimizer,
         classes=class_names,
         modality=input_modality,
-        eval_mod=['det', 'map', 'track'],
+        eval_mod=['det', 'map', 'track','motion'],
     ),
     shuffler_sampler=dict(type="DistributedGroupSampler"),
     nonshuffler_sampler=dict(type="DistributedSampler"),
@@ -558,13 +680,13 @@ lr_config = dict(
     warmup_ratio=1.0 / 3,
     min_lr_ratio=1e-3,
 )
-total_epochs = 6
-evaluation = dict(interval=1, pipeline=test_pipeline)
+total_epochs = 20
+evaluation = dict(interval=4, pipeline=test_pipeline)
 runner = dict(type="EpochBasedRunner", max_epochs=total_epochs)
 log_config = dict(
     interval=10, hooks=[dict(type="TextLoggerHook"), dict(type="TensorboardLoggerHook")]
 )
 checkpoint_config = dict(interval=1)
-load_from = "ckpts/bevformer_r101_dcn_24ep.pth"
+load_from = "ckpts/uniad_base_track_map.pth"
 
 find_unused_parameters = True

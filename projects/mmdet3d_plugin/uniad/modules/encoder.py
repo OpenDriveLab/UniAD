@@ -157,6 +157,7 @@ class BEVFormerEncoder(TransformerLayerSequence):
                 valid_ratios=None,
                 prev_bev=None,
                 shift=0.,
+                img_metas=None,
                 **kwargs):
         """Forward function for `TransformerDecoder`.
         Args:
@@ -176,62 +177,62 @@ class BEVFormerEncoder(TransformerLayerSequence):
                 return_intermediate is `False`, otherwise it has shape
                 [num_layers, num_query, bs, embed_dims].
         """
+        with torch.profiler.record_function("BEVFormerEncoder(TransformerDecoder)"):
+            output = bev_query
+            intermediate = []
 
-        output = bev_query
-        intermediate = []
+            ref_3d = self.get_reference_points(
+                bev_h, bev_w, self.pc_range[5]-self.pc_range[2], self.num_points_in_pillar, dim='3d', bs=bev_query.size(1),  device=bev_query.device, dtype=bev_query.dtype)
+            ref_2d = self.get_reference_points(
+                bev_h, bev_w, dim='2d', bs=bev_query.size(1), device=bev_query.device, dtype=bev_query.dtype)
 
-        ref_3d = self.get_reference_points(
-            bev_h, bev_w, self.pc_range[5]-self.pc_range[2], self.num_points_in_pillar, dim='3d', bs=bev_query.size(1),  device=bev_query.device, dtype=bev_query.dtype)
-        ref_2d = self.get_reference_points(
-            bev_h, bev_w, dim='2d', bs=bev_query.size(1), device=bev_query.device, dtype=bev_query.dtype)
+            reference_points_cam, bev_mask = self.point_sampling(
+                ref_3d, self.pc_range, img_metas)
 
-        reference_points_cam, bev_mask = self.point_sampling(
-            ref_3d, self.pc_range, kwargs['img_metas'])
+            # bug: this code should be 'shift_ref_2d = ref_2d.clone()', we keep this bug for reproducing our results in paper.
+            shift_ref_2d = ref_2d  # .clone()
+            shift_ref_2d += shift[:, None, None, :]
 
-        # bug: this code should be 'shift_ref_2d = ref_2d.clone()', we keep this bug for reproducing our results in paper.
-        shift_ref_2d = ref_2d  # .clone()
-        shift_ref_2d += shift[:, None, None, :]
+            # (num_query, bs, embed_dims) -> (bs, num_query, embed_dims)
+            bev_query = bev_query.permute(1, 0, 2)
+            bev_pos = bev_pos.permute(1, 0, 2)
+            bs, len_bev, num_bev_level, _ = ref_2d.shape
+            if prev_bev is not None:
+                prev_bev = prev_bev.permute(1, 0, 2)
+                prev_bev = torch.stack(
+                    [prev_bev, bev_query], 1).reshape(bs*2, len_bev, -1)
+                hybird_ref_2d = torch.stack([shift_ref_2d, ref_2d], 1).reshape(
+                    bs*2, len_bev, num_bev_level, 2)
+            else:
+                hybird_ref_2d = torch.stack([ref_2d, ref_2d], 1).reshape(
+                    bs*2, len_bev, num_bev_level, 2)
+            
+            for lid, layer in enumerate(self.layers):
+                output = layer(
+                    bev_query,
+                    key,
+                    value,
+                    *args,
+                    bev_pos=bev_pos,
+                    ref_2d=hybird_ref_2d,
+                    ref_3d=ref_3d,
+                    bev_h=bev_h,
+                    bev_w=bev_w,
+                    spatial_shapes=spatial_shapes,
+                    level_start_index=level_start_index,
+                    reference_points_cam=reference_points_cam,
+                    bev_mask=bev_mask,
+                    prev_bev=prev_bev,
+                    **kwargs)
 
-        # (num_query, bs, embed_dims) -> (bs, num_query, embed_dims)
-        bev_query = bev_query.permute(1, 0, 2)
-        bev_pos = bev_pos.permute(1, 0, 2)
-        bs, len_bev, num_bev_level, _ = ref_2d.shape
-        if prev_bev is not None:
-            prev_bev = prev_bev.permute(1, 0, 2)
-            prev_bev = torch.stack(
-                [prev_bev, bev_query], 1).reshape(bs*2, len_bev, -1)
-            hybird_ref_2d = torch.stack([shift_ref_2d, ref_2d], 1).reshape(
-                bs*2, len_bev, num_bev_level, 2)
-        else:
-            hybird_ref_2d = torch.stack([ref_2d, ref_2d], 1).reshape(
-                bs*2, len_bev, num_bev_level, 2)
+                bev_query = output
+                if self.return_intermediate:
+                    intermediate.append(output)
 
-        for lid, layer in enumerate(self.layers):
-            output = layer(
-                bev_query,
-                key,
-                value,
-                *args,
-                bev_pos=bev_pos,
-                ref_2d=hybird_ref_2d,
-                ref_3d=ref_3d,
-                bev_h=bev_h,
-                bev_w=bev_w,
-                spatial_shapes=spatial_shapes,
-                level_start_index=level_start_index,
-                reference_points_cam=reference_points_cam,
-                bev_mask=bev_mask,
-                prev_bev=prev_bev,
-                **kwargs)
-
-            bev_query = output
             if self.return_intermediate:
-                intermediate.append(output)
+                return torch.stack(intermediate)
 
-        if self.return_intermediate:
-            return torch.stack(intermediate)
-
-        return output
+            return output
 
 
 @TRANSFORMER_LAYER.register_module()
@@ -248,12 +249,12 @@ class BEVFormerLayer(MyCustomBaseTransformerLayer):
             in ffn. Default 0.0.
         operation_order (tuple[str]): The execution order of operation
             in transformer. Such as ('self_attn', 'norm', 'ffn', 'norm').
-            Default：None
+            Default: None
         act_cfg (dict): The activation config for FFNs. Default: `LN`
         norm_cfg (dict): Config dict for normalization layer.
             Default: `LN`.
         ffn_num_fcs (int): The number of fully-connected layers in FFNs.
-            Default：2.
+            Default: 2.
     """
 
     def __init__(self,
@@ -330,72 +331,74 @@ class BEVFormerLayer(MyCustomBaseTransformerLayer):
             Tensor: forwarded results with shape [num_queries, bs, embed_dims].
         """
 
-        norm_index = 0
-        attn_index = 0
-        ffn_index = 0
-        identity = query
-        if attn_masks is None:
-            attn_masks = [None for _ in range(self.num_attn)]
-        elif isinstance(attn_masks, torch.Tensor):
-            attn_masks = [
-                copy.deepcopy(attn_masks) for _ in range(self.num_attn)
-            ]
-            warnings.warn(f'Use same attn_mask in all attentions in '
-                          f'{self.__class__.__name__} ')
-        else:
-            assert len(attn_masks) == self.num_attn, f'The length of ' \
-                                                     f'attn_masks {len(attn_masks)} must be equal ' \
-                                                     f'to the number of attention in ' \
-                f'operation_order {self.num_attn}'
+        with torch.profiler.record_function("BEVFormerLayer(TransformerDecoderLayer)"):
 
-        for layer in self.operation_order:
-            # temporal self attention
-            if layer == 'self_attn':
+            norm_index = 0
+            attn_index = 0
+            ffn_index = 0
+            identity = query
+            if attn_masks is None:
+                attn_masks = [None for _ in range(self.num_attn)]
+            elif isinstance(attn_masks, torch.Tensor):
+                attn_masks = [
+                    copy.deepcopy(attn_masks) for _ in range(self.num_attn)
+                ]
+                warnings.warn(f'Use same attn_mask in all attentions in '
+                              f'{self.__class__.__name__} ')
+            else:
+                assert len(attn_masks) == self.num_attn, f'The length of ' \
+                                                         f'attn_masks {len(attn_masks)} must be equal ' \
+                                                         f'to the number of attention in ' \
+                    f'operation_order {self.num_attn}'
 
-                query = self.attentions[attn_index](
-                    query,
-                    prev_bev,
-                    prev_bev,
-                    identity if self.pre_norm else None,
-                    query_pos=bev_pos,
-                    key_pos=bev_pos,
-                    attn_mask=attn_masks[attn_index],
-                    key_padding_mask=query_key_padding_mask,
-                    reference_points=ref_2d,
-                    spatial_shapes=torch.tensor(
-                        [[bev_h, bev_w]], device=query.device),
-                    level_start_index=torch.tensor([0], device=query.device),
-                    **kwargs)
-                attn_index += 1
-                identity = query
+            for layer in self.operation_order:
+                # temporal self attention
+                if layer == 'self_attn':
 
-            elif layer == 'norm':
-                query = self.norms[norm_index](query)
-                norm_index += 1
+                    query = self.attentions[attn_index](
+                        query,
+                        prev_bev,
+                        prev_bev,
+                        identity if self.pre_norm else None,
+                        query_pos=bev_pos,
+                        key_pos=bev_pos,
+                        attn_mask=attn_masks[attn_index],
+                        key_padding_mask=query_key_padding_mask,
+                        reference_points=ref_2d,
+                        spatial_shapes=torch.tensor(
+                            [[bev_h, bev_w]], device=query.device),
+                        level_start_index=torch.tensor([0], device=query.device),
+                        **kwargs)
+                    attn_index += 1
+                    identity = query
 
-            # spaital cross attention
-            elif layer == 'cross_attn':
-                query = self.attentions[attn_index](
-                    query,
-                    key,
-                    value,
-                    identity if self.pre_norm else None,
-                    query_pos=query_pos,
-                    key_pos=key_pos,
-                    reference_points=ref_3d,
-                    reference_points_cam=reference_points_cam,
-                    mask=mask,
-                    attn_mask=attn_masks[attn_index],
-                    key_padding_mask=key_padding_mask,
-                    spatial_shapes=spatial_shapes,
-                    level_start_index=level_start_index,
-                    **kwargs)
-                attn_index += 1
-                identity = query
+                elif layer == 'norm':
+                    query = self.norms[norm_index](query)
+                    norm_index += 1
 
-            elif layer == 'ffn':
-                query = self.ffns[ffn_index](
-                    query, identity if self.pre_norm else None)
-                ffn_index += 1
+                # spaital cross attention
+                elif layer == 'cross_attn':
+                    query = self.attentions[attn_index](
+                        query,
+                        key,
+                        value,
+                        identity if self.pre_norm else None,
+                        query_pos=query_pos,
+                        key_pos=key_pos,
+                        reference_points=ref_3d,
+                        reference_points_cam=reference_points_cam,
+                        mask=mask,
+                        attn_mask=attn_masks[attn_index],
+                        key_padding_mask=key_padding_mask,
+                        spatial_shapes=spatial_shapes,
+                        level_start_index=level_start_index,
+                        **kwargs)
+                    attn_index += 1
+                    identity = query
 
-        return query
+                elif layer == 'ffn':
+                    query = self.ffns[ffn_index](
+                        query, identity if self.pre_norm else None)
+                    ffn_index += 1
+
+            return query

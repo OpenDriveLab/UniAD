@@ -210,9 +210,7 @@ class CVT_Decoder(BaseModule):
                 y = layer(y, x)
         
         y = rearrange(y, '(b t) c h w -> b t c h w', b=b, t=t)
-        out = dict()
-        out['decoded_feature'] = y
-        return out
+        return y
 
 
 # Conv modules

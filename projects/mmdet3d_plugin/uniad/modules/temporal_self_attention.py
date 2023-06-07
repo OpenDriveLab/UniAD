@@ -172,100 +172,93 @@ class TemporalSelfAttention(BaseModule):
         Returns:
              Tensor: forwarded results with shape [num_query, bs, embed_dims].
         """
+        with torch.profiler.record_function("MultiScaleDeformAttention"):
+            if value is None:
+                assert self.batch_first
+                bs, len_bev, c = query.shape
+                value = torch.stack([query, query], 1).reshape(bs*2, len_bev, c)
 
-        if value is None:
-            assert self.batch_first
-            bs, len_bev, c = query.shape
-            value = torch.stack([query, query], 1).reshape(bs*2, len_bev, c)
+            if identity is None:
+                identity = query
+            if query_pos is not None:
+                query = query + query_pos
+            if not self.batch_first:
+                # change to (bs, num_query ,embed_dims)
+                query = query.permute(1, 0, 2)
+                value = value.permute(1, 0, 2)
+            bs,  num_query, embed_dims = query.shape
+            _, num_value, _ = value.shape
+            assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
+            assert self.num_bev_queue == 2
 
-            # value = torch.cat([query, query], 0)
+            query = torch.cat([value[:bs], query], -1)
+            value = self.value_proj(value)
 
-        if identity is None:
-            identity = query
-        if query_pos is not None:
-            query = query + query_pos
-        if not self.batch_first:
-            # change to (bs, num_query ,embed_dims)
-            query = query.permute(1, 0, 2)
-            value = value.permute(1, 0, 2)
-        bs,  num_query, embed_dims = query.shape
-        _, num_value, _ = value.shape
-        assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
-        assert self.num_bev_queue == 2
+            if key_padding_mask is not None:
+                value = value.masked_fill(key_padding_mask[..., None], 0.0)
 
-        query = torch.cat([value[:bs], query], -1)
-        value = self.value_proj(value)
+            value = value.reshape(bs*self.num_bev_queue,
+                                num_value, self.num_heads, -1)
 
-        if key_padding_mask is not None:
-            value = value.masked_fill(key_padding_mask[..., None], 0.0)
+            sampling_offsets = self.sampling_offsets(query)
+            sampling_offsets = sampling_offsets.view(
+                bs, num_query, self.num_heads,  self.num_bev_queue, self.num_levels, self.num_points, 2)
+            attention_weights = self.attention_weights(query).view(
+                bs, num_query,  self.num_heads, self.num_bev_queue, self.num_levels * self.num_points)
+            attention_weights = attention_weights.softmax(-1)
 
-        value = value.reshape(bs*self.num_bev_queue,
-                              num_value, self.num_heads, -1)
+            attention_weights = attention_weights.view(bs, num_query,
+                                                    self.num_heads,
+                                                    self.num_bev_queue,
+                                                    self.num_levels,
+                                                    self.num_points)
 
-        sampling_offsets = self.sampling_offsets(query)
-        sampling_offsets = sampling_offsets.view(
-            bs, num_query, self.num_heads,  self.num_bev_queue, self.num_levels, self.num_points, 2)
-        attention_weights = self.attention_weights(query).view(
-            bs, num_query,  self.num_heads, self.num_bev_queue, self.num_levels * self.num_points)
-        attention_weights = attention_weights.softmax(-1)
+            attention_weights = attention_weights.permute(0, 3, 1, 2, 4, 5)\
+                .reshape(bs*self.num_bev_queue, num_query, self.num_heads, self.num_levels, self.num_points).contiguous()
+            sampling_offsets = sampling_offsets.permute(0, 3, 1, 2, 4, 5, 6)\
+                .reshape(bs*self.num_bev_queue, num_query, self.num_heads, self.num_levels, self.num_points, 2)
 
-        attention_weights = attention_weights.view(bs, num_query,
-                                                   self.num_heads,
-                                                   self.num_bev_queue,
-                                                   self.num_levels,
-                                                   self.num_points)
+            if reference_points.shape[-1] == 2:
+                offset_normalizer = torch.stack(
+                    [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
+                sampling_locations = reference_points[:, :, None, :, None, :] \
+                    + sampling_offsets \
+                    / offset_normalizer[None, None, None, :, None, :]
 
-        attention_weights = attention_weights.permute(0, 3, 1, 2, 4, 5)\
-            .reshape(bs*self.num_bev_queue, num_query, self.num_heads, self.num_levels, self.num_points).contiguous()
-        sampling_offsets = sampling_offsets.permute(0, 3, 1, 2, 4, 5, 6)\
-            .reshape(bs*self.num_bev_queue, num_query, self.num_heads, self.num_levels, self.num_points, 2)
-
-        if reference_points.shape[-1] == 2:
-            offset_normalizer = torch.stack(
-                [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
-            sampling_locations = reference_points[:, :, None, :, None, :] \
-                + sampling_offsets \
-                / offset_normalizer[None, None, None, :, None, :]
-
-        elif reference_points.shape[-1] == 4:
-            sampling_locations = reference_points[:, :, None, :, None, :2] \
-                + sampling_offsets / self.num_points \
-                * reference_points[:, :, None, :, None, 2:] \
-                * 0.5
-        else:
-            raise ValueError(
-                f'Last dim of reference_points must be'
-                f' 2 or 4, but get {reference_points.shape[-1]} instead.')
-        if torch.cuda.is_available() and value.is_cuda:
-
-            # using fp16 deformable attention is unstable because it performs many sum operations
-            if value.dtype == torch.float16:
-                MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+            elif reference_points.shape[-1] == 4:
+                sampling_locations = reference_points[:, :, None, :, None, :2] \
+                    + sampling_offsets / self.num_points \
+                    * reference_points[:, :, None, :, None, 2:] \
+                    * 0.5
             else:
-                MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
-            output = MultiScaleDeformableAttnFunction.apply(
-                value, spatial_shapes, level_start_index, sampling_locations,
-                attention_weights, self.im2col_step)
-        else:
+                raise ValueError(
+                    f'Last dim of reference_points must be'
+                    f' 2 or 4, but get {reference_points.shape[-1]} instead.')
+            if torch.cuda.is_available() and value.is_cuda:
 
-            output = multi_scale_deformable_attn_pytorch(
-                value, spatial_shapes, sampling_locations, attention_weights)
+                # using fp16 deformable attention is unstable because it performs many sum operations
+                if value.dtype == torch.float16:
+                    MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
+                else:
 
-        # output shape (bs*num_bev_queue, num_query, embed_dims)
-        # (bs*num_bev_queue, num_query, embed_dims)-> (num_query, embed_dims, bs*num_bev_queue)
-        output = output.permute(1, 2, 0)
+                    output = multi_scale_deformable_attn_pytorch(
+                        value, spatial_shapes, sampling_locations, attention_weights)
 
-        # fuse history value and current value
-        # (num_query, embed_dims, bs*num_bev_queue)-> (num_query, embed_dims, bs, num_bev_queue)
-        output = output.view(num_query, embed_dims, bs, self.num_bev_queue)
-        output = output.mean(-1)
+                # output shape (bs*num_bev_queue, num_query, embed_dims)
+                # (bs*num_bev_queue, num_query, embed_dims)-> (num_query, embed_dims, bs*num_bev_queue)
+                output = output.permute(1, 2, 0)
 
-        # (num_query, embed_dims, bs)-> (bs, num_query, embed_dims)
-        output = output.permute(2, 0, 1)
+                # fuse history value and current value
+                # (num_query, embed_dims, bs*num_bev_queue)-> (num_query, embed_dims, bs, num_bev_queue)
+                output = output.view(num_query, embed_dims, bs, self.num_bev_queue)
+                output = output.mean(-1)
 
-        output = self.output_proj(output)
+                # (num_query, embed_dims, bs)-> (bs, num_query, embed_dims)
+                output = output.permute(2, 0, 1)
 
-        if not self.batch_first:
-            output = output.permute(1, 0, 2)
+                output = self.output_proj(output)
 
-        return self.dropout(output) + identity
+                if not self.batch_first:
+                    output = output.permute(1, 0, 2)
+
+                return self.dropout(output) + identity

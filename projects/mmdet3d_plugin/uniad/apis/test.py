@@ -46,7 +46,7 @@ def custom_encode_mask_results(mask_results):
 
 
 @torch.no_grad()
-def gpu_profile_one_batch(model, data_loader, index, step=20, worker_num=1):
+def gpu_profile_one_batch(model, data_loader, index, step=5, worker_num=1):
     start_index = index * step
 
     dataset = data_loader.dataset
@@ -67,7 +67,7 @@ def gpu_profile_one_batch(model, data_loader, index, step=20, worker_num=1):
 
     # tfb_writer = SummaryWriter(profile_path)
     # tfb_writer.add_graph(model, inputs)
-    warmup_iters = 10
+    warmup_iters = 2
     wait_iters = 2
     batch_num = len(data_loader)
     num_iters = step - wait_iters - warmup_iters
@@ -208,7 +208,6 @@ def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
 
             # Eval Occ
             if eval_occ:
-                # TODO: change occ_has_invalid_frame  to occ_future_has_invalid_frame
                 occ_has_invalid_frame = data['gt_occ_has_invalid_frame'][0]
                 occ_to_eval = not occ_has_invalid_frame.item()
                 if occ_to_eval and 'occ' in result[0].keys():
@@ -225,7 +224,7 @@ def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
                 result[0].pop('occ', None)
                 result[0].pop('planning', None)
             else:
-                for k in ['seg_gt', 'ins_seg_gt', 'topk_query_ins_segs', 'seg_out', 'ins_seg_out']:
+                for k in ['seg_gt', 'ins_seg_gt', 'pred_ins_sigmoid', 'seg_out', 'ins_seg_out']:
                     if k in result[0]['occ']:
                         result[0]['occ'][k] = result[0]['occ'][k].detach().cpu()
                 for k in ['bbox', 'segm', 'labels', 'panoptic', 'drivable', 'score_list', 'lane', 'lane_score', 'stuff_score_list']:
