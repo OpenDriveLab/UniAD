@@ -17,15 +17,18 @@ class RuntimeTrackerBase(object):
     def update(self, track_instances: Instances, iou_thre=None):
         with torch.profiler.record_function("RuntimneTrackerBase-update"):
             track_instances.disappear_time[track_instances.scores >= self.score_thresh] = 0
+            # print("There are {} track instances".format(len(track_instances)))
+            # There are 910 instances
             for i in range(len(track_instances)):
                 if (
                     track_instances.obj_idxes[i] == -1
                     and track_instances.scores[i] >= self.score_thresh
                 ):  
-                    if iou_thre is not None and track_instances.pred_boxes[track_instances.obj_idxes>=0].shape[0]!=0:
-                        iou3ds = iou_3d(denormalize_bbox(track_instances.pred_boxes[i].unsqueeze(0), None)[...,:7], denormalize_bbox(track_instances.pred_boxes[track_instances.obj_idxes>=0], None)[...,:7])
-                        if iou3ds.max()>iou_thre:
-                            continue
+                    with torch.profiler.record_function("compute_iou"):
+                        if iou_thre is not None and track_instances.pred_boxes[track_instances.obj_idxes>=0].shape[0]!=0:
+                            iou3ds = iou_3d(denormalize_bbox(track_instances.pred_boxes[i].unsqueeze(0), None)[...,:7], denormalize_bbox(track_instances.pred_boxes[track_instances.obj_idxes>=0], None)[...,:7])
+                            if iou3ds.max()>iou_thre:
+                                continue
                     # new track
                     # print("track {} has score {}, assign obj_id {}".format(i, track_instances.scores[i], self.max_obj_id))
                     track_instances.obj_idxes[i] = self.max_obj_id

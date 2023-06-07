@@ -1,468 +1,55 @@
-roject.0.weight, occ_head.base_downscale.0.layers.abn_down_project.0.bias, occ_head.base_do
-wnscale.0.layers.abn_down_project.0.running_mean, occ_head.base_downscale.0.layers.abn_down
-_project.0.running_var, occ_head.base_downscale.0.layers.abn_down_project.0.num_batches_tra
-cked, occ_head.base_downscale.0.layers.conv.weight, occ_head.base_downscale.0.layers.abn.0.
-weight, occ_head.base_downscale.0.layers.abn.0.bias, occ_head.base_downscale.0.layers.abn.0
-.running_mean, occ_head.base_downscale.0.layers.abn.0.running_var, occ_head.base_downscale.
-0.layers.abn.0.num_batches_tracked, occ_head.base_downscale.0.layers.conv_up_project.weight
-, occ_head.base_downscale.0.layers.abn_up_project.0.weight, occ_head.base_downscale.0.layer
-s.abn_up_project.0.bias, occ_head.base_downscale.0.layers.abn_up_project.0.running_mean, oc
-c_head.base_downscale.0.layers.abn_up_project.0.running_var, occ_head.base_downscale.0.laye
-rs.abn_up_project.0.num_batches_tracked, occ_head.base_downscale.0.projection.conv_skip_pro
-j.weight, occ_head.base_downscale.0.projection.bn_skip_proj.weight, occ_head.base_downscale
-.0.projection.bn_skip_proj.bias, occ_head.base_downscale.0.projection.bn_skip_proj.running_
-mean, occ_head.base_downscale.0.projection.bn_skip_proj.running_var, occ_head.base_downscal
-e.0.projection.bn_skip_proj.num_batches_tracked, occ_head.base_downscale.1.layers.conv_down
-_project.weight, occ_head.base_downscale.1.layers.abn_down_project.0.weight, occ_head.base_
-downscale.1.layers.abn_down_project.0.bias, occ_head.base_downscale.1.layers.abn_down_proje
-ct.0.running_mean, occ_head.base_downscale.1.layers.abn_down_project.0.running_var, occ_hea
-d.base_downscale.1.layers.abn_down_project.0.num_batches_tracked, occ_head.base_downscale.1
-.layers.conv.weight, occ_head.base_downscale.1.layers.abn.0.weight, occ_head.base_downscale
-.1.layers.abn.0.bias, occ_head.base_downscale.1.layers.abn.0.running_mean, occ_head.base_do
-wnscale.1.layers.abn.0.running_var, occ_head.base_downscale.1.layers.abn.0.num_batches_trac
-ked, occ_head.base_downscale.1.layers.conv_up_project.weight, occ_head.base_downscale.1.lay
-ers.abn_up_project.0.weight, occ_head.base_downscale.1.layers.abn_up_project.0.bias, occ_he
-ad.base_downscale.1.layers.abn_up_project.0.running_mean, occ_head.base_downscale.1.layers.
-abn_up_project.0.running_var, occ_head.base_downscale.1.layers.abn_up_project.0.num_batches
-_tracked, occ_head.base_downscale.1.projection.conv_skip_proj.weight, occ_head.base_downsca
-le.1.projection.bn_skip_proj.weight, occ_head.base_downscale.1.projection.bn_skip_proj.bias
-, occ_head.base_downscale.1.projection.bn_skip_proj.running_mean, occ_head.base_downscale.1
-.projection.bn_skip_proj.running_var, occ_head.base_downscale.1.projection.bn_skip_proj.num
-_batches_tracked, occ_head.transformer_decoder.layers.0.attentions.0.attn.in_proj_weight, o
-cc_head.transformer_decoder.layers.0.attentions.0.attn.in_proj_bias, occ_head.transformer_d
-ecoder.layers.0.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.0.at
-tentions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.0.attentions.1.attn.in_p
-roj_weight, occ_head.transformer_decoder.layers.0.attentions.1.attn.in_proj_bias, occ_head.
-transformer_decoder.layers.0.attentions.1.attn.out_proj.weight, occ_head.transformer_decode
-r.layers.0.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.0.ffns.0.la
-yers.0.0.weight, occ_head.transformer_decoder.layers.0.ffns.0.layers.0.0.bias, occ_head.tra
-nsformer_decoder.layers.0.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.0.ffn
-s.0.layers.1.bias, occ_head.transformer_decoder.layers.0.norms.0.weight, occ_head.transform
-er_decoder.layers.0.norms.0.bias, occ_head.transformer_decoder.layers.0.norms.1.weight, occ
-_head.transformer_decoder.layers.0.norms.1.bias, occ_head.transformer_decoder.layers.0.norm
-s.2.weight, occ_head.transformer_decoder.layers.0.norms.2.bias, occ_head.transformer_decode
-r.layers.1.attentions.0.attn.in_proj_weight, occ_head.transformer_decoder.layers.1.attentio
-ns.0.attn.in_proj_bias, occ_head.transformer_decoder.layers.1.attentions.0.attn.out_proj.we
-ight, occ_head.transformer_decoder.layers.1.attentions.0.attn.out_proj.bias, occ_head.trans
-former_decoder.layers.1.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.laye
-rs.1.attentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.1.attentions.1.att
-n.out_proj.weight, occ_head.transformer_decoder.layers.1.attentions.1.attn.out_proj.bias, o
-cc_head.transformer_decoder.layers.1.ffns.0.layers.0.0.weight, occ_head.transformer_decoder
-.layers.1.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.layers.1.ffns.0.layers.1.wei
-ght, occ_head.transformer_decoder.layers.1.ffns.0.layers.1.bias, occ_head.transformer_decod
-er.layers.1.norms.0.weight, occ_head.transformer_decoder.layers.1.norms.0.bias, occ_head.tr
-ansformer_decoder.layers.1.norms.1.weight, occ_head.transformer_decoder.layers.1.norms.1.bi
-as, occ_head.transformer_decoder.layers.1.norms.2.weight, occ_head.transformer_decoder.laye
-rs.1.norms.2.bias, occ_head.transformer_decoder.layers.2.attentions.0.attn.in_proj_weight,
-occ_head.transformer_decoder.layers.2.attentions.0.attn.in_proj_bias, occ_head.transformer_
-decoder.layers.2.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.2.a
-ttentions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.2.attentions.1.attn.in_
-proj_weight, occ_head.transformer_decoder.layers.2.attentions.1.attn.in_proj_bias, occ_head
-.transformer_decoder.layers.2.attentions.1.attn.out_proj.weight, occ_head.transformer_decod
-er.layers.2.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.2.ffns.0.l
-ayers.0.0.weight, occ_head.transformer_decoder.layers.2.ffns.0.layers.0.0.bias, occ_head.tr
-ansformer_decoder.layers.2.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.2.ff
-ns.0.layers.1.bias, occ_head.transformer_decoder.layers.2.norms.0.weight, occ_head.transfor
-mer_decoder.layers.2.norms.0.bias, occ_head.transformer_decoder.layers.2.norms.1.weight, oc
-c_head.transformer_decoder.layers.2.norms.1.bias, occ_head.transformer_decoder.layers.2.nor
-ms.2.weight, occ_head.transformer_decoder.layers.2.norms.2.bias, occ_head.transformer_decod
-er.layers.3.attentions.0.attn.in_proj_weight, occ_head.transformer_decoder.layers.3.attenti
-ons.0.attn.in_proj_bias, occ_head.transformer_decoder.layers.3.attentions.0.attn.out_proj.w
-eight, occ_head.transformer_decoder.layers.3.attentions.0.attn.out_proj.bias, occ_head.tran
-sformer_decoder.layers.3.attentions.1.attn.in_proj_weight, occ_head.transformer_decoder.lay
-ers.3.attentions.1.attn.in_proj_bias, occ_head.transformer_decoder.layers.3.attentions.1.at
-tn.out_proj.weight, occ_head.transformer_decoder.layers.3.attentions.1.attn.out_proj.bias,
-occ_head.transformer_decoder.layers.3.ffns.0.layers.0.0.weight, occ_head.transformer_decode
-r.layers.3.ffns.0.layers.0.0.bias, occ_head.transformer_decoder.layers.3.ffns.0.layers.1.we
-ight, occ_head.transformer_decoder.layers.3.ffns.0.layers.1.bias, occ_head.transformer_deco
-der.layers.3.norms.0.weight, occ_head.transformer_decoder.layers.3.norms.0.bias, occ_head.t
-ransformer_decoder.layers.3.norms.1.weight, occ_head.transformer_decoder.layers.3.norms.1.b
-ias, occ_head.transformer_decoder.layers.3.norms.2.weight, occ_head.transformer_decoder.lay
-ers.3.norms.2.bias, occ_head.transformer_decoder.layers.4.attentions.0.attn.in_proj_weight,
- occ_head.transformer_decoder.layers.4.attentions.0.attn.in_proj_bias, occ_head.transformer
-_decoder.layers.4.attentions.0.attn.out_proj.weight, occ_head.transformer_decoder.layers.4.
-attentions.0.attn.out_proj.bias, occ_head.transformer_decoder.layers.4.attentions.1.attn.in
-_proj_weight, occ_head.transformer_decoder.layers.4.attentions.1.attn.in_proj_bias, occ_hea
-d.transformer_decoder.layers.4.attentions.1.attn.out_proj.weight, occ_head.transformer_deco
-der.layers.4.attentions.1.attn.out_proj.bias, occ_head.transformer_decoder.layers.4.ffns.0.
-layers.0.0.weight, occ_head.transformer_decoder.layers.4.ffns.0.layers.0.0.bias, occ_head.t
-ransformer_decoder.layers.4.ffns.0.layers.1.weight, occ_head.transformer_decoder.layers.4.f
-fns.0.layers.1.bias, occ_head.transformer_decoder.layers.4.norms.0.weight, occ_head.transfo
-rmer_decoder.layers.4.norms.0.bias, occ_head.transformer_decoder.layers.4.norms.1.weight, o
-cc_head.transformer_decoder.layers.4.norms.1.bias, occ_head.transformer_decoder.layers.4.no
-rms.2.weight, occ_head.transformer_decoder.layers.4.norms.2.bias, occ_head.transformer_deco
-der.post_norm.weight, occ_head.transformer_decoder.post_norm.bias, occ_head.temporal_mlps.0
-.layers.0.weight, occ_head.temporal_mlps.0.layers.0.bias, occ_head.temporal_mlps.0.layers.1
-.weight, occ_head.temporal_mlps.0.layers.1.bias, occ_head.temporal_mlps.1.layers.0.weight,
-occ_head.temporal_mlps.1.layers.0.bias, occ_head.temporal_mlps.1.layers.1.weight, occ_head.
-temporal_mlps.1.layers.1.bias, occ_head.temporal_mlps.2.layers.0.weight, occ_head.temporal_
-mlps.2.layers.0.bias, occ_head.temporal_mlps.2.layers.1.weight, occ_head.temporal_mlps.2.la
-yers.1.bias, occ_head.temporal_mlps.3.layers.0.weight, occ_head.temporal_mlps.3.layers.0.bi
-as, occ_head.temporal_mlps.3.layers.1.weight, occ_head.temporal_mlps.3.layers.1.bias, occ_h
-ead.temporal_mlps.4.layers.0.weight, occ_head.temporal_mlps.4.layers.0.bias, occ_head.tempo
-ral_mlps.4.layers.1.weight, occ_head.temporal_mlps.4.layers.1.bias, occ_head.downscale_conv
-s.0.layers.conv_down_project.weight, occ_head.downscale_convs.0.layers.abn_down_project.0.w
-eight, occ_head.downscale_convs.0.layers.abn_down_project.0.bias, occ_head.downscale_convs.
-0.layers.abn_down_project.0.running_mean, occ_head.downscale_convs.0.layers.abn_down_projec
-t.0.running_var, occ_head.downscale_convs.0.layers.abn_down_project.0.num_batches_tracked,
-occ_head.downscale_convs.0.layers.conv.weight, occ_head.downscale_convs.0.layers.abn.0.weig
-ht, occ_head.downscale_convs.0.layers.abn.0.bias, occ_head.downscale_convs.0.layers.abn.0.r
-unning_mean, occ_head.downscale_convs.0.layers.abn.0.running_var, occ_head.downscale_convs.
-0.layers.abn.0.num_batches_tracked, occ_head.downscale_convs.0.layers.conv_up_project.weigh
-t, occ_head.downscale_convs.0.layers.abn_up_project.0.weight, occ_head.downscale_convs.0.la
-yers.abn_up_project.0.bias, occ_head.downscale_convs.0.layers.abn_up_project.0.running_mean
-, occ_head.downscale_convs.0.layers.abn_up_project.0.running_var, occ_head.downscale_convs.
-0.layers.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.0.projection.conv_s
-kip_proj.weight, occ_head.downscale_convs.0.projection.bn_skip_proj.weight, occ_head.downsc
-ale_convs.0.projection.bn_skip_proj.bias, occ_head.downscale_convs.0.projection.bn_skip_pro
-j.running_mean, occ_head.downscale_convs.0.projection.bn_skip_proj.running_var, occ_head.do
-wnscale_convs.0.projection.bn_skip_proj.num_batches_tracked, occ_head.downscale_convs.1.lay
-ers.conv_down_project.weight, occ_head.downscale_convs.1.layers.abn_down_project.0.weight,
-occ_head.downscale_convs.1.layers.abn_down_project.0.bias, occ_head.downscale_convs.1.layer
-s.abn_down_project.0.running_mean, occ_head.downscale_convs.1.layers.abn_down_project.0.run
-ning_var, occ_head.downscale_convs.1.layers.abn_down_project.0.num_batches_tracked, occ_hea
-d.downscale_convs.1.layers.conv.weight, occ_head.downscale_convs.1.layers.abn.0.weight, occ
-_head.downscale_convs.1.layers.abn.0.bias, occ_head.downscale_convs.1.layers.abn.0.running_
-mean, occ_head.downscale_convs.1.layers.abn.0.running_var, occ_head.downscale_convs.1.layer
-s.abn.0.num_batches_tracked, occ_head.downscale_convs.1.layers.conv_up_project.weight, occ_
-head.downscale_convs.1.layers.abn_up_project.0.weight, occ_head.downscale_convs.1.layers.ab
-n_up_project.0.bias, occ_head.downscale_convs.1.layers.abn_up_project.0.running_mean, occ_h
-ead.downscale_convs.1.layers.abn_up_project.0.running_var, occ_head.downscale_convs.1.layer
-s.abn_up_project.0.num_batches_tracked, occ_head.downscale_convs.1.projection.conv_skip_pro
-j.weight, occ_head.downscale_convs.1.projection.bn_skip_proj.weight, occ_head.downscale_con
-vs.1.projection.bn_skip_proj.bias, occ_head.downscale_convs.1.projection.bn_skip_proj.runni
-ng_mean, occ_head.downscale_convs.1.projection.bn_skip_proj.running_var, occ_head.downscale
-_convs.1.projection.bn_skip_proj.num_batches_tracked, occ_head.downscale_convs.2.layers.con
-v_down_project.weight, occ_head.downscale_convs.2.layers.abn_down_project.0.weight, occ_hea
-d.downscale_convs.2.layers.abn_down_project.0.bias, occ_head.downscale_convs.2.layers.abn_d
-own_project.0.running_mean, occ_head.downscale_convs.2.layers.abn_down_project.0.running_va
-r, occ_head.downscale_convs.2.layers.abn_down_project.0.num_batches_tracked, occ_head.downs
-cale_convs.2.layers.conv.weight, occ_head.downscale_convs.2.layers.abn.0.weight, occ_head.d
-ownscale_convs.2.layers.abn.0.bias, occ_head.downscale_convs.2.layers.abn.0.running_mean, o
-cc_head.downscale_convs.2.layers.abn.0.running_var, occ_head.downscale_convs.2.layers.abn.0
-.num_batches_tracked, occ_head.downscale_convs.2.layers.conv_up_project.weight, occ_head.do
-wnscale_convs.2.layers.abn_up_project.0.weight, occ_head.downscale_convs.2.layers.abn_up_pr
-oject.0.bias, occ_head.downscale_convs.2.layers.abn_up_project.0.running_mean, occ_head.dow
-nscale_convs.2.layers.abn_up_project.0.running_var, occ_head.downscale_convs.2.layers.abn_u
-p_project.0.num_batches_tracked, occ_head.downscale_convs.2.projection.conv_skip_proj.weigh
-t, occ_head.downscale_convs.2.projection.bn_skip_proj.weight, occ_head.downscale_convs.2.pr
-ojection.bn_skip_proj.bias, occ_head.downscale_convs.2.projection.bn_skip_proj.running_mean
-, occ_head.downscale_convs.2.projection.bn_skip_proj.running_var, occ_head.downscale_convs.
-2.projection.bn_skip_proj.num_batches_tracked, occ_head.downscale_convs.3.layers.conv_down_
-project.weight, occ_head.downscale_convs.3.layers.abn_down_project.0.weight, occ_head.downs
-cale_convs.3.layers.abn_down_project.0.bias, occ_head.downscale_convs.3.layers.abn_down_pro
-ject.0.running_mean, occ_head.downscale_convs.3.layers.abn_down_project.0.running_var, occ_
-head.downscale_convs.3.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_co
-nvs.3.layers.conv.weight, occ_head.downscale_convs.3.layers.abn.0.weight, occ_head.downscal
-e_convs.3.layers.abn.0.bias, occ_head.downscale_convs.3.layers.abn.0.running_mean, occ_head
-.downscale_convs.3.layers.abn.0.running_var, occ_head.downscale_convs.3.layers.abn.0.num_ba
-tches_tracked, occ_head.downscale_convs.3.layers.conv_up_project.weight, occ_head.downscale
-_convs.3.layers.abn_up_project.0.weight, occ_head.downscale_convs.3.layers.abn_up_project.0
-.bias, occ_head.downscale_convs.3.layers.abn_up_project.0.running_mean, occ_head.downscale_
-convs.3.layers.abn_up_project.0.running_var, occ_head.downscale_convs.3.layers.abn_up_proje
-ct.0.num_batches_tracked, occ_head.downscale_convs.3.projection.conv_skip_proj.weight, occ_
-head.downscale_convs.3.projection.bn_skip_proj.weight, occ_head.downscale_convs.3.projectio
-n.bn_skip_proj.bias, occ_head.downscale_convs.3.projection.bn_skip_proj.running_mean, occ_h
-ead.downscale_convs.3.projection.bn_skip_proj.running_var, occ_head.downscale_convs.3.proje
-ction.bn_skip_proj.num_batches_tracked, occ_head.downscale_convs.4.layers.conv_down_project
-.weight, occ_head.downscale_convs.4.layers.abn_down_project.0.weight, occ_head.downscale_co
-nvs.4.layers.abn_down_project.0.bias, occ_head.downscale_convs.4.layers.abn_down_project.0.
-running_mean, occ_head.downscale_convs.4.layers.abn_down_project.0.running_var, occ_head.do
-wnscale_convs.4.layers.abn_down_project.0.num_batches_tracked, occ_head.downscale_convs.4.l
-ayers.conv.weight, occ_head.downscale_convs.4.layers.abn.0.weight, occ_head.downscale_convs
-.4.layers.abn.0.bias, occ_head.downscale_convs.4.layers.abn.0.running_mean, occ_head.downsc
-ale_convs.4.layers.abn.0.running_var, occ_head.downscale_convs.4.layers.abn.0.num_batches_t
-racked, occ_head.downscale_convs.4.layers.conv_up_project.weight, occ_head.downscale_convs.
-4.layers.abn_up_project.0.weight, occ_head.downscale_convs.4.layers.abn_up_project.0.bias,
-occ_head.downscale_convs.4.layers.abn_up_project.0.running_mean, occ_head.downscale_convs.4
-.layers.abn_up_project.0.running_var, occ_head.downscale_convs.4.layers.abn_up_project.0.nu
-m_batches_tracked, occ_head.downscale_convs.4.projection.conv_skip_proj.weight, occ_head.do
-wnscale_convs.4.projection.bn_skip_proj.weight, occ_head.downscale_convs.4.projection.bn_sk
-ip_proj.bias, occ_head.downscale_convs.4.projection.bn_skip_proj.running_mean, occ_head.dow
-nscale_convs.4.projection.bn_skip_proj.running_var, occ_head.downscale_convs.4.projection.b
-n_skip_proj.num_batches_tracked, occ_head.upsample_adds.0.upsample_layer.1.weight, occ_head
-.upsample_adds.0.upsample_layer.2.weight, occ_head.upsample_adds.0.upsample_layer.2.bias, o
-cc_head.upsample_adds.0.upsample_layer.2.running_mean, occ_head.upsample_adds.0.upsample_la
-yer.2.running_var, occ_head.upsample_adds.0.upsample_layer.2.num_batches_tracked, occ_head.
-upsample_adds.1.upsample_layer.1.weight, occ_head.upsample_adds.1.upsample_layer.2.weight,
-occ_head.upsample_adds.1.upsample_layer.2.bias, occ_head.upsample_adds.1.upsample_layer.2.r
-unning_mean, occ_head.upsample_adds.1.upsample_layer.2.running_var, occ_head.upsample_adds.
-1.upsample_layer.2.num_batches_tracked, occ_head.upsample_adds.2.upsample_layer.1.weight, o
-cc_head.upsample_adds.2.upsample_layer.2.weight, occ_head.upsample_adds.2.upsample_layer.2.
-bias, occ_head.upsample_adds.2.upsample_layer.2.running_mean, occ_head.upsample_adds.2.upsa
-mple_layer.2.running_var, occ_head.upsample_adds.2.upsample_layer.2.num_batches_tracked, oc
-c_head.upsample_adds.3.upsample_layer.1.weight, occ_head.upsample_adds.3.upsample_layer.2.w
-eight, occ_head.upsample_adds.3.upsample_layer.2.bias, occ_head.upsample_adds.3.upsample_la
-yer.2.running_mean, occ_head.upsample_adds.3.upsample_layer.2.running_var, occ_head.upsampl
-e_adds.3.upsample_layer.2.num_batches_tracked, occ_head.upsample_adds.4.upsample_layer.1.we
-ight, occ_head.upsample_adds.4.upsample_layer.2.weight, occ_head.upsample_adds.4.upsample_l
-ayer.2.bias, occ_head.upsample_adds.4.upsample_layer.2.running_mean, occ_head.upsample_adds
-.4.upsample_layer.2.running_var, occ_head.upsample_adds.4.upsample_layer.2.num_batches_trac
-ked, occ_head.dense_decoder.layers.0.conv.1.weight, occ_head.dense_decoder.layers.0.conv.2.
-weight, occ_head.dense_decoder.layers.0.conv.2.bias, occ_head.dense_decoder.layers.0.conv.2
-.running_mean, occ_head.dense_decoder.layers.0.conv.2.running_var, occ_head.dense_decoder.l
-ayers.0.conv.2.num_batches_tracked, occ_head.dense_decoder.layers.0.conv.4.weight, occ_head
-.dense_decoder.layers.0.conv.5.weight, occ_head.dense_decoder.layers.0.conv.5.bias, occ_hea
-d.dense_decoder.layers.0.conv.5.running_mean, occ_head.dense_decoder.layers.0.conv.5.runnin
-g_var, occ_head.dense_decoder.layers.0.conv.5.num_batches_tracked, occ_head.dense_decoder.l
-ayers.0.up.weight, occ_head.dense_decoder.layers.0.up.bias, occ_head.dense_decoder.layers.1
-.conv.1.weight, occ_head.dense_decoder.layers.1.conv.2.weight, occ_head.dense_decoder.layer
-s.1.conv.2.bias, occ_head.dense_decoder.layers.1.conv.2.running_mean, occ_head.dense_decode
-r.layers.1.conv.2.running_var, occ_head.dense_decoder.layers.1.conv.2.num_batches_tracked,
-occ_head.dense_decoder.layers.1.conv.4.weight, occ_head.dense_decoder.layers.1.conv.5.weigh
-t, occ_head.dense_decoder.layers.1.conv.5.bias, occ_head.dense_decoder.layers.1.conv.5.runn
-ing_mean, occ_head.dense_decoder.layers.1.conv.5.running_var, occ_head.dense_decoder.layers
-.1.conv.5.num_batches_tracked, occ_head.dense_decoder.layers.1.up.weight, occ_head.dense_de
-coder.layers.1.up.bias, occ_head.mode_fuser.0.weight, occ_head.mode_fuser.0.bias, occ_head.
-mode_fuser.1.weight, occ_head.mode_fuser.1.bias, occ_head.multi_query_fuser.0.weight, occ_h
-ead.multi_query_fuser.0.bias, occ_head.multi_query_fuser.1.weight, occ_head.multi_query_fus
-er.1.bias, occ_head.multi_query_fuser.3.weight, occ_head.multi_query_fuser.3.bias, occ_head
-.query_to_occ_feat.layers.0.weight, occ_head.query_to_occ_feat.layers.0.bias, occ_head.quer
-y_to_occ_feat.layers.1.weight, occ_head.query_to_occ_feat.layers.1.bias, occ_head.query_to_
-occ_feat.layers.2.weight, occ_head.query_to_occ_feat.layers.2.bias, motion_head.learnable_m
-otion_query_embedding.weight, motion_head.deep_interact.intention_interaction_layers.intera
-ction_transformer.self_attn.in_proj_weight, motion_head.deep_interact.intention_interaction
-_layers.interaction_transformer.self_attn.in_proj_bias, motion_head.deep_interact.intention
-_interaction_layers.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_int
-eract.intention_interaction_layers.interaction_transformer.self_attn.out_proj.bias, motion_
-head.deep_interact.intention_interaction_layers.interaction_transformer.linear1.weight, mot
-ion_head.deep_interact.intention_interaction_layers.interaction_transformer.linear1.bias, m
-otion_head.deep_interact.intention_interaction_layers.interaction_transformer.linear2.weigh
-t, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.linear2.b
-ias, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.norm1.w
-eight, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.norm1
-.bias, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.norm2
-.weight, motion_head.deep_interact.intention_interaction_layers.interaction_transformer.nor
-m2.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer
-.self_attn.in_proj_weight, motion_head.deep_interact.track_agent_interaction_layers.0.inter
-action_transformer.self_attn.in_proj_bias, motion_head.deep_interact.track_agent_interactio
-n_layers.0.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact.tra
-ck_agent_interaction_layers.0.interaction_transformer.self_attn.out_proj.bias, motion_head.
-deep_interact.track_agent_interaction_layers.0.interaction_transformer.multihead_attn.in_pr
-oj_weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transform
-er.multihead_attn.in_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.0.
-interaction_transformer.multihead_attn.out_proj.weight, motion_head.deep_interact.track_age
-nt_interaction_layers.0.interaction_transformer.multihead_attn.out_proj.bias, motion_head.d
-eep_interact.track_agent_interaction_layers.0.interaction_transformer.linear1.weight, motio
-n_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer.linear1.bias,
- motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer.linear2
-.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_transformer
-.linear2.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interaction_trans
-former.norm1.weight, motion_head.deep_interact.track_agent_interaction_layers.0.interaction
-_transformer.norm1.bias, motion_head.deep_interact.track_agent_interaction_layers.0.interac
-tion_transformer.norm2.weight, motion_head.deep_interact.track_agent_interaction_layers.0.i
-nteraction_transformer.norm2.bias, motion_head.deep_interact.track_agent_interaction_layers
-.0.interaction_transformer.norm3.weight, motion_head.deep_interact.track_agent_interaction_
-layers.0.interaction_transformer.norm3.bias, motion_head.deep_interact.track_agent_interact
-ion_layers.1.interaction_transformer.self_attn.in_proj_weight, motion_head.deep_interact.tr
-ack_agent_interaction_layers.1.interaction_transformer.self_attn.in_proj_bias, motion_head.
-deep_interact.track_agent_interaction_layers.1.interaction_transformer.self_attn.out_proj.w
-eight, motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.s
-elf_attn.out_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interact
-ion_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact.track_agent_intera
-ction_layers.1.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep_intera
-ct.track_agent_interaction_layers.1.interaction_transformer.multihead_attn.out_proj.weight,
- motion_head.deep_interact.track_agent_interaction_layers.1.interaction_transformer.multihe
-ad_attn.out_proj.bias, motion_head.deep_interact.track_agent_interaction_layers.1.interacti
-on_transformer.linear1.weight, motion_head.deep_interact.track_agent_interaction_layers.1.i
-nteraction_transformer.linear1.bias, motion_head.deep_interact.track_agent_interaction_laye
-rs.1.interaction_transformer.linear2.weight, motion_head.deep_interact.track_agent_interact
-ion_layers.1.interaction_transformer.linear2.bias, motion_head.deep_interact.track_agent_in
-teraction_layers.1.interaction_transformer.norm1.weight, motion_head.deep_interact.track_ag
-ent_interaction_layers.1.interaction_transformer.norm1.bias, motion_head.deep_interact.trac
-k_agent_interaction_layers.1.interaction_transformer.norm2.weight, motion_head.deep_interac
-t.track_agent_interaction_layers.1.interaction_transformer.norm2.bias, motion_head.deep_int
-eract.track_agent_interaction_layers.1.interaction_transformer.norm3.weight, motion_head.de
-ep_interact.track_agent_interaction_layers.1.interaction_transformer.norm3.bias, motion_hea
-d.deep_interact.track_agent_interaction_layers.2.interaction_transformer.self_attn.in_proj_
-weight, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.
-self_attn.in_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.2.interact
-ion_transformer.self_attn.out_proj.weight, motion_head.deep_interact.track_agent_interactio
-n_layers.2.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.track
-_agent_interaction_layers.2.interaction_transformer.multihead_attn.in_proj_weight, motion_h
-ead.deep_interact.track_agent_interaction_layers.2.interaction_transformer.multihead_attn.i
-n_proj_bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transfo
-rmer.multihead_attn.out_proj.weight, motion_head.deep_interact.track_agent_interaction_laye
-rs.2.interaction_transformer.multihead_attn.out_proj.bias, motion_head.deep_interact.track_
-agent_interaction_layers.2.interaction_transformer.linear1.weight, motion_head.deep_interac
-t.track_agent_interaction_layers.2.interaction_transformer.linear1.bias, motion_head.deep_i
-nteract.track_agent_interaction_layers.2.interaction_transformer.linear2.weight, motion_hea
-d.deep_interact.track_agent_interaction_layers.2.interaction_transformer.linear2.bias, moti
-on_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.norm1.weight
-, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.norm1.
-bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transformer.no
-rm2.weight, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_transfor
-mer.norm2.bias, motion_head.deep_interact.track_agent_interaction_layers.2.interaction_tran
-sformer.norm3.weight, motion_head.deep_interact.track_agent_interaction_layers.2.interactio
-n_transformer.norm3.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_tr
-ansformer.self_attn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.0.inte
-raction_transformer.self_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layer
-s.0.interaction_transformer.self_attn.out_proj.weight, motion_head.deep_interact.map_intera
-ction_layers.0.interaction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.m
-ap_interaction_layers.0.interaction_transformer.multihead_attn.in_proj_weight, motion_head.
-deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.in_proj_bias,
- motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.multihead_attn.
-out_proj.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer
-.multihead_attn.out_proj.bias, motion_head.deep_interact.map_interaction_layers.0.interacti
-on_transformer.linear1.weight, motion_head.deep_interact.map_interaction_layers.0.interacti
-on_transformer.linear1.bias, motion_head.deep_interact.map_interaction_layers.0.interaction
-_transformer.linear2.weight, motion_head.deep_interact.map_interaction_layers.0.interaction
-_transformer.linear2.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_t
-ransformer.norm1.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_tra
-nsformer.norm1.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transfo
-rmer.norm2.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transform
-er.norm2.bias, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.n
-orm3.weight, motion_head.deep_interact.map_interaction_layers.0.interaction_transformer.nor
-m3.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.self_at
-tn.in_proj_weight, motion_head.deep_interact.map_interaction_layers.1.interaction_transform
-er.self_attn.in_proj_bias, motion_head.deep_interact.map_interaction_layers.1.interaction_t
-ransformer.self_attn.out_proj.weight, motion_head.deep_interact.map_interaction_layers.1.in
-teraction_transformer.self_attn.out_proj.bias, motion_head.deep_interact.map_interaction_la
-yers.1.interaction_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact.map
-_interaction_layers.1.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep
-_interact.map_interaction_layers.1.interaction_transformer.multihead_attn.out_proj.weight,
-motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.multihead_attn.o
-ut_proj.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.li
-near1.weight, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.li
-near1.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.line
-ar2.weight, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.line
-ar2.bias, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm1.
-weight, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm1.bi
-as, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm2.weight
-, motion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm2.bias, mo
-tion_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm3.weight, moti
-on_head.deep_interact.map_interaction_layers.1.interaction_transformer.norm3.bias, motion_h
-ead.deep_interact.map_interaction_layers.2.interaction_transformer.self_attn.in_proj_weight
-, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.self_attn.in_p
-roj_bias, motion_head.deep_interact.map_interaction_layers.2.interaction_transformer.self_a
-ttn.out_proj.weight, motion_head.deep_interact.map_interaction_layers.2.interaction_transfo
-rmer.self_attn.out_proj.bias, motion_head.deep_interact.map_interaction_layers.2.interactio
-n_transformer.multihead_attn.in_proj_weight, motion_head.deep_interact.map_interaction_laye
-rs.2.interaction_transformer.multihead_attn.in_proj_bias, motion_head.deep_interact.map_int
-eraction_layers.2.interaction_transformer.multihead_attn.out_proj.weight, motion_head.deep_
-interact.map_interaction_layers.2.interaction_transformer.multihead_attn.out_proj.bias, mot
-ion_head.deep_interact.map_interaction_layers.2.interaction_transformer.linear1.weight, mot
-ion_head.deep_interact.map_interaction_layers.2.interaction_transformer.linear1.bias, motio
-n_head.deep_interact.map_interaction_layers.2.interaction_transformer.linear2.weight, motio
-n_head.deep_interact.map_interaction_layers.2.interaction_transformer.linear2.bias, motion_
-head.deep_interact.map_interaction_layers.2.interaction_transformer.norm1.weight, motion_he
-ad.deep_interact.map_interaction_layers.2.interaction_transformer.norm1.bias, motion_head.d
-eep_interact.map_interaction_layers.2.interaction_transformer.norm2.weight, motion_head.dee
-p_interact.map_interaction_layers.2.interaction_transformer.norm2.bias, motion_head.deep_in
-teract.map_interaction_layers.2.interaction_transformer.norm3.weight, motion_head.deep_inte
-ract.map_interaction_layers.2.interaction_transformer.norm3.bias, motion_head.deep_interact
-.bev_interaction_layers.0.attentions.0.sampling_offsets.weight, motion_head.deep_interact.b
-ev_interaction_layers.0.attentions.0.sampling_offsets.bias, motion_head.deep_interact.bev_i
-nteraction_layers.0.attentions.0.attention_weights.weight, motion_head.deep_interact.bev_in
-teraction_layers.0.attentions.0.attention_weights.bias, motion_head.deep_interact.bev_inter
-action_layers.0.attentions.0.value_proj.weight, motion_head.deep_interact.bev_interaction_l
-ayers.0.attentions.0.value_proj.bias, motion_head.deep_interact.bev_interaction_layers.0.at
-tentions.0.output_proj.0.weight, motion_head.deep_interact.bev_interaction_layers.0.attenti
-ons.0.output_proj.0.bias, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.o
-utput_proj.1.weight, motion_head.deep_interact.bev_interaction_layers.0.attentions.0.output
-_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.0.ffns.0.layers.0.0.weight,
-motion_head.deep_interact.bev_interaction_layers.0.ffns.0.layers.0.0.bias, motion_head.deep
-_interact.bev_interaction_layers.0.ffns.0.layers.1.weight, motion_head.deep_interact.bev_in
-teraction_layers.0.ffns.0.layers.1.bias, motion_head.deep_interact.bev_interaction_layers.0
-.norms.0.weight, motion_head.deep_interact.bev_interaction_layers.0.norms.0.bias, motion_he
-ad.deep_interact.bev_interaction_layers.0.norms.1.weight, motion_head.deep_interact.bev_int
-eraction_layers.0.norms.1.bias, motion_head.deep_interact.bev_interaction_layers.1.attentio
-ns.0.sampling_offsets.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions
-.0.sampling_offsets.bias, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.a
-ttention_weights.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.at
-tention_weights.bias, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.value
-_proj.weight, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.value_proj.bi
-as, motion_head.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.0.weight, m
-otion_head.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.0.bias, motion_h
-ead.deep_interact.bev_interaction_layers.1.attentions.0.output_proj.1.weight, motion_head.d
-eep_interact.bev_interaction_layers.1.attentions.0.output_proj.1.bias, motion_head.deep_int
-eract.bev_interaction_layers.1.ffns.0.layers.0.0.weight, motion_head.deep_interact.bev_inte
-raction_layers.1.ffns.0.layers.0.0.bias, motion_head.deep_interact.bev_interaction_layers.1
-.ffns.0.layers.1.weight, motion_head.deep_interact.bev_interaction_layers.1.ffns.0.layers.1
-.bias, motion_head.deep_interact.bev_interaction_layers.1.norms.0.weight, motion_head.deep_
-interact.bev_interaction_layers.1.norms.0.bias, motion_head.deep_interact.bev_interaction_l
-ayers.1.norms.1.weight, motion_head.deep_interact.bev_interaction_layers.1.norms.1.bias, mo
-tion_head.deep_interact.bev_interaction_layers.2.attentions.0.sampling_offsets.weight, moti
-on_head.deep_interact.bev_interaction_layers.2.attentions.0.sampling_offsets.bias, motion_h
-ead.deep_interact.bev_interaction_layers.2.attentions.0.attention_weights.weight, motion_he
-ad.deep_interact.bev_interaction_layers.2.attentions.0.attention_weights.bias, motion_head.
-deep_interact.bev_interaction_layers.2.attentions.0.value_proj.weight, motion_head.deep_int
-eract.bev_interaction_layers.2.attentions.0.value_proj.bias, motion_head.deep_interact.bev_
-interaction_layers.2.attentions.0.output_proj.0.weight, motion_head.deep_interact.bev_inter
-action_layers.2.attentions.0.output_proj.0.bias, motion_head.deep_interact.bev_interaction_
-layers.2.attentions.0.output_proj.1.weight, motion_head.deep_interact.bev_interaction_layer
-s.2.attentions.0.output_proj.1.bias, motion_head.deep_interact.bev_interaction_layers.2.ffn
-s.0.layers.0.0.weight, motion_head.deep_interact.bev_interaction_layers.2.ffns.0.layers.0.0
-.bias, motion_head.deep_interact.bev_interaction_layers.2.ffns.0.layers.1.weight, motion_he
-ad.deep_interact.bev_interaction_layers.2.ffns.0.layers.1.bias, motion_head.deep_interact.b
-ev_interaction_layers.2.norms.0.weight, motion_head.deep_interact.bev_interaction_layers.2.
-norms.0.bias, motion_head.deep_interact.bev_interaction_layers.2.norms.1.weight, motion_hea
-d.deep_interact.bev_interaction_layers.2.norms.1.bias, motion_head.deep_interact.static_dyn
-amic_fuser.0.weight, motion_head.deep_interact.static_dynamic_fuser.0.bias, motion_head.dee
-p_interact.static_dynamic_fuser.2.weight, motion_head.deep_interact.static_dynamic_fuser.2.
-bias, motion_head.deep_interact.dynamic_embed_fuser.0.weight, motion_head.deep_interact.dyn
-amic_embed_fuser.0.bias, motion_head.deep_interact.dynamic_embed_fuser.2.weight, motion_hea
-d.deep_interact.dynamic_embed_fuser.2.bias, motion_head.deep_interact.query_fuser.0.weight,
- motion_head.deep_interact.query_fuser.0.bias, motion_head.deep_interact.query_fuser.2.weig
-ht, motion_head.deep_interact.query_fuser.2.bias, motion_head.traj_cls_branches.0.0.weight,
- motion_head.traj_cls_branches.0.0.bias, motion_head.traj_cls_branches.0.1.weight, motion_h
-ead.traj_cls_branches.0.1.bias, motion_head.traj_cls_branches.0.3.weight, motion_head.traj_
-cls_branches.0.3.bias, motion_head.traj_cls_branches.0.4.weight, motion_head.traj_cls_branc
-hes.0.4.bias, motion_head.traj_cls_branches.0.6.weight, motion_head.traj_cls_branches.0.6.b
-ias, motion_head.traj_cls_branches.1.0.weight, motion_head.traj_cls_branches.1.0.bias, moti
-on_head.traj_cls_branches.1.1.weight, motion_head.traj_cls_branches.1.1.bias, motion_head.t
-raj_cls_branches.1.3.weight, motion_head.traj_cls_branches.1.3.bias, motion_head.traj_cls_b
-ranches.1.4.weight, motion_head.traj_cls_branches.1.4.bias, motion_head.traj_cls_branches.1
-.6.weight, motion_head.traj_cls_branches.1.6.bias, motion_head.traj_cls_branches.2.0.weight
-, motion_head.traj_cls_branches.2.0.bias, motion_head.traj_cls_branches.2.1.weight, motion_
-head.traj_cls_branches.2.1.bias, motion_head.traj_cls_branches.2.3.weight, motion_head.traj
-_cls_branches.2.3.bias, motion_head.traj_cls_branches.2.4.weight, motion_head.traj_cls_bran
-ches.2.4.bias, motion_head.traj_cls_branches.2.6.weight, motion_head.traj_cls_branches.2.6.
-bias, motion_head.traj_reg_branches.0.0.weight, motion_head.traj_reg_branches.0.0.bias, mot
-ion_head.traj_reg_branches.0.2.weight, motion_head.traj_reg_branches.0.2.bias, motion_head.
-traj_reg_branches.0.4.weight, motion_head.traj_reg_branches.0.4.bias, motion_head.traj_reg_
-branches.1.0.weight, motion_head.traj_reg_branches.1.0.bias, motion_head.traj_reg_branches.
-1.2.weight, motion_head.traj_reg_branches.1.2.bias, motion_head.traj_reg_branches.1.4.weigh
-t, motion_head.traj_reg_branches.1.4.bias, motion_head.traj_reg_branches.2.0.weight, motion
-_head.traj_reg_branches.2.0.bias, motion_head.traj_reg_branches.2.2.weight, motion_head.tra
-j_reg_branches.2.2.bias, motion_head.traj_reg_branches.2.4.weight, motion_head.traj_reg_bra
-nches.2.4.bias, motion_head.intention_ep_embedding_agent.0.weight, motion_head.intention_ep
-_embedding_agent.0.bias, motion_head.intention_ep_embedding_agent.2.weight, motion_head.int
-ention_ep_embedding_agent.2.bias, motion_head.intention_ep_embedding_offset.0.weight, motio
-n_head.intention_ep_embedding_offset.0.bias, motion_head.intention_ep_embedding_offset.2.we
-ight, motion_head.intention_ep_embedding_offset.2.bias, motion_head.intention_ep_embedding_
-ego.0.weight, motion_head.intention_ep_embedding_ego.0.bias, motion_head.intention_ep_embed
-ding_ego.2.weight, motion_head.intention_ep_embedding_ego.2.bias, motion_head.query_embeddi
-ng_box.0.weight, motion_head.query_embedding_box.0.bias, motion_head.query_embedding_box.2.
-weight, motion_head.query_embedding_box.2.bias
+(base) hyou37@eic-gt-gpu1:~/xluo/UniAD$ conda activate uniad
+(uniad) hyou37@eic-gt-gpu1:~/xluo/UniAD$ nvidia-smi
+Wed Jun  7 02:47:21 2023
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 530.30.02              Driver Version: 530.30.02    CUDA Version: 12.1     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                  Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf            Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA RTX A5000                On | 00000000:01:00.0 Off |                    0 |
+| 30%   29C    P8               23W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   1  NVIDIA RTX A5000                On | 00000000:23:00.0 Off |                    0 |
+| 30%   29C    P8               22W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   2  NVIDIA RTX A5000                On | 00000000:41:00.0 Off |                    0 |
+| 30%   30C    P8               25W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   3  NVIDIA RTX A5000                On | 00000000:61:00.0 Off |                    0 |
+| 30%   30C    P8               28W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   4  NVIDIA RTX A5000                On | 00000000:81:00.0 Off |                    0 |
+| 30%   30C    P8               29W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   5  NVIDIA RTX A5000                On | 00000000:A1:00.0 Off |                    0 |
+| 30%   29C    P8               24W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   6  NVIDIA RTX A5000                On | 00000000:C1:00.0 Off |                    0 |
+| 30%   27C    P8               19W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   7  NVIDIA RTX A5000                On | 00000000:E1:00.0 Off |                    0 |
+| 30%   27C    P8               18W / 230W|      1MiB / 23028MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
 
-[                                                  ] 0/5, elapsed: 0s, ETA:
-
-from 5 to 10 in rank 0, batch1
-
-
-[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 9/5, 0.5 task/s, elapsed: 1
-9s, ETA:    -7s
-
-rank 0 batch 1 done!
-
-
-(batch_size: 1): 1.92 FPS, max mem: 2784053760.00 MB, batch: 1, rank: 0
-Profile Done
-/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
-y:178: FutureWarning: The module torch.distributed.launch is deprecated
-and will be removed in future. Use torch.distributed.run.
-Note that --use_env is set by default in torch.distributed.run.
-If your script expects `--local_rank` argument to be set, please
-change it to read from `os.environ['LOCAL_RANK']` instead. See
-https://pytorch.org/docs/stable/distributed.html#launch-utility for
-further instructions
-
-  warnings.warn(
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage2_e2e/base_e2e.py uniad_base_e2e.pth  1 0
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+(uniad) hyou37@eic-gt-gpu1:~/xluo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/configs/stage2_e2e/base_e2e.py ./ckpts/un
+iad_base_e2e.pth  1 0
 projects.mmdet3d_plugin
 ======
 Loading NuScenes tables for version v1.0-trainval...
@@ -479,32 +66,32 @@ Loading NuScenes tables for version v1.0-trainval...
 2631083 sample_data,
 1166187 sample_annotation,
 4 map,
-Done loading in 36.623 seconds.
+Done loading in 36.342 seconds.
 ======
 Reverse indexing ...
-Done reverse indexing in 8.3 seconds.
+Done reverse indexing in 8.2 seconds.
 ======
-load checkpoint from local path: uniad_base_e2e.pth
+load checkpoint from local path: ./ckpts/uniad_base_e2e.pth
 Traceback (most recent call last):
   File "./tools/test.py", line 268, in <module>
     main()
   File "./tools/test.py", line 209, in main
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkp
-oint.py", line 531, in load_checkpoint
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 531, in load_c
+heckpoint
     checkpoint = _load_checkpoint(filename, map_location, logger)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkp
-oint.py", line 470, in _load_checkpoint
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 470, in _load_
+checkpoint
     return CheckpointLoader.load_checkpoint(filename, map_location, logger)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkp
-oint.py", line 249, in load_checkpoint
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 249, in load_c
+heckpoint
     return checkpoint_loader(filename, map_location)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkp
-oint.py", line 265, in load_from_local
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 265, in load_f
+rom_local
     raise IOError(f'{filename} is not a checkpoint file')
-OSError: uniad_base_e2e.pth is not a checkpoint file
-/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
-y:178: FutureWarning: The module torch.distributed.launch is deprecated
+OSError: ./ckpts/uniad_base_e2e.pth is not a checkpoint file
+/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py:178: FutureWarning: The mod
+ule torch.distributed.launch is deprecated
 and will be removed in future. Use torch.distributed.run.
 Note that --use_env is set by default in torch.distributed.run.
 If your script expects `--local_rank` argument to be set, please
@@ -513,31 +100,28 @@ https://pytorch.org/docs/stable/distributed.html#launch-utility for
 further instructions
 
   warnings.warn(
-ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid
-: 1491730) of binary: /nethome/hyou37/anaconda3/envs/uniad/bin/python
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 147458) of binary: /nethome
+/hyou37/anaconda3/envs/uniad/bin/python
 Traceback (most recent call last):
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 194, in _run_mod
-ule_as_main
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 194, in _run_module_as_main
     return _run_code(code, main_globals, None,
   File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 87, in _run_code
     exec(code, run_globals)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 193, in <module>
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 193, in <mod
+ule>
     main()
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 189, in main
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 189, in main
     launch(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 174, in launch
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.py", line 174, in laun
+ch
     run(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-run.py", line 689, in run
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/run.py", line 689, in run
     elastic_launch(
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 116, in __call__
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 116, i
+n __call__
     return launch_agent(self._config, self._entrypoint, list(args))
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 244, in launch_agent
+  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 244, i
+n launch_agent
     raise ChildFailedError(
 torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
 ***************************************
@@ -545,9 +129,9 @@ torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
 =======================================
 Root Cause:
 [0]:
-  time: 2023-05-18_03:08:03
+  time: 2023-06-07_02:49:06
   rank: 0 (local_rank: 0)
-  exitcode: 1 (pid: 1491730)
+  exitcode: 1 (pid: 147458)
   error_file: <N/A>
   msg: "Process failed with exitcode 1"
 =======================================
@@ -555,475 +139,5 @@ Other Failures:
   <NO_OTHER_FAILURES>
 ***************************************
 
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
-projects.mmdet3d_plugin
-======
-Loading NuScenes tables for version v1.0-trainval...
-23 category,
-8 attribute,
-4 visibility,
-64386 instance,
-12 sensor,
-10200 calibrated_sensor,
-2631083 ego_pose,
-68 log,
-850 scene,
-34149 sample,
-2631083 sample_data,
-1166187 sample_annotation,
-4 map,
-Done loading in 36.337 seconds.
-======
-Reverse indexing ...
-Done reverse indexing in 8.4 seconds.
-======
-load checkpoint from local path: ./ckpts/uniad_base_e2e.pth
-2023-05-18 03:13:30,328 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,332 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,335 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,338 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,341 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,343 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,346 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,349 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,352 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,355 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,358 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,363 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,368 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,371 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,374 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,377 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,380 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,383 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,386 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,388 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,391 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,394 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,397 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv
-2 is upgraded to version 2.
-2023-05-18 03:13:30,400 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,404 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2
- is upgraded to version 2.
-2023-05-18 03:13:30,407 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2
- is upgraded to version 2.
-[                                                  ] 0/5, elapsed: 0s, ETA:
-
-from 0 to 5 in rank 0, batch0
-
-
-[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 5/5, 0.5 task/s, elapsed: 11s, ETA:     0s
-
-rank 0 batch 0 done!
-
-
-(batch_size: 1): 1.79 FPS, max mem: 3051527168.00 MB, batch: 0, rank: 0
-Profile Done
-/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
-y:178: FutureWarning: The module torch.distributed.launch is deprecated
-and will be removed in future. Use torch.distributed.run.
-Note that --use_env is set by default in torch.distributed.run.
-If your script expects `--local_rank` argument to be set, please
-change it to read from `os.environ['LOCAL_RANK']` instead. See
-https://pytorch.org/docs/stable/distributed.html#launch-utility for
-further instructions
-
-  warnings.warn(
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ pwd
-/nethome/hyou37/xluo/gitrepo/UniAD
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
-Traceback (most recent call last):
-  File "./tools/test.py", line 16, in <module>
-    from projects.mmdet3d_plugin.datasets.builder import build_dataloader
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/__init__.py", line 5, in
- <module>
-    from .datasets.pipelines import (
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/datasets/pipelines/__ini
-t__.py", line 6, in <module>
-    from .occflow_label import GenerateOccFlowLabels
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/datasets/pipelines/occfl
-ow_label.py", line 5, in <module>
-    from projects.mmdet3d_plugin.uniad.dense_heads.occ_head_plugin import calculate_birds_e
-ye_view_parameters
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/__init__.py", line
- 3, in <module>
-    from .detectors import *
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/detectors/__init__
-.py", line 1, in <module>
-    from .uniad_e2e import UniAD
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/detectors/uniad_e2
-e.py", line 13, in <module>
-    from .uniad_track import UniADTrack
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/detectors/uniad_tr
-ack.py", line 21, in <module>
-    from ..dense_heads.track_head_plugin import MemoryBank, QueryInteractionModule, Instanc
-es, RuntimeTrackerBase
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/dense_heads/track_
-head_plugin/__init__.py", line 3, in <module>
-    from .tracker import RuntimeTrackerBase
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/dense_heads/track_
-head_plugin/tracker.py", line 18
-    with torch.profiler.record_function("RuntimneTrackerBase-update")
-                                                                    ^
-SyntaxError: invalid syntax
-/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
-y:178: FutureWarning: The module torch.distributed.launch is deprecated
-and will be removed in future. Use torch.distributed.run.
-Note that --use_env is set by default in torch.distributed.run.
-If your script expects `--local_rank` argument to be set, please
-change it to read from `os.environ['LOCAL_RANK']` instead. See
-https://pytorch.org/docs/stable/distributed.html#launch-utility for
-further instructions
-
-  warnings.warn(
-ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid
-: 1501444) of binary: /nethome/hyou37/anaconda3/envs/uniad/bin/python
-Traceback (most recent call last):
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 194, in _run_mod
-ule_as_main
-    return _run_code(code, main_globals, None,
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 87, in _run_code
-    exec(code, run_globals)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 193, in <module>
-    main()
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 189, in main
-    launch(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 174, in launch
-    run(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-run.py", line 689, in run
-    elastic_launch(
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 116, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 244, in launch_agent
-    raise ChildFailedError(
-torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
-***************************************
-         ./tools/test.py FAILED
-=======================================
-Root Cause:
-[0]:
-  time: 2023-05-18_03:50:17
-  rank: 0 (local_rank: 0)
-  exitcode: 1 (pid: 1501444)
-  error_file: <N/A>
-  msg: "Process failed with exitcode 1"
-=======================================
-Other Failures:
-  <NO_OTHER_FAILURES>
-***************************************
-
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
-Traceback (most recent call last):
-  File "./tools/test.py", line 16, in <module>
-    from projects.mmdet3d_plugin.datasets.builder import build_dataloader
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/__init__.py", line 5, in
- <module>
-    from .datasets.pipelines import (
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/datasets/pipelines/__ini
-t__.py", line 6, in <module>
-    from .occflow_label import GenerateOccFlowLabels
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/datasets/pipelines/occfl
-ow_label.py", line 5, in <module>
-    from projects.mmdet3d_plugin.uniad.dense_heads.occ_head_plugin import calculate_birds_e
-ye_view_parameters
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/__init__.py", line
- 3, in <module>
-    from .detectors import *
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/detectors/__init__
-.py", line 1, in <module>
-    from .uniad_e2e import UniAD
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/detectors/uniad_e2
-e.py", line 13, in <module>
-    from .uniad_track import UniADTrack
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/detectors/uniad_tr
-ack.py", line 21, in <module>
-    from ..dense_heads.track_head_plugin import MemoryBank, QueryInteractionModule, Instanc
-es, RuntimeTrackerBase
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/dense_heads/track_
-head_plugin/__init__.py", line 3, in <module>
-    from .tracker import RuntimeTrackerBase
-  File "/nethome/hyou37/xluo/gitrepo/UniAD/projects/mmdet3d_plugin/uniad/dense_heads/track_
-head_plugin/tracker.py", line 18
-    with torch.profiler.record_function("RuntimneTrackerBase-update")
-                                                                    ^
-SyntaxError: invalid syntax
-/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
-y:178: FutureWarning: The module torch.distributed.launch is deprecated
-and will be removed in future. Use torch.distributed.run.
-Note that --use_env is set by default in torch.distributed.run.
-If your script expects `--local_rank` argument to be set, please
-change it to read from `os.environ['LOCAL_RANK']` instead. See
-https://pytorch.org/docs/stable/distributed.html#launch-utility for
-further instructions
-
-  warnings.warn(
-ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid
-: 1507785) of binary: /nethome/hyou37/anaconda3/envs/uniad/bin/python
-Traceback (most recent call last):
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 194, in _run_mod
-ule_as_main
-    return _run_code(code, main_globals, None,
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/runpy.py", line 87, in _run_code
-    exec(code, run_globals)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 193, in <module>
-    main()
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 189, in main
-    launch(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launch.py", line 174, in launch
-    run(args)
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-run.py", line 689, in run
-    elastic_launch(
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 116, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-  File "/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/
-launcher/api.py", line 244, in launch_agent
-    raise ChildFailedError(
-torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
-***************************************
-         ./tools/test.py FAILED
-=======================================
-Root Cause:
-[0]:
-  time: 2023-05-18_03:51:27
-  rank: 0 (local_rank: 0)
-  exitcode: 1 (pid: 1507785)
-  error_file: <N/A>
-  msg: "Process failed with exitcode 1"
-=======================================
-Other Failures:
-  <NO_OTHER_FAILURES>
-***************************************
-
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
-projects.mmdet3d_plugin
-======
-Loading NuScenes tables for version v1.0-trainval...
-23 category,
-8 attribute,
-4 visibility,
-64386 instance,
-12 sensor,
-10200 calibrated_sensor,
-2631083 ego_pose,
-68 log,
-850 scene,
-34149 sample,
-2631083 sample_data,
-1166187 sample_annotation,
-4 map,
-Done loading in 36.238 seconds.
-======
-Reverse indexing ...
-Done reverse indexing in 8.4 seconds.
-======
-load checkpoint from local path: ./ckpts/uniad_base_e2e.pth
-2023-05-18 03:53:29,689 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,693 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,696 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,699 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,702 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,705 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,708 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,710 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,713 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,717 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,721 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,724 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,727 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,730 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,732 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,735 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,738 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,741 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,744 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,747 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,750 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,753 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,755 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv
-2 is upgraded to version 2.
-2023-05-18 03:53:29,759 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,763 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2
- is upgraded to version 2.
-2023-05-18 03:53:29,766 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2
- is upgraded to version 2.
-[                                                  ] 0/5, elapsed: 0s, ETA:
-
-from 0 to 5 in rank 0, batch0
-
-
-[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 5/5, 0.5 task/s, elapsed: 11s, ETA:     0s
-
-rank 0 batch 0 done!
-
-
-(batch_size: 1): 1.78 FPS, max mem: 3051527168.00 MB, batch: 0, rank: 0
-Profile Done
-/nethome/hyou37/anaconda3/envs/uniad/lib/python3.8/site-packages/torch/distributed/launch.p
-y:178: FutureWarning: The module torch.distributed.launch is deprecated
-and will be removed in future. Use torch.distributed.run.
-Note that --use_env is set by default in torch.distributed.run.
-If your script expects `--local_rank` argument to be set, please
-change it to read from `os.environ['LOCAL_RANK']` instead. See
-https://pytorch.org/docs/stable/distributed.html#launch-utility for
-further instructions
-
-  warnings.warn(
-(uniad) hyou37@eic-gt-gpu2:~/xluo/gitrepo/UniAD$ ./tools/uniad_dist_eval.sh ./projects/conf
-igs/stage2_e2e/base_e2e.py ./ckpts/uniad_base_e2e.pth  1 0
-bash: /nethome/hyou37/anaconda3/lib/libtinfo.so.6: no version information available (requir
-ed by bash)
-projects.mmdet3d_plugin
-======
-Loading NuScenes tables for version v1.0-trainval...
-23 category,
-8 attribute,
-4 visibility,
-64386 instance,
-12 sensor,
-10200 calibrated_sensor,
-2631083 ego_pose,
-68 log,
-850 scene,
-34149 sample,
-2631083 sample_data,
-1166187 sample_annotation,
-4 map,
-Done loading in 36.030 seconds.
-======
-Reverse indexing ...
-Done reverse indexing in 8.7 seconds.
-======
-load checkpoint from local path: ./ckpts/uniad_base_e2e.pth
-2023-05-18 04:14:55,589 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.0.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,594 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.1.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,597 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.2.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,601 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.3.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,604 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.4.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,608 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.5.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,611 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.6.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,615 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.7.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,618 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.8.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,621 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.9.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,625 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.10.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,628 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.11.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,632 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.12.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,635 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.13.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,639 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.14.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,642 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.15.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,646 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.16.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,649 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.17.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,652 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.18.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,656 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.19.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,659 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.20.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,663 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.21.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,667 - root - INFO - ModulatedDeformConvPack img_backbone.layer3.22.conv
-2 is upgraded to version 2.
-2023-05-18 04:14:55,671 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.0.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,676 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.1.conv2
- is upgraded to version 2.
-2023-05-18 04:14:55,680 - root - INFO - ModulatedDeformConvPack img_backbone.layer4.2.conv2
- is upgraded to version 2.
-[                                                  ] 0/5, elapsed: 0s, ETA:
-
-from 0 to 5 in rank 0, batch0
-
-
-[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 5/5, 0.4 task/s, elapsed: 13s, ETA:     0s
-
-rank 0 batch 0 done!
-
-
-(batch_size: 1): 1.76 FPS, max mem: 3051527168.00 MB, batch: 0, rank: 0
+(uniad) hyou37@eic-gt-gpu1:~/xluo/UniAD$
 

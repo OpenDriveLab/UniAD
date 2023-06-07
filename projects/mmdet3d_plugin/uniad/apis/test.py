@@ -46,7 +46,7 @@ def custom_encode_mask_results(mask_results):
 
 
 @torch.no_grad()
-def gpu_profile_one_batch(model, data_loader, index, step=5, worker_num=1):
+def gpu_profile_one_batch(model, data_loader, index, step=20, worker_num=1):
     start_index = index * step
 
     dataset = data_loader.dataset
@@ -68,7 +68,7 @@ def gpu_profile_one_batch(model, data_loader, index, step=5, worker_num=1):
     # tfb_writer = SummaryWriter(profile_path)
     # tfb_writer.add_graph(model, inputs)
     warmup_iters = 2
-    wait_iters = 2
+    wait_iters = 17
     batch_num = len(data_loader)
     num_iters = step - wait_iters - warmup_iters
 
