@@ -1,6 +1,15 @@
 _base_ = ["../_base_/datasets/nus-3d.py",
           "../_base_/default_runtime.py"]
 
+# Update-2023-06-12: 
+# [Enhance] Update some freezing args of UniAD 
+# [Bugfix] Reproduce the from-scratch results of stage1
+# 1. Remove loss_past_traj in stage1 training
+# 2. Unfreeze neck and BN
+# --> Reproduced tracking result: AMOTA 0.393
+
+
+# Unfreeze neck and BN, the from-scratch results of stage1 could be reproduced
 plugin = True
 plugin_dir = "projects/mmdet3d_plugin/"
 # If point cloud range is changed, the models should also change their point
@@ -36,7 +45,7 @@ _feed_dim_ = _ffn_dim_
 _dim_half_ = _pos_dim_
 canvas_size = (bev_h_, bev_w_)
 
-# NOTE: You can change queue_length from 5 to 3 to save GPU memory.
+# NOTE: You can change queue_length from 5 to 3 to save GPU memory, but at risk of performance drop.
 queue_length = 5  # each sequence contains `queue_length` frames.
 
 ### traj prediction args ###
@@ -97,7 +106,9 @@ model = dict(
         num_outs=4,
         relu_before_extra_convs=True,
     ),
-    freeze_img_modules=True,  # set fix feats to true can fix the backbone
+    freeze_img_backbone=True,
+    freeze_img_neck=False,
+    freeze_bn=False,
     score_thresh=0.4,
     filter_score_thresh=0.35,
     qim_args=dict(
@@ -127,6 +138,7 @@ model = dict(
             type="FocalLoss", use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=2.0
         ),
         loss_bbox=dict(type="L1Loss", loss_weight=0.25),
+        loss_past_traj_weight=0.0,
     ),  # loss cfg for tracking
     pts_bbox_head=dict(
         type="BEVFormerTrackHead",
@@ -558,7 +570,7 @@ lr_config = dict(
     min_lr_ratio=1e-3,
 )
 total_epochs = 6
-evaluation = dict(interval=2, pipeline=test_pipeline)
+evaluation = dict(interval=6, pipeline=test_pipeline)
 runner = dict(type="EpochBasedRunner", max_epochs=total_epochs)
 log_config = dict(
     interval=10, hooks=[dict(type="TextLoggerHook"), dict(type="TensorboardLoggerHook")]

@@ -66,8 +66,9 @@ class UniADTrack(MVXTwoStageDetector):
         filter_score_thresh=0.1,
         miss_tolerance=5,
         gt_iou_threshold=0.0,
-
-        freeze_img_modules=False,   # * Remember to use it
+        freeze_img_backbone=False,
+        freeze_img_neck=False,
+        freeze_bn=False,
         freeze_bev_encoder=False,
         queue_length=3,
     ):
@@ -87,14 +88,21 @@ class UniADTrack(MVXTwoStageDetector):
         self.fp16_enabled = False
         self.embed_dims = embed_dims
         self.num_query = num_query
-        self.freeze_img_modules = freeze_img_modules
         self.num_classes = num_classes
         self.vehicle_id_list = vehicle_id_list
         self.pc_range = pc_range
         self.queue_length = queue_length
-        if self.freeze_img_modules:
-            self.img_backbone.eval()
-            self.img_neck.eval()
+        if freeze_img_backbone:
+            if freeze_bn:
+                self.img_backbone.eval()
+            for param in self.img_backbone.parameters():
+                param.requires_grad = False
+        
+        if freeze_img_neck:
+            if freeze_bn:
+                self.img_neck.eval()
+            for param in self.img_neck.parameters():
+                param.requires_grad = False
 
         # temporal
         self.video_test_mode = video_test_mode
@@ -168,16 +176,6 @@ class UniADTrack(MVXTwoStageDetector):
                 img_feat_reshaped = img_feat.view(B, N, c, h, w)
             img_feats_reshaped.append(img_feat_reshaped)
         return img_feats_reshaped
-
-    @auto_fp16(apply_to=("img"))
-    def extract_feat(self, img, len_queue=None):
-        """Extract features from images and points."""
-        if self.freeze_img_modules:
-            with torch.no_grad():
-                img_feats = self.extract_img_feat(img, len_queue=len_queue)
-        else:
-            img_feats = self.extract_img_feat(img, len_queue=len_queue)
-        return img_feats
 
     def _generate_empty_tracks(self):
         track_instances = Instances((1, 1))
@@ -331,7 +329,7 @@ class UniADTrack(MVXTwoStageDetector):
             prev_bev = None
             bs, len_queue, num_cams, C, H, W = imgs_queue.shape
             imgs_queue = imgs_queue.reshape(bs * len_queue, num_cams, C, H, W)
-            img_feats_list = self.extract_feat(img=imgs_queue, len_queue=len_queue)
+            img_feats_list = self.extract_img_feat(img=imgs_queue, len_queue=len_queue)
             for i in range(len_queue):
                 img_metas = [each[i] for each in img_metas_list]
                 img_feats = [each_scale[:, i] for each_scale in img_feats_list]
@@ -348,7 +346,7 @@ class UniADTrack(MVXTwoStageDetector):
             assert prev_bev is None
             prev_bev = self.get_history_bev(prev_img, prev_img_metas)
 
-        img_feats = self.extract_feat(img=imgs)
+        img_feats = self.extract_img_feat(img=imgs)
         if self.freeze_bev_encoder:
             with torch.no_grad():
                 bev_embed, bev_pos = self.pts_bbox_head.get_bev_features(
@@ -579,11 +577,12 @@ class UniADTrack(MVXTwoStageDetector):
             # all_query_embeddings: len=dec nums, N*256
             # all_matched_idxes: len=dec nums, N*2
             track_instances = frame_res["track_instances"]
-            if i == num_frame - 1:
-                get_keys = ["bev_embed", "bev_pos",
-                            "track_query_embeddings", "track_query_matched_idxes", "track_bbox_results",
-                            "sdc_boxes_3d", "sdc_scores_3d", "sdc_track_scores", "sdc_track_bbox_results", "sdc_embedding"]
-                out.update({k: frame_res[k] for k in get_keys})
+        
+        get_keys = ["bev_embed", "bev_pos",
+                    "track_query_embeddings", "track_query_matched_idxes", "track_bbox_results",
+                    "sdc_boxes_3d", "sdc_scores_3d", "sdc_track_scores", "sdc_track_bbox_results", "sdc_embedding"]
+        out.update({k: frame_res[k] for k in get_keys})
+        
         losses = self.criterion.losses_dict
         return losses, out
 

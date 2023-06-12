@@ -1,6 +1,8 @@
 _base_ = ["../_base_/datasets/nus-3d.py",
           "../_base_/default_runtime.py"]
 
+# Update-2023-06-12: 
+# [Enhance] Update some freezing args of UniAD 
 plugin = True
 plugin_dir = "projects/mmdet3d_plugin/"
 # If point cloud range is changed, the models should also change their point
@@ -97,7 +99,9 @@ model = dict(
         num_outs=4,
         relu_before_extra_convs=True,
     ),
-    freeze_img_modules=True,  # set fix feats to true can fix the backbone
+    freeze_img_backbone=True,
+    freeze_img_neck=True,
+    freeze_bn=True,
     freeze_bev_encoder=True,
     score_thresh=0.4,
     filter_score_thresh=0.35,
