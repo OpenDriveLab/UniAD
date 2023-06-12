@@ -59,6 +59,9 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 
 - **`Paper Title Change`**: To avoid confusion with the "goal-point" navigation in Robotics, we change the title from "Goal-oriented" to "Planning-oriented" suggested by Reviewers. Thank you!
 
+- [2023/06/12] Bugfix [Ref: https://github.com/OpenDriveLab/UniAD/issues/21]: Previously, 
+the performance of the released stage1 (track-map) model cannot be reproduced when training from scratch. After careful investigation, we found that the performance disparity is led by two causes: 1) mistakenly adding the `loss_past_traj` and 2) freezing the `img_neck` and `BN` in stage1 training. By removing `loss_past_traj` and unfreezing `img_neck` and `BN` in training, the reported results could be reproduced (AMOTA: 0.393).
+
 - [2023/04/18] New feature: You can replace BEVFormer with other BEV Encoding methods, e.g., LSS, as long as you provide the `bev_embed` and `bev_pos` in [track_train](https://github.com/OpenDriveLab/UniAD/blob/cb4e3dc336ac9f94897ef3c7d85edba85a507726/projects/mmdet3d_plugin/uniad/detectors/uniad_track.py#L394) and [track_inference](https://github.com/OpenDriveLab/UniAD/blob/cb4e3dc336ac9f94897ef3c7d85edba85a507726/projects/mmdet3d_plugin/uniad/detectors/uniad_track.py#L661). Make sure your bevs and ours are of the same shape.
 - [2023/04/18] Base-model checkpoints are released.
 
@@ -108,7 +111,6 @@ Pre-trained models and results under main metrics are provided below. We refer y
 The overall pipeline of UniAD is controlled by [uniad_e2e.py](projects/mmdet3d_plugin/uniad/detectors/uniad_e2e.py) which coordinates all the task modules in `UniAD/projects/mmdet3d_plugin/uniad/dense_heads`. If you are interested in the implementation of a specific task module, please refer to its corresponding file, e.g., [motion_head](projects/mmdet3d_plugin/uniad/dense_heads/motion_head.py).
 
 ## TODO List <a name="todos"></a>
-- [ ] Fix bug: Unable to reproduce the results of stage1 track-map model when training from scratch. [Ref: https://github.com/OpenDriveLab/UniAD/issues/21]
 - [ ] Upgrade the implementation of MapFormer from Panoptic SegFormer to [TopoNet](https://github.com/OpenDriveLab/TopoNet), which features the vectorized map representations and topology reasoning.
 - [ ] Support larger batch size [Est. 2023/04]
 - [ ] [Long-term] Improve flexibility for future extensions
@@ -117,6 +119,7 @@ The overall pipeline of UniAD is controlled by [uniad_e2e.py](projects/mmdet3d_p
 - [x] Separating BEV encoder and tracking module
 - [x] Base-model configs & checkpoints
 - [x] Code initialization
+- [x] Fix bug: Unable to reproduce the results of stage1 track-map model when training from scratch. [Ref: https://github.com/OpenDriveLab/UniAD/issues/21]
 
 
 ## License <a name="license"></a>
