@@ -56,7 +56,7 @@ class MemoryBank(nn.Module):
         if len(track_instances) == 0:
             return track_instances
 
-        key_padding_mask = track_instances.mem_padding_mask
+        key_padding_mask = track_instances.mem_padding_mask  # [n_, memory_bank_len]
 
         valid_idxes = key_padding_mask[:, -1] == 0
         embed = track_instances.output_embedding[valid_idxes]  # (n, 256)

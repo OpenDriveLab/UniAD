@@ -76,7 +76,7 @@ class MotionTransformerDecoder(BaseModule):
                 scene_level_ego_embedding_layer=None,
                 scene_level_offset_embedding_layer=None,
                 **kwargs):
-        """Forward function for `Detr3DTransformerDecoder`.
+        """Forward function for `MotionTransformerDecoder`.
         Args:
             agent_query (B, A, D)
             map_query (B, M, D) 

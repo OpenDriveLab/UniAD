@@ -70,7 +70,6 @@ class PerceptionTransformer(BaseModule):
             self.num_feature_levels, self.embed_dims))
         self.cams_embeds = nn.Parameter(
             torch.Tensor(self.num_cams, self.embed_dims))
-        self.reference_points = nn.Linear(self.embed_dims, 3)
         self.can_bus_mlp = nn.Sequential(
             nn.Linear(18, self.embed_dims // 2),
             nn.ReLU(inplace=True),
@@ -94,7 +93,6 @@ class PerceptionTransformer(BaseModule):
                     m.init_weights()
         normal_(self.level_embeds)
         normal_(self.cams_embeds)
-        xavier_init(self.reference_points, distribution='uniform', bias=0.)
         xavier_init(self.can_bus_mlp, distribution='uniform', bias=0.)
 
     @auto_fp16(apply_to=('mlvl_feats', 'bev_queries', 'prev_bev', 'bev_pos'))
@@ -200,7 +198,7 @@ class PerceptionTransformer(BaseModule):
         object_query_embed,
         bev_h,
         bev_w,
-        reference_points=None,
+        reference_points,
         reg_branches=None,
         cls_branches=None,
         img_metas=None
@@ -210,11 +208,10 @@ class PerceptionTransformer(BaseModule):
             object_query_embed, self.embed_dims, dim=1)
         query_pos = query_pos.unsqueeze(0).expand(bs, -1, -1)
         query = query.unsqueeze(0).expand(bs, -1, -1)
-        if reference_points is not None:
-            reference_points = reference_points.unsqueeze(0).expand(bs, -1, -1)
-        else:
-            reference_points = self.reference_points(query_pos)
+
+        reference_points = reference_points.unsqueeze(0).expand(bs, -1, -1)
         reference_points = reference_points.sigmoid()
+
         init_reference_out = reference_points
         query = query.permute(1, 0, 2)
         query_pos = query_pos.permute(1, 0, 2)

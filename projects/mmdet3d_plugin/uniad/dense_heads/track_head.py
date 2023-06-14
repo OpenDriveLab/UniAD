@@ -53,6 +53,8 @@ class BEVFormerTrackHead(DETRHead):
         self.fp16_enabled = False
 
         self.with_box_refine = with_box_refine
+
+        assert as_two_stage is False, 'as_two_stage is not supported yet.'
         self.as_two_stage = as_two_stage
         if self.as_two_stage:
             transformer['as_two_stage'] = self.as_two_stage
@@ -127,8 +129,6 @@ class BEVFormerTrackHead(DETRHead):
         if not self.as_two_stage:
             self.bev_embedding = nn.Embedding(
                 self.bev_h * self.bev_w, self.embed_dims)
-            self.query_embedding = nn.Embedding(self.num_query,
-                                                self.embed_dims * 2)
 
     def init_weights(self):
         """Initialize weights of the DeformDETR head."""
