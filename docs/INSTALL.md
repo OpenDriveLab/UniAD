@@ -47,9 +47,10 @@ pip install mmsegmentation==0.14.1
 cd ~
 git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
-git checkout v0.17.1 # Other versions may not be compatible.
-python setup.py install
-pip install -r requirements.txt  # Install packages for mmdet3d
+git checkout v0.17.1
+pip install scipy==1.7.3
+pip install scikit-image==0.20.0
+pip install -v -e .
 ```
 
 **h. Install UniAD.**
