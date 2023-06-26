@@ -247,7 +247,7 @@ class MotionHead(BaseMotionHead):
             track_bbox_results, self.pc_range)
         track_query_pos = self.boxes_query_embedding_layer(pos2posemb2d(reference_points_track.to(device)))  # B, A, D
         
-        # construct the learnable query postional embedding
+        # construct the learnable query positional embedding
         # split and stack according to groups
         learnable_query_pos = self.learnable_motion_query_embedding.weight.to(dtype)  # latent anchor (P*G, D)
         learnable_query_pos = torch.stack(torch.split(learnable_query_pos, self.num_anchor, dim=0))
