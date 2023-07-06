@@ -9,6 +9,8 @@ conda activate uniad
 
 **b. Torch: Install PyTorch and torchvision following the [official instructions](https://pytorch.org/).**
 ```shell
+conda install cudatoolkit=11.1.1 -c conda-forge
+# We use cuda-11.1 by default
 pip install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html
 # Recommended torch>=1.9
 ```

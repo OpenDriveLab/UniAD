@@ -45,10 +45,10 @@ wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/motion_anchor_
 UniAD
 ├── projects/
 ├── tools/
-├── configs/
 ├── ckpts/
 │   ├── bevformer_r101_dcn_24ep.pth
 │   ├── uniad_base_track_map.pth
+|   ├── uniad_base_e2e.pth
 ├── data/
 │   ├── nuscenes/
 │   │   ├── can_bus/

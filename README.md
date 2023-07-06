@@ -65,7 +65,7 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 - [2023/04/18] Base-model checkpoints are released.
 
 
-- [2023/03/29] Code & model initial release `v1.0`
+- [2023/03/29] Code & model initial release `v1.0`.
 - [2023/03/21] :rocket::rocket: UniAD is accepted by CVPR 2023, as an **Award Candidate** (12 out of 2360 accepted papers)!
 - [2022/12/21] UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv.
 
