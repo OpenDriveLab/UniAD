@@ -64,10 +64,10 @@ The second-stage training takes ~ 17 GB GPU memory, ~ 4 days for 20 epochs on 8 
 # N_GPUS is the number of GPUs used.  Recommended =8.
 # If you evaluate with different number of GPUs rather than 8, the results might be slightly different.
 
-./tools/uniad_dist_eval.sh ./projects/configs/stage1_track_map/base_track_map.py ./path/to/ckpts.pth N_GPUS
+./tools/uniad_dist_eval.sh ./projects/configs/stage1_track_map/base_track_map.py /PATH/TO/YOUR/CKPT.pth N_GPUS
 
 # For slurm users:
-# ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/stage1_track_map/base_track_map.py ./path/to/ckpts.pth N_GPUS
+# ./tools/uniad_slurm_eval.sh YOUR_PARTITION ./projects/configs/stage1_track_map/base_track_map.py /PATH/TO/YOUR/CKPT.pth N_GPUS
 ```
 
 ## Visualization <a name="vis"></a>
@@ -79,8 +79,8 @@ The second-stage training takes ~ 17 GB GPU memory, ~ 4 days for 20 epochs on 8 
 ```shell
 # please refer to  ./tools/uniad_vis_result.sh
 python ./tools/analysis_tools/visualize/run.py \
-    --predroot ./path/to/results.pkl \
-    --out_folder ./path/to/output \
+    --predroot /PATH/TO/YOUR/RESULTS.pkl \
+    --out_folder /PATH/TO/YOUR/OUTPUT \
     --demo_video test_demo.avi \
     --project_to_cam True
 ```
