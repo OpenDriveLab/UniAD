@@ -47,7 +47,6 @@ class CameraRender(BaseRender):
         _, cs_record, pose_record, cam_intrinsic, imsize = self.get_image_info(
             sample_data_token, nusc)
         boxes = []
-        # import pdb;pdb.set_trace()
         for agent in agent_prediction_list:
             box = Box(agent.pred_center, agent.pred_dim, Quaternion(axis=(0.0, 0.0, 1.0), radians=agent.pred_yaw),
                       name=agent.pred_label, token='predicted')

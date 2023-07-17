@@ -203,7 +203,6 @@ class BEVRender(BaseRender):
             -51.2, 51.2, -51.2, 51.2), vmax=0.2, cmap=matplotlib.colormaps[cmap_name])
 
     def render_hd_map(self, nusc, nusc_maps, sample_token):
-        # import pdb;pdb.set_trace()
         sample_record = nusc.get('sample', sample_token)
         sd_rec = nusc.get('sample_data', sample_record['data']['LIDAR_TOP'])
         cs_record = nusc.get('calibrated_sensor',

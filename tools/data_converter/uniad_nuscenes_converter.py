@@ -319,7 +319,6 @@ def _fill_trainval_infos(nusc,
                              for ann in annotations]
             future_traj_all, future_traj_valid_mask_all = _get_future_traj_info(nusc, sample)
             instance_tokens = [ann['instance_token'] for ann in annotations]  # dtype('<U[length_of_str]')
-            # import pdb; pdb.set_trace()
 
             # TODO: Add traj in next dataset_version
             # future_traj_all, future_traj_valid_mask_all = _get_future_traj_info(nusc, sample)

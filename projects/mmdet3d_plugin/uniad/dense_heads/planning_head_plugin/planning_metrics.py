@@ -130,7 +130,6 @@ class PlanningMetric(Metric):
         segmentation: torch.Tensor (B, n_future, 200, 200)
         '''
         assert trajs.shape == gt_trajs.shape
-        # import pdb;pdb.set_trace()
         trajs[..., 0] = - trajs[..., 0]
         gt_trajs[..., 0] = - gt_trajs[..., 0]
         L2 = self.compute_L2(trajs, gt_trajs, gt_trajs_mask)
