@@ -517,8 +517,6 @@ class SegDETRHead(
         """
         num_bboxes = bbox_pred.size(0)
         # assigner and sampler
-        # import ipdb
-        # ipdb.set_trace()
         assign_result = self.assigner.assign(bbox_pred, cls_score, gt_bboxes,
                                             gt_labels, img_meta,
                                             gt_bboxes_ignore)
