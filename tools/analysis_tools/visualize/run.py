@@ -184,8 +184,6 @@ class Visualizer:
                 track_yaw = bboxes.yaw.cpu().detach().numpy()
                 track_velocity = bboxes.tensor.cpu().detach().numpy()[:, -2:]
 
-                outputs[k]['planning_traj'][0][:, 0] = - \
-                    outputs[k]['planning_traj'][0][:, 0]
                 if self.show_command:
                     command = outputs[k]['command'][0].cpu().detach().numpy()
                 else:
