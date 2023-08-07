@@ -188,7 +188,7 @@ class PlanningHeadSingleMode(nn.Module):
         plan_query = self.attn_module(plan_query, bev_feat)   # [1, 1, 256]
         
         sdc_traj_all = self.reg_branch(plan_query).view((-1, self.planning_steps, 2))
-        sdc_traj_all[...,:2] = torch.cumsum(sdc_traj_all[...,:2], dim=2)
+        sdc_traj_all[...,:2] = torch.cumsum(sdc_traj_all[...,:2], dim=1)
         sdc_traj_all[0] = bivariate_gaussian_activation(sdc_traj_all[0])
         if self.use_col_optim and not self.training:
             # post process, only used when testing
