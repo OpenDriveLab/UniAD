@@ -89,7 +89,7 @@ Pre-trained models and results under main metrics are provided below. We refer y
 
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | Motion<br>minADE |Occupancy<br>IoU-n. | Planning<br>avg.Col. | config | Download |
 | :---: | :---: | :---: | :---: | :---:|:---:| :---: | :---: | :---: |
-| UniAD-B | R101 | 0.358 | 0.317 | 0.709 | 64.1 | 0.25 |  [base-stage2](projects/configs/stage2_e2e/base_e2e.py) | [base-stage2](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_e2e.pth) |
+| UniAD-B | R101 | 0.363 | 0.313 | 0.705 | 63.7 | 0.29 |  [base-stage2](projects/configs/stage2_e2e/base_e2e.py) | [base-stage2](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0.1/uniad_base_e2e.pth) |
 
 ### Checkpoint Usage
 * Download the checkpoints you need into `UniAD/ckpts/` directory.

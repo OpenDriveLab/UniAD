@@ -76,7 +76,7 @@ wget https://github.com/zhiqi-li/storage/releases/download/v1.0/bevformer_r101_d
 wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_track_map.pth
 
 # Pretrained weights of stage2 model (fully functional UniAD)
-wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/uniad_base_e2e.pth
+wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0.1/uniad_base_e2e.pth
 ```
 
 ---

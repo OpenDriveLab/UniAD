@@ -138,6 +138,7 @@ dmypy.json
 output/
 test/
 ckpts/
+ckpts
 
 # work_dirs
 **/work_dirs
@@ -147,3 +148,5 @@ phoenix*
 
 debug/
 *projs/
+
+core.*
