@@ -24,6 +24,7 @@ wget https://github.com/OpenDriveLab/UniAD/releases/download/v1.0/nuscenes_infos
 
 
 *Option2: You can also generate the data infos by yourself:*
+> The generated data path will contain the root directory. Please remember to change the `data_root` to empty in config files if using your generated pkl. Refer to https://github.com/OpenDriveLab/UniAD/issues/13.
 ```shell
 cd UniAD/data
 mkdir infos
