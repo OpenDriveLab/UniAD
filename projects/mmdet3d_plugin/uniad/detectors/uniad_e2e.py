@@ -274,7 +274,7 @@ class UniAD(UniADTrack):
         tmp_pos = copy.deepcopy(img_metas[0][0]['can_bus'][:3])
         tmp_angle = copy.deepcopy(img_metas[0][0]['can_bus'][-1])
         # first frame
-        if self.prev_frame_info['scene_token'] is None:
+        if self.prev_frame_info['prev_bev'] is None:
             img_metas[0][0]['can_bus'][:3] = 0
             img_metas[0][0]['can_bus'][-1] = 0
         # following frames
