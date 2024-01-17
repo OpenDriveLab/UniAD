@@ -82,6 +82,7 @@ class UniAD(UniADTrack):
             return self.forward_train(**kwargs)
         else:
             return self.forward_test(**kwargs)
+            # return self.forward_inference(**kwargs)
 
     # Add the subtask loss to the whole model loss
     @auto_fp16(apply_to=("img", "points"))
@@ -398,6 +399,79 @@ class UniAD(UniADTrack):
                 res.update(result_seg[i])
 
         return result
+
+    def forward_inference(
+        self,
+        img=None,
+        img_metas=None,
+        l2g_t=None,
+        l2g_r_mat=None,
+        timestamp=None,
+        gt_lane_labels=None,
+        gt_lane_masks=None,
+        rescale=False,
+        # planning gt(for evaluation only)
+        sdc_planning=None,
+        sdc_planning_mask=None,
+        command=None,
+        # Occ_gt (for evaluation only)
+        gt_segmentation=None,
+        gt_instance=None,
+        gt_occ_img_is_valid=None,
+        **kwargs,
+    ):
+        # temp ------
+        img = img[0]
+        img_metas = img_metas[0]
+        timestamp = timestamp[0] if timestamp is not None else None
+        # temp ------
+        img_metas[0] = {
+            k: v
+            for k, v in img_metas[0].items()
+            if k in ("scene_token", "can_bus", "lidar2img", "img_shape", "box_type_3d")
+        }
+
+        outs_track = self.simple_test_track(img, l2g_t, l2g_r_mat, img_metas, timestamp)
+        outs_track[0] = self.upsample_bev_if_tiny(outs_track[0])
+
+        # get the bev embedding
+        bev_embed = outs_track[0]["bev_embed"]
+
+        # get the segmentation result using the bev embedding
+        outs_seg = self.seg_head.forward(bev_embed)
+
+        # get the motion
+        _, outs_motion = self.motion_head.forward_test(
+            bev_embed, outs_track[0], outs_seg
+        )
+        outs_motion["bev_pos"] = outs_track[0]["bev_pos"]
+
+        # get the occ result
+        occ_no_query = outs_motion["track_query"].shape[1] == 0
+        if occ_no_query:
+            pass
+        # more stuff here
+
+        ins_query = self.occ_head.merge_queries(
+            outs_motion, self.occ_head.detach_query_pos
+        )
+        _, pred_ins_logits = self.occ_head.forward(bev_embed, ins_query=ins_query)
+        pred_ins_logits = pred_ins_logits[:, :, : 1 + self.occ_head.n_future]
+        pred_ins_sigmoid = pred_ins_logits.sigmoid()
+        pred_seg_scores = pred_ins_sigmoid.max(1)[0]
+        occ_mask = (pred_seg_scores > self.occ_head.test_seg_thresh).long().unsqueeze(2)
+
+        # get the planning output
+        outs_planning = self.planning_head.forward(
+            bev_embed,
+            occ_mask,
+            outs_motion["bev_pos"],
+            outs_motion["sdc_traj_query"],
+            outs_motion["sdc_track_query"],
+            command=command,
+        )
+
+        return outs_planning
 
 
 def pop_elem_in_result(task_result: dict, pop_list: list = None):
