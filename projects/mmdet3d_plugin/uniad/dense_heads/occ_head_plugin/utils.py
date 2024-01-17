@@ -1,8 +1,8 @@
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 # UniAD: Planning-oriented Autonomous Driving (https://arxiv.org/abs/2212.10156)  #
 # Source code: https://github.com/OpenDriveLab/UniAD                              #
 # Copyright (c) OpenDriveLab. All rights reserved.                                #
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 
 import torch
 import torch.nn as nn
@@ -24,22 +24,27 @@ def calculate_birds_eye_view_parameters(x_bounds, y_bounds, z_bounds):
         bev_start_position Bird's-eye view first element
         bev_dimension Bird's-eye view tensor spatial dimension
     """
-    bev_resolution = torch.tensor(
-        [row[2] for row in [x_bounds, y_bounds, z_bounds]])
+    bev_resolution = torch.tensor([row[2] for row in [x_bounds, y_bounds, z_bounds]])
     bev_start_position = torch.tensor(
-        [row[0] + row[2] / 2.0 for row in [x_bounds, y_bounds, z_bounds]])
-    bev_dimension = torch.tensor([(row[1] - row[0]) / row[2]
-                                 for row in [x_bounds, y_bounds, z_bounds]], dtype=torch.long)
+        [row[0] + row[2] / 2.0 for row in [x_bounds, y_bounds, z_bounds]]
+    )
+    bev_dimension = torch.tensor(
+        [(row[1] - row[0]) / row[2] for row in [x_bounds, y_bounds, z_bounds]],
+        dtype=torch.long,
+    )
 
     return bev_resolution, bev_start_position, bev_dimension
 
 
 def gen_dx_bx(xbound, ybound, zbound):
     dx = torch.Tensor([row[2] for row in [xbound, ybound, zbound]])
-    bx = torch.Tensor([row[0] + row[2]/2.0 for row in [xbound, ybound, zbound]])
-    nx = torch.LongTensor([(row[1] - row[0]) / row[2] for row in [xbound, ybound, zbound]])
+    bx = torch.Tensor([row[0] + row[2] / 2.0 for row in [xbound, ybound, zbound]])
+    nx = torch.LongTensor(
+        [(row[1] - row[0]) / row[2] for row in [xbound, ybound, zbound]]
+    )
 
     return dx, bx, nx
+
 
 # Instance utils
 def update_instance_ids(instance_seg, old_ids, new_ids):
@@ -69,17 +74,21 @@ def make_instance_seg_consecutive(instance_seg):
 
 
 def predict_instance_segmentation_and_trajectories(
-                                    foreground_masks,
-                                    ins_sigmoid,
-                                    vehicles_id=1,
-                                    ):
+    foreground_masks,
+    ins_sigmoid,
+    vehicles_id=1,
+):
     if foreground_masks.dim() == 5 and foreground_masks.shape[2] == 1:
         foreground_masks = foreground_masks.squeeze(2)  # [b, t, h, w]
-    foreground_masks = foreground_masks == vehicles_id  # [b, t, h, w]  Only these places have foreground id
-    
+    foreground_masks = (
+        foreground_masks == vehicles_id
+    )  # [b, t, h, w]  Only these places have foreground id
+
     argmax_ins = ins_sigmoid.argmax(dim=1)  # long, [b, t, h, w], ins_id starts from 0
-    argmax_ins = argmax_ins + 1 # [b, t, h, w], ins_id starts from 1
-    instance_seg = (argmax_ins * foreground_masks.float()).long()  # bg is 0, fg starts with 1
+    argmax_ins = argmax_ins + 1  # [b, t, h, w], ins_id starts from 1
+    instance_seg = (
+        argmax_ins * foreground_masks.float()
+    ).long()  # bg is 0, fg starts with 1
 
     # Make the indices of instance_seg consecutive
     instance_seg = make_instance_seg_consecutive(instance_seg).long()

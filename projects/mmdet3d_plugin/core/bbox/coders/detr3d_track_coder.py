@@ -6,6 +6,7 @@ from projects.mmdet3d_plugin.core.bbox.util import normalize_bbox, denormalize_b
 from mmdet3d.core import xywhr2xyxyr
 from mmcv.ops import nms_bev
 
+
 @BBOX_CODERS.register_module()
 class DETRTrack3DCoder(BaseBBoxCoder):
     """Bbox coder for DETR3D.
@@ -19,15 +20,16 @@ class DETRTrack3DCoder(BaseBBoxCoder):
         code_size (int): Code size of bboxes. Default: 9
     """
 
-    def __init__(self,
-                 pc_range,
-                 post_center_range=None,
-                 max_num=100,
-                 score_threshold=0.2,
-                 num_classes=7,
-                 with_nms=False,
-                 iou_thres=0.3):
-        
+    def __init__(
+        self,
+        pc_range,
+        post_center_range=None,
+        max_num=100,
+        score_threshold=0.2,
+        num_classes=7,
+        with_nms=False,
+        iou_thres=0.3,
+    ):
         self.pc_range = pc_range
         self.post_center_range = post_center_range
         self.max_num = max_num
@@ -39,8 +41,15 @@ class DETRTrack3DCoder(BaseBBoxCoder):
     def encode(self):
         pass
 
-    def decode_single(self, cls_scores, bbox_preds, 
-                      track_scores, obj_idxes, with_mask=True, img_metas=None):
+    def decode_single(
+        self,
+        cls_scores,
+        bbox_preds,
+        track_scores,
+        obj_idxes,
+        with_mask=True,
+        img_metas=None,
+    ):
         """Decode bboxes.
         Args:
             cls_scores (Tensor): Outputs from the classification head, \
@@ -61,15 +70,15 @@ class DETRTrack3DCoder(BaseBBoxCoder):
         labels = indexs % self.num_classes
 
         _, bbox_index = track_scores.topk(max_num)
-        
+
         labels = labels[bbox_index]
         bbox_preds = bbox_preds[bbox_index]
         track_scores = track_scores[bbox_index]
         obj_idxes = obj_idxes[bbox_index]
 
         scores = track_scores
-        
-        final_box_preds = denormalize_bbox(bbox_preds, self.pc_range)   
+
+        final_box_preds = denormalize_bbox(bbox_preds, self.pc_range)
         final_scores = track_scores
         final_preds = labels
 
@@ -78,25 +87,25 @@ class DETRTrack3DCoder(BaseBBoxCoder):
             thresh_mask = final_scores > self.score_threshold
 
         if self.with_nms:
-            boxes_for_nms = xywhr2xyxyr(img_metas[0]['box_type_3d'](final_box_preds[:, :], 9).bev)
+            boxes_for_nms = xywhr2xyxyr(
+                img_metas[0]["box_type_3d"](final_box_preds[:, :], 9).bev
+            )
             nms_mask = boxes_for_nms.new_zeros(boxes_for_nms.shape[0]) > 0
             # print(self.nms_iou_thres)
             try:
                 selected = nms_bev(
-                    boxes_for_nms,
-                    final_scores,
-                    thresh=self.nms_iou_thres)
+                    boxes_for_nms, final_scores, thresh=self.nms_iou_thres
+                )
                 nms_mask[selected] = True
             except:
-                print('Error', boxes_for_nms, final_scores)
+                print("Error", boxes_for_nms, final_scores)
                 nms_mask = boxes_for_nms.new_ones(boxes_for_nms.shape[0]) > 0
         if self.post_center_range is not None:
             self.post_center_range = torch.tensor(
-                self.post_center_range, device=scores.device)
-            mask = (final_box_preds[..., :3] >=
-                    self.post_center_range[:3]).all(1)
-            mask &= (final_box_preds[..., :3] <=
-                     self.post_center_range[3:]).all(1)
+                self.post_center_range, device=scores.device
+            )
+            mask = (final_box_preds[..., :3] >= self.post_center_range[:3]).all(1)
+            mask &= (final_box_preds[..., :3] <= self.post_center_range[3:]).all(1)
 
             if self.score_threshold:
                 mask &= thresh_mask
@@ -111,19 +120,20 @@ class DETRTrack3DCoder(BaseBBoxCoder):
             track_scores = track_scores[mask]
             obj_idxes = obj_idxes[mask]
             predictions_dict = {
-                'bboxes': boxes3d,
-                'scores': scores,
-                'labels': labels,
-                'track_scores': track_scores,
-                'obj_idxes': obj_idxes,
-                'bbox_index': bbox_index,
-                'mask': mask
+                "bboxes": boxes3d,
+                "scores": scores,
+                "labels": labels,
+                "track_scores": track_scores,
+                "obj_idxes": obj_idxes,
+                "bbox_index": bbox_index,
+                "mask": mask,
             }
 
         else:
             raise NotImplementedError(
-                'Need to reorganize output as a batch, only '
-                'support post_center_range is not None for now!')
+                "Need to reorganize output as a batch, only "
+                "support post_center_range is not None for now!"
+            )
         return predictions_dict
 
     def decode(self, preds_dicts, with_mask=True, img_metas=None):
@@ -140,17 +150,24 @@ class DETRTrack3DCoder(BaseBBoxCoder):
         Returns:
             list[dict]: Decoded boxes.
         """
-        all_cls_scores = preds_dicts['cls_scores']
-        all_bbox_preds = preds_dicts['bbox_preds']
-        track_scores = preds_dicts['track_scores']
-        obj_idxes = preds_dicts['obj_idxes']
-        
+        all_cls_scores = preds_dicts["cls_scores"]
+        all_bbox_preds = preds_dicts["bbox_preds"]
+        track_scores = preds_dicts["track_scores"]
+        obj_idxes = preds_dicts["obj_idxes"]
+
         batch_size = all_cls_scores.size()[0]
         predictions_list = []
         # bs size = 1
-        predictions_list.append(self.decode_single(
-            all_cls_scores, all_bbox_preds,
-            track_scores, obj_idxes, with_mask, img_metas))
-        #for i in range(batch_size):
+        predictions_list.append(
+            self.decode_single(
+                all_cls_scores,
+                all_bbox_preds,
+                track_scores,
+                obj_idxes,
+                with_mask,
+                img_metas,
+            )
+        )
+        # for i in range(batch_size):
         #    predictions_list.append(self.decode_single(all_cls_scores[i], all_bbox_preds[i]))
         return predictions_list

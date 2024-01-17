@@ -1,8 +1,8 @@
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 # UniAD: Planning-oriented Autonomous Driving (https://arxiv.org/abs/2212.10156)  #
 # Source code: https://github.com/OpenDriveLab/UniAD                              #
 # Copyright (c) OpenDriveLab. All rights reserved.                                #
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 
 import torch
 import torch.nn as nn
@@ -12,6 +12,7 @@ import math
 
 from mmdet.models import LOSSES
 
+
 @LOSSES.register_module()
 class MTPLoss(nn.Module):
     """
@@ -20,7 +21,7 @@ class MTPLoss(nn.Module):
     Multipath outputs, with residuals added to anchors.
     """
 
-    def __init__(self, use_variance=False, alpha=1., beta=1., loss_weight=1.):
+    def __init__(self, use_variance=False, alpha=1.0, beta=1.0, loss_weight=1.0):
         """
         Initialize MTP loss
         :param args: Dictionary with the following (optional) keys
@@ -37,11 +38,7 @@ class MTPLoss(nn.Module):
         self.beta = beta
         self.loss_weight = loss_weight
 
-    def forward(self,
-                traj_prob, 
-                traj_preds, 
-                gt_future_traj, 
-                gt_future_traj_valid_mask):
+    def forward(self, traj_prob, traj_preds, gt_future_traj, gt_future_traj_valid_mask):
         """
         Compute MTP loss
         :param predictions: Dictionary with 'traj': predicted trajectories
@@ -51,7 +48,7 @@ class MTPLoss(nn.Module):
         :return:
         """
         # Unpack arguments
-        traj = traj_preds # (b, nmodes, seq, 5)
+        traj = traj_preds  # (b, nmodes, seq, 5)
         log_probs = traj_prob
         traj_gt = gt_future_traj
 
@@ -63,9 +60,7 @@ class MTPLoss(nn.Module):
         # Masks for variable length ground truth trajectories
         masks = 1 - gt_future_traj_valid_mask.to(traj.dtype)
         errs, inds = min_ade(traj, traj_gt, masks)
-        inds_rep = inds.repeat(
-            sequence_length,
-            pred_params, 1, 1).permute(3, 2, 0, 1)
+        inds_rep = inds.repeat(sequence_length, pred_params, 1, 1).permute(3, 2, 0, 1)
 
         # Calculate MSE or NLL loss for trajectories corresponding to selected
         # outputs:
@@ -77,17 +72,19 @@ class MTPLoss(nn.Module):
             l_reg = errs
 
         # Compute classification loss
-        l_class = - torch.squeeze(log_probs.gather(1, inds.unsqueeze(1)))
+        l_class = -torch.squeeze(log_probs.gather(1, inds.unsqueeze(1)))
 
         loss = self.beta * l_reg + self.alpha * l_class
-        loss = torch.sum(loss)/(batch_size + 1e-5) * self.loss_weight
-        l_reg = torch.sum(l_reg)/(batch_size + 1e-5) * self.loss_weight
-        l_class = torch.sum(l_class)/(batch_size + 1e-5) * self.loss_weight
-        l_mindae = torch.sum(errs)/(batch_size + 1e-5)
+        loss = torch.sum(loss) / (batch_size + 1e-5) * self.loss_weight
+        l_reg = torch.sum(l_reg) / (batch_size + 1e-5) * self.loss_weight
+        l_class = torch.sum(l_class) / (batch_size + 1e-5) * self.loss_weight
+        l_mindae = torch.sum(errs) / (batch_size + 1e-5)
         return loss, l_class, l_reg, l_mindae
 
-def min_ade(traj: torch.Tensor, traj_gt: torch.Tensor,
-            masks: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+
+def min_ade(
+    traj: torch.Tensor, traj_gt: torch.Tensor, masks: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Computes average displacement error for the best trajectory is a set,
     with respect to ground truth
@@ -106,17 +103,16 @@ def min_ade(traj: torch.Tensor, traj_gt: torch.Tensor,
     err = torch.pow(err, exponent=2)
     err = torch.sum(err, dim=3)
     err = torch.pow(err, exponent=0.5)
-    err = torch.sum(err * (1 - masks_rpt), dim=2) / \
-        torch.clip(torch.sum((1 - masks_rpt), dim=2), min=1)
+    err = torch.sum(err * (1 - masks_rpt), dim=2) / torch.clip(
+        torch.sum((1 - masks_rpt), dim=2), min=1
+    )
     err, inds = torch.min(err, dim=1)
 
     return err, inds
 
+
 # TODO: DEBUG THIS FUNCTION (?)
-def traj_nll(
-        pred_dist: torch.Tensor,
-        traj_gt: torch.Tensor,
-        masks: torch.Tensor):
+def traj_nll(pred_dist: torch.Tensor, traj_gt: torch.Tensor, masks: torch.Tensor):
     """
     Computes negative log likelihood of ground truth trajectory under a
     predictive distribution with a single mode,
@@ -141,11 +137,22 @@ def traj_nll(
     rho = pred_dist[:, :, 4]
     ohr = torch.pow(1 - torch.pow(rho, 2), -0.5)
 
-    nll = 0.5 * torch.pow(ohr, 2) * \
-        (torch.pow(sig_x, 2) * torch.pow(x - mu_x, 2) + torch.pow(sig_y, 2) *
-         torch.pow(y - mu_y, 2) - 2 * rho * torch.pow(sig_x, 1) *
-         torch.pow(sig_y, 1) * (x - mu_x) * (y - mu_y)) - \
-        torch.log(sig_x * sig_y * ohr) + 1.8379
+    nll = (
+        0.5
+        * torch.pow(ohr, 2)
+        * (
+            torch.pow(sig_x, 2) * torch.pow(x - mu_x, 2)
+            + torch.pow(sig_y, 2) * torch.pow(y - mu_y, 2)
+            - 2
+            * rho
+            * torch.pow(sig_x, 1)
+            * torch.pow(sig_y, 1)
+            * (x - mu_x)
+            * (y - mu_y)
+        )
+        - torch.log(sig_x * sig_y * ohr)
+        + 1.8379
+    )
 
     nll[nll.isnan()] = 0
     nll[nll.isinf()] = 0
@@ -157,8 +164,10 @@ def traj_nll(
 
     return nll
 
-def min_fde(traj: torch.Tensor, traj_gt: torch.Tensor,
-            masks: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+
+def min_fde(
+    traj: torch.Tensor, traj_gt: torch.Tensor, masks: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Computes final displacement error for the best trajectory is a set,
     with respect to ground truth
@@ -173,8 +182,7 @@ def min_fde(traj: torch.Tensor, traj_gt: torch.Tensor,
     num_modes = traj.shape[1]
     traj_gt_rpt = traj_gt.unsqueeze(1).repeat(1, num_modes, 1, 1)
     lengths = torch.sum(1 - masks, dim=1).long()
-    inds = lengths.unsqueeze(1).unsqueeze(
-        2).unsqueeze(3).repeat(1, num_modes, 1, 2) - 1
+    inds = lengths.unsqueeze(1).unsqueeze(2).unsqueeze(3).repeat(1, num_modes, 1, 2) - 1
 
     traj_last = torch.gather(traj[..., :2], dim=2, index=inds).squeeze(2)
     traj_gt_last = torch.gather(traj_gt_rpt, dim=2, index=inds).squeeze(2)
@@ -189,10 +197,11 @@ def min_fde(traj: torch.Tensor, traj_gt: torch.Tensor,
 
 
 def miss_rate(
-        traj: torch.Tensor,
-        traj_gt: torch.Tensor,
-        masks: torch.Tensor,
-        dist_thresh: float = 2) -> torch.Tensor:
+    traj: torch.Tensor,
+    traj_gt: torch.Tensor,
+    masks: torch.Tensor,
+    dist_thresh: float = 2,
+) -> torch.Tensor:
     """
     Computes miss rate for mini batch of trajectories,
     with respect to ground truth and given distance threshold

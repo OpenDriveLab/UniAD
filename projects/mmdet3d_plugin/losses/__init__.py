@@ -6,9 +6,12 @@ from .planning_loss import PlanningLoss, CollisionLoss
 from .dice_loss import DiceLoss
 
 __all__ = [
-    'ClipMatcher', 'MTPLoss',
-    'DiceLoss',
-    'FieryBinarySegmentationLoss', 'DiceLossWithMasks',
-    'TrajLoss',
-    'PlanningLoss', 'CollisionLoss'
+    "ClipMatcher",
+    "MTPLoss",
+    "DiceLoss",
+    "FieryBinarySegmentationLoss",
+    "DiceLossWithMasks",
+    "TrajLoss",
+    "PlanningLoss",
+    "CollisionLoss",
 ]

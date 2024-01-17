@@ -1,9 +1,9 @@
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 # UniAD: Planning-oriented Autonomous Driving (https://arxiv.org/abs/2212.10156)  #
 # Source code: https://github.com/OpenDriveLab/UniAD                              #
 # Copyright (c) OpenDriveLab. All rights reserved.                                #
 # Modified from Fiery (https://github.com/wayveai/fiery)                          #
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,9 +11,17 @@ from einops import rearrange
 from mmdet.models.builder import LOSSES
 from mmdet.models.losses.utils import weight_reduce_loss
 
+
 @LOSSES.register_module()
 class FieryBinarySegmentationLoss(nn.Module):
-    def __init__(self, use_top_k=False, top_k_ratio=1.0, future_discount=1.0, loss_weight=1.0, ignore_index=255):
+    def __init__(
+        self,
+        use_top_k=False,
+        top_k_ratio=1.0,
+        future_discount=1.0,
+        loss_weight=1.0,
+        ignore_index=255,
+    ):
         super().__init__()
         self.use_top_k = use_top_k
         self.top_k_ratio = top_k_ratio
@@ -23,7 +31,9 @@ class FieryBinarySegmentationLoss(nn.Module):
 
     def forward(self, prediction, target, frame_mask=None):
         n_gt, s, h, w = prediction.size()
-        assert prediction.size() == target.size(), f"{prediction.size()}, {target.size()}"
+        assert (
+            prediction.size() == target.size()
+        ), f"{prediction.size()}, {target.size()}"
 
         # Deal target > 1 (ignore_index)
         keep_mask = (target.long() != self.ignore_index).float()
@@ -32,10 +42,10 @@ class FieryBinarySegmentationLoss(nn.Module):
         loss = F.binary_cross_entropy_with_logits(
             prediction,
             target.float(),
-            reduction='none',
+            reduction="none",
         )
         assert loss.size() == prediction.size(), f"{loss.size()}, {prediction.size()}"
-        
+
         # Deal ignore_index
         if self.ignore_index is not None:
             # keep_mask = (target.long() != self.ignore_index).float()
@@ -45,11 +55,13 @@ class FieryBinarySegmentationLoss(nn.Module):
         if frame_mask is not None:
             assert frame_mask.size(0) == s, f"{frame_mask.size()}"
             if frame_mask.sum().item() == 0:
-                return prediction.sum() * 0.
+                return prediction.sum() * 0.0
             frame_mask = frame_mask.view(1, s, 1, 1)
             loss = loss * frame_mask.float()
-        
-        future_discounts = self.future_discount ** torch.arange(s, device=loss.device, dtype=loss.dtype)
+
+        future_discounts = self.future_discount ** torch.arange(
+            s, device=loss.device, dtype=loss.dtype
+        )
         future_discounts = future_discounts.view(1, s, 1, 1)
         loss = loss * future_discounts
 
@@ -61,16 +73,19 @@ class FieryBinarySegmentationLoss(nn.Module):
             loss = loss[:, :, :k]
 
         return self.loss_weight * torch.mean(loss)
-        
-def dice_loss(pred,
-              target,
-              weight=None,
-              eps=1e-3,
-              reduction='mean',
-              naive_dice=False,
-              avg_factor=None,
-              ignore_index=None,
-              frame_mask=None):
+
+
+def dice_loss(
+    pred,
+    target,
+    weight=None,
+    eps=1e-3,
+    reduction="mean",
+    naive_dice=False,
+    avg_factor=None,
+    ignore_index=None,
+    frame_mask=None,
+):
     """Calculate dice loss, there are two forms of dice loss is supported:
 
         - the one proposed in `V-Net: Fully Convolutional Neural
@@ -99,23 +114,22 @@ def dice_loss(pred,
             the loss. Defaults to None.
     """
     n, s, h, w = pred.size()
-    assert pred.size() == target.size(),  \
-                f"{pred.size()}, {target.size()}"
-    
+    assert pred.size() == target.size(), f"{pred.size()}, {target.size()}"
+
     # Ignore invalid index(255)
     if ignore_index is not None:
-        keep_mask = (target.long() != ignore_index)
+        keep_mask = target.long() != ignore_index
         target = target * keep_mask.float()
-        pred   = pred   * keep_mask.float()
+        pred = pred * keep_mask.float()
 
     # Ignore invalid frame
     if frame_mask is not None:
         assert frame_mask.size(0) == s, f"{frame_mask.size()}"
         if frame_mask.sum().item() == 0:
-            return pred.sum() * 0.
+            return pred.sum() * 0.0
         frame_mask = frame_mask.view(1, s, 1, 1)
         target = target * frame_mask.float()
-        pred   = pred   * frame_mask.float()
+        pred = pred * frame_mask.float()
 
     input = pred.flatten(1)
     target = target.flatten(1).float()
@@ -137,16 +151,19 @@ def dice_loss(pred,
     loss = weight_reduce_loss(loss, weight, reduction, avg_factor)
     return loss
 
+
 @LOSSES.register_module()
 class DiceLossWithMasks(nn.Module):
-    def __init__(self,
-                 use_sigmoid=True,
-                 activate=True,
-                 reduction='mean',
-                 naive_dice=False,
-                 loss_weight=1.0,
-                 ignore_index=255,
-                 eps=1e-3):
+    def __init__(
+        self,
+        use_sigmoid=True,
+        activate=True,
+        reduction="mean",
+        naive_dice=False,
+        loss_weight=1.0,
+        ignore_index=255,
+        eps=1e-3,
+    ):
         """Compute dice loss.
 
         Args:
@@ -176,14 +193,15 @@ class DiceLossWithMasks(nn.Module):
         self.activate = activate
         self.ignore_index = ignore_index
 
-    def forward(self,
-                pred,
-                target,
-                weight=None,
-                reduction_override=None,
-                avg_factor=None,
-                frame_mask=None
-                ):
+    def forward(
+        self,
+        pred,
+        target,
+        weight=None,
+        reduction_override=None,
+        avg_factor=None,
+        frame_mask=None,
+    ):
         """Forward function.
 
         Args:
@@ -202,9 +220,8 @@ class DiceLossWithMasks(nn.Module):
             torch.Tensor: The calculated loss
         """
 
-        assert reduction_override in (None, 'none', 'mean', 'sum')
-        reduction = (
-            reduction_override if reduction_override else self.reduction)
+        assert reduction_override in (None, "none", "mean", "sum")
+        reduction = reduction_override if reduction_override else self.reduction
 
         if self.activate:
             if self.use_sigmoid:
@@ -221,6 +238,7 @@ class DiceLossWithMasks(nn.Module):
             naive_dice=self.naive_dice,
             avg_factor=avg_factor,
             ignore_index=self.ignore_index,
-            frame_mask=frame_mask)
+            frame_mask=frame_mask,
+        )
 
         return loss

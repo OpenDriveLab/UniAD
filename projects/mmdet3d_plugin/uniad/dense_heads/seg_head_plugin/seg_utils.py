@@ -1,5 +1,3 @@
-
-
 def IOU(intputs, targets):
     numerator = (intputs * targets).sum(dim=1)
     denominator = intputs.sum(dim=1) + targets.sum(dim=1) - numerator

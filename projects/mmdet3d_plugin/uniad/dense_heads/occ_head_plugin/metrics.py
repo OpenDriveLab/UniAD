@@ -1,24 +1,28 @@
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 # UniAD: Planning-oriented Autonomous Driving (https://arxiv.org/abs/2212.10156)  #
 # Source code: https://github.com/OpenDriveLab/UniAD                              #
 # Copyright (c) OpenDriveLab. All rights reserved.                                #
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 
 from typing import Optional
 
 import torch
 from pytorch_lightning.metrics.metric import Metric
-from pytorch_lightning.metrics.functional.classification import stat_scores_multiple_classes
+from pytorch_lightning.metrics.functional.classification import (
+    stat_scores_multiple_classes,
+)
 from pytorch_lightning.metrics.functional.reduction import reduce
+
 
 class IntersectionOverUnion(Metric):
     """Computes intersection-over-union."""
+
     def __init__(
         self,
         n_classes: int,
         ignore_index: Optional[int] = None,
         absent_score: float = 0.0,
-        reduction: str = 'none',
+        reduction: str = "none",
         compute_on_step: bool = False,
     ):
         super().__init__(compute_on_step=compute_on_step)
@@ -28,13 +32,21 @@ class IntersectionOverUnion(Metric):
         self.absent_score = absent_score
         self.reduction = reduction
 
-        self.add_state('true_positive', default=torch.zeros(n_classes), dist_reduce_fx='sum')
-        self.add_state('false_positive', default=torch.zeros(n_classes), dist_reduce_fx='sum')
-        self.add_state('false_negative', default=torch.zeros(n_classes), dist_reduce_fx='sum')
-        self.add_state('support', default=torch.zeros(n_classes), dist_reduce_fx='sum')
+        self.add_state(
+            "true_positive", default=torch.zeros(n_classes), dist_reduce_fx="sum"
+        )
+        self.add_state(
+            "false_positive", default=torch.zeros(n_classes), dist_reduce_fx="sum"
+        )
+        self.add_state(
+            "false_negative", default=torch.zeros(n_classes), dist_reduce_fx="sum"
+        )
+        self.add_state("support", default=torch.zeros(n_classes), dist_reduce_fx="sum")
 
     def update(self, prediction: torch.Tensor, target: torch.Tensor):
-        tps, fps, _, fns, sups = stat_scores_multiple_classes(prediction, target, self.n_classes)
+        tps, fps, _, fns, sups = stat_scores_multiple_classes(
+            prediction, target, self.n_classes
+        )
 
         self.true_positive += tps
         self.false_positive += fps
@@ -42,7 +54,9 @@ class IntersectionOverUnion(Metric):
         self.support += sups
 
     def compute(self):
-        scores = torch.zeros(self.n_classes, device=self.true_positive.device, dtype=torch.float32)
+        scores = torch.zeros(
+            self.n_classes, device=self.true_positive.device, dtype=torch.float32
+        )
 
         for class_idx in range(self.n_classes):
             if class_idx == self.ignore_index:
@@ -64,8 +78,12 @@ class IntersectionOverUnion(Metric):
             scores[class_idx] = score
 
         # Remove the ignored class index from the scores.
-        if (self.ignore_index is not None) and (0 <= self.ignore_index < self.n_classes):
-            scores = torch.cat([scores[:self.ignore_index], scores[self.ignore_index+1:]])
+        if (self.ignore_index is not None) and (
+            0 <= self.ignore_index < self.n_classes
+        ):
+            scores = torch.cat(
+                [scores[: self.ignore_index], scores[self.ignore_index + 1 :]]
+            )
 
         return reduce(scores, reduction=self.reduction)
 
@@ -83,12 +101,18 @@ class PanopticMetric(Metric):
         self.n_classes = n_classes
         self.temporally_consistent = temporally_consistent
         self.vehicles_id = vehicles_id
-        self.keys = ['iou', 'true_positive', 'false_positive', 'false_negative']
+        self.keys = ["iou", "true_positive", "false_positive", "false_negative"]
 
-        self.add_state('iou', default=torch.zeros(n_classes), dist_reduce_fx='sum')
-        self.add_state('true_positive', default=torch.zeros(n_classes), dist_reduce_fx='sum')
-        self.add_state('false_positive', default=torch.zeros(n_classes), dist_reduce_fx='sum')
-        self.add_state('false_negative', default=torch.zeros(n_classes), dist_reduce_fx='sum')
+        self.add_state("iou", default=torch.zeros(n_classes), dist_reduce_fx="sum")
+        self.add_state(
+            "true_positive", default=torch.zeros(n_classes), dist_reduce_fx="sum"
+        )
+        self.add_state(
+            "false_positive", default=torch.zeros(n_classes), dist_reduce_fx="sum"
+        )
+        self.add_state(
+            "false_negative", default=torch.zeros(n_classes), dist_reduce_fx="sum"
+        )
 
     def update(self, pred_instance, gt_instance):
         """
@@ -103,7 +127,7 @@ class PanopticMetric(Metric):
         """
         batch_size, sequence_length = gt_instance.shape[:2]
         # Process labels
-        assert gt_instance.min() == 0, 'ID 0 of gt_instance must be background'
+        assert gt_instance.min() == 0, "ID 0 of gt_instance must be background"
         pred_segmentation = (pred_instance > 0).long()
         gt_segmentation = (gt_instance > 0).long()
 
@@ -118,28 +142,40 @@ class PanopticMetric(Metric):
                     unique_id_mapping,
                 )
 
-                self.iou += result['iou']
-                self.true_positive += result['true_positive']
-                self.false_positive += result['false_positive']
-                self.false_negative += result['false_negative']
+                self.iou += result["iou"]
+                self.true_positive += result["true_positive"]
+                self.false_positive += result["false_positive"]
+                self.false_negative += result["false_negative"]
 
     def compute(self):
         denominator = torch.maximum(
             (self.true_positive + self.false_positive / 2 + self.false_negative / 2),
-            torch.ones_like(self.true_positive)
+            torch.ones_like(self.true_positive),
         )
         pq = self.iou / denominator
-        sq = self.iou / torch.maximum(self.true_positive, torch.ones_like(self.true_positive))
+        sq = self.iou / torch.maximum(
+            self.true_positive, torch.ones_like(self.true_positive)
+        )
         rq = self.true_positive / denominator
 
-        return {'pq': pq,
-                'sq': sq,
-                'rq': rq,
-                # If 0, it means there wasn't any detection.
-                'denominator': (self.true_positive + self.false_positive / 2 + self.false_negative / 2),
-                }
+        return {
+            "pq": pq,
+            "sq": sq,
+            "rq": rq,
+            # If 0, it means there wasn't any detection.
+            "denominator": (
+                self.true_positive + self.false_positive / 2 + self.false_negative / 2
+            ),
+        }
 
-    def panoptic_metrics(self, pred_segmentation, pred_instance, gt_segmentation, gt_instance, unique_id_mapping):
+    def panoptic_metrics(
+        self,
+        pred_segmentation,
+        pred_instance,
+        gt_segmentation,
+        gt_instance,
+        unique_id_mapping,
+    ):
         """
         Computes panoptic quality metric components.
 
@@ -153,34 +189,50 @@ class PanopticMetric(Metric):
         """
         n_classes = self.n_classes
 
-        result = {key: torch.zeros(n_classes, dtype=torch.float32, device=gt_instance.device) for key in self.keys}
+        result = {
+            key: torch.zeros(n_classes, dtype=torch.float32, device=gt_instance.device)
+            for key in self.keys
+        }
 
         assert pred_segmentation.dim() == 2
-        assert pred_segmentation.shape == pred_instance.shape == gt_segmentation.shape == gt_instance.shape
+        assert (
+            pred_segmentation.shape
+            == pred_instance.shape
+            == gt_segmentation.shape
+            == gt_instance.shape
+        )
 
         n_instances = int(torch.cat([pred_instance, gt_instance]).max().item())
         n_all_things = n_instances + n_classes  # Classes + instances.
         n_things_and_void = n_all_things + 1
 
-        # Now 1 is background; 0 is void (not used). 2 is vehicle semantic class but since it overlaps with
+        # Now 1 is background; 0 is void (not used). 2 is vehicle semantic class but since it overlaps with
         # instances, it is not present.
         # and the rest are instance ids starting from 3
-        prediction, pred_to_cls = self.combine_mask(pred_segmentation, pred_instance, n_classes, n_all_things)
-        target, target_to_cls = self.combine_mask(gt_segmentation, gt_instance, n_classes, n_all_things)
+        prediction, pred_to_cls = self.combine_mask(
+            pred_segmentation, pred_instance, n_classes, n_all_things
+        )
+        target, target_to_cls = self.combine_mask(
+            gt_segmentation, gt_instance, n_classes, n_all_things
+        )
 
         # Compute ious between all stuff and things
         # hack for bincounting 2 arrays together
         x = prediction + n_things_and_void * target
-        bincount_2d = torch.bincount(x.long(), minlength=n_things_and_void ** 2)
-        if bincount_2d.shape[0] != n_things_and_void ** 2:
-            raise ValueError('Incorrect bincount size.')
+        bincount_2d = torch.bincount(x.long(), minlength=n_things_and_void**2)
+        if bincount_2d.shape[0] != n_things_and_void**2:
+            raise ValueError("Incorrect bincount size.")
         conf = bincount_2d.reshape((n_things_and_void, n_things_and_void))
         # Drop void class
         conf = conf[1:, 1:]
 
         # Confusion matrix contains intersections between all combinations of classes
         union = conf.sum(0).unsqueeze(0) + conf.sum(1).unsqueeze(1) - conf
-        iou = torch.where(union > 0, (conf.float() + 1e-9) / (union.float() + 1e-9), torch.zeros_like(union).float())
+        iou = torch.where(
+            union > 0,
+            (conf.float() + 1e-9) / (union.float() + 1e-9),
+            torch.zeros_like(union).float(),
+        )
 
         # In the iou matrix, first dimension is target idx, second dimension is pred idx.
         # Mapping will contain a tuple that maps prediction idx to target idx for segments matched by iou.
@@ -198,15 +250,18 @@ class PanopticMetric(Metric):
             cls_id = pred_to_cls[pred_id]
 
             if self.temporally_consistent and cls_id == self.vehicles_id:
-                if target_id.item() in unique_id_mapping and unique_id_mapping[target_id.item()] != pred_id.item():
+                if (
+                    target_id.item() in unique_id_mapping
+                    and unique_id_mapping[target_id.item()] != pred_id.item()
+                ):
                     # Not temporally consistent
-                    result['false_negative'][target_to_cls[target_id]] += 1
-                    result['false_positive'][pred_to_cls[pred_id]] += 1
+                    result["false_negative"][target_to_cls[target_id]] += 1
+                    result["false_positive"][pred_to_cls[pred_id]] += 1
                     unique_id_mapping[target_id.item()] = pred_id.item()
                     continue
 
-            result['true_positive'][cls_id] += 1
-            result['iou'][cls_id] += iou[target_id][pred_id]
+            result["true_positive"][cls_id] += 1
+            result["iou"][cls_id] += iou[target_id][pred_id]
             unique_id_mapping[target_id.item()] = pred_id.item()
 
         for target_id in range(n_classes, n_all_things):
@@ -215,7 +270,7 @@ class PanopticMetric(Metric):
                 continue
             # If this target instance didn't match with any predictions and was present set it as false negative.
             if target_to_cls[target_id] != -1:
-                result['false_negative'][target_to_cls[target_id]] += 1
+                result["false_negative"][target_to_cls[target_id]] += 1
 
         for pred_id in range(n_classes, n_all_things):
             # If this is a true positive do nothing.
@@ -223,11 +278,17 @@ class PanopticMetric(Metric):
                 continue
             # If this predicted instance didn't match with any prediction, set that predictions as false positive.
             if pred_to_cls[pred_id] != -1 and (conf[:, pred_id] > 0).any():
-                result['false_positive'][pred_to_cls[pred_id]] += 1
+                result["false_positive"][pred_to_cls[pred_id]] += 1
 
         return result
 
-    def combine_mask(self, segmentation: torch.Tensor, instance: torch.Tensor, n_classes: int, n_all_things: int):
+    def combine_mask(
+        self,
+        segmentation: torch.Tensor,
+        instance: torch.Tensor,
+        n_classes: int,
+        n_all_things: int,
+    ):
         """Shifts all things ids by num_classes and combines things and stuff into a single mask
 
         Returns a combined mask + a mapping from id to segmentation class.
@@ -248,10 +309,12 @@ class PanopticMetric(Metric):
             dim=1,
         )
         instance_id_to_class = -instance_id_to_class_tuples.new_ones((n_all_things,))
-        instance_id_to_class[instance_id_to_class_tuples[:, 0]] = instance_id_to_class_tuples[:, 1]
-        instance_id_to_class[torch.arange(n_classes, device=segmentation.device)] = torch.arange(
-            n_classes, device=segmentation.device
-        )
+        instance_id_to_class[
+            instance_id_to_class_tuples[:, 0]
+        ] = instance_id_to_class_tuples[:, 1]
+        instance_id_to_class[
+            torch.arange(n_classes, device=segmentation.device)
+        ] = torch.arange(n_classes, device=segmentation.device)
 
         segmentation[instance_mask] = instance[instance_mask]
         segmentation += 1  # Shift all legit classes by 1.

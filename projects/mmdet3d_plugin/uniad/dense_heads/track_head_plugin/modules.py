@@ -3,13 +3,16 @@ import torch.nn.functional as F
 from torch import nn
 from .track_instance import Instances
 
+
 # MemoryBank
 class MemoryBank(nn.Module):
-
-    def __init__(self,
-                 args,
-                 dim_in, hidden_dim, dim_out,
-                 ):
+    def __init__(
+        self,
+        args,
+        dim_in,
+        hidden_dim,
+        dim_out,
+    ):
         super().__init__()
         self._build_layers(args, dim_in, hidden_dim, dim_out)
         for p in self.parameters():
@@ -17,9 +20,9 @@ class MemoryBank(nn.Module):
                 nn.init.xavier_uniform_(p)
 
     def _build_layers(self, args, dim_in, hidden_dim, dim_out):
-        self.save_thresh = args['memory_bank_score_thresh']
+        self.save_thresh = args["memory_bank_score_thresh"]
         self.save_period = 3
-        self.max_his_length = args['memory_bank_len']
+        self.max_his_length = args["memory_bank_len"]
 
         self.save_proj = nn.Linear(dim_in, dim_in)
 
@@ -30,7 +33,7 @@ class MemoryBank(nn.Module):
         self.temporal_norm2 = nn.LayerNorm(dim_in)
 
     def update(self, track_instances):
-        embed = track_instances.output_embedding[:, None]  #( N, 1, 256)
+        embed = track_instances.output_embedding[:, None]  # ( N, 1, 256)
         scores = track_instances.scores
         mem_padding_mask = track_instances.mem_padding_mask
         device = embed.device
@@ -48,9 +51,17 @@ class MemoryBank(nn.Module):
         if len(saved_embed) > 0:
             prev_embed = track_instances.mem_bank[saved_idxes]
             save_embed = self.save_proj(saved_embed)
-            mem_padding_mask[saved_idxes] = torch.cat([mem_padding_mask[saved_idxes, 1:], torch.zeros((len(saved_embed), 1), dtype=torch.bool, device=device)], dim=1)
+            mem_padding_mask[saved_idxes] = torch.cat(
+                [
+                    mem_padding_mask[saved_idxes, 1:],
+                    torch.zeros((len(saved_embed), 1), dtype=torch.bool, device=device),
+                ],
+                dim=1,
+            )
             track_instances.mem_bank = track_instances.mem_bank.clone()
-            track_instances.mem_bank[saved_idxes] = torch.cat([prev_embed[:, 1:], save_embed], dim=1)
+            track_instances.mem_bank[saved_idxes] = torch.cat(
+                [prev_embed[:, 1:], save_embed], dim=1
+            )
 
     def _forward_temporal_attn(self, track_instances):
         if len(track_instances) == 0:
@@ -65,8 +76,10 @@ class MemoryBank(nn.Module):
             prev_embed = track_instances.mem_bank[valid_idxes]
             key_padding_mask = key_padding_mask[valid_idxes]
             embed2 = self.temporal_attn(
-                embed[None],                  # (num_track, dim) to (1, num_track, dim)
-                prev_embed.transpose(0, 1),   # (num_track, mem_len, dim) to (mem_len, num_track, dim)
+                embed[None],  # (num_track, dim) to (1, num_track, dim)
+                prev_embed.transpose(
+                    0, 1
+                ),  # (num_track, mem_len, dim) to (mem_len, num_track, dim)
                 prev_embed.transpose(0, 1),
                 key_padding_mask=key_padding_mask,
             )[0][0]
@@ -91,7 +104,6 @@ class MemoryBank(nn.Module):
 
 # QIM
 class QueryInteractionBase(nn.Module):
-
     def __init__(self, args, dim_in, hidden_dim, dim_out):
         super().__init__()
         self.args = args
@@ -112,8 +124,8 @@ class QueryInteractionBase(nn.Module):
     def _update_track_embedding(self, track_instances):
         raise NotImplementedError()
 
-class QueryInteractionModule(QueryInteractionBase):
 
+class QueryInteractionModule(QueryInteractionBase):
     def __init__(self, args, dim_in, hidden_dim, dim_out):
         super().__init__(args, dim_in, hidden_dim, dim_out)
         self.random_drop = args["random_drop"]
@@ -153,14 +165,13 @@ class QueryInteractionModule(QueryInteractionBase):
             return track_instances
         dim = track_instances.query.shape[1]
         out_embed = track_instances.output_embedding
-        query_pos = track_instances.query[:, :dim // 2]
-        query_feat = track_instances.query[:, dim // 2:]
+        query_pos = track_instances.query[:, : dim // 2]
+        query_feat = track_instances.query[:, dim // 2 :]
         q = k = query_pos + out_embed
 
         # attention
         tgt = out_embed
-        tgt2 = self.self_attn(q[:, None], k[:, None], value=tgt[:, None])[0][:,
-                                                                             0]
+        tgt2 = self.self_attn(q[:, None], k[:, None], value=tgt[:, None])[0][:, 0]
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
 
@@ -172,16 +183,18 @@ class QueryInteractionModule(QueryInteractionBase):
         if self.update_query_pos:
             # ffn: linear_pos2
             query_pos2 = self.linear_pos2(
-                self.dropout_pos1(self.activation(self.linear_pos1(tgt))))
+                self.dropout_pos1(self.activation(self.linear_pos1(tgt)))
+            )
             query_pos = query_pos + self.dropout_pos2(query_pos2)
             query_pos = self.norm_pos(query_pos)
-            track_instances.query[:, :dim // 2] = query_pos
+            track_instances.query[:, : dim // 2] = query_pos
 
         query_feat2 = self.linear_feat2(
-            self.dropout_feat1(self.activation(self.linear_feat1(tgt))))
+            self.dropout_feat1(self.activation(self.linear_feat1(tgt)))
+        )
         query_feat = query_feat + self.dropout_feat2(query_feat2)
         query_feat = self.norm_feat(query_feat)
-        track_instances.query[:, dim // 2:] = query_feat
+        track_instances.query[:, dim // 2 :] = query_feat
         # track_instances.ref_pts = inverse_sigmoid(track_instances.pred_boxes[:, :2].detach().clone())
         # update ref_pts using track_instances.pred_boxes
         return track_instances
@@ -193,18 +206,19 @@ class QueryInteractionModule(QueryInteractionBase):
             track_instances = track_instances[keep_idxes]
         return track_instances
 
-    def _add_fp_tracks(self, track_instances: Instances,
-                       active_track_instances: Instances) -> Instances:
+    def _add_fp_tracks(
+        self, track_instances: Instances, active_track_instances: Instances
+    ) -> Instances:
         """
         self.fp_ratio is used to control num(add_fp) / num(active)
         """
         inactive_instances = track_instances[track_instances.obj_idxes < 0]
 
         # add fp for each active track in a specific probability.
-        fp_prob = torch.ones_like(
-            active_track_instances.scores) * self.fp_ratio
+        fp_prob = torch.ones_like(active_track_instances.scores) * self.fp_ratio
         selected_active_track_instances = active_track_instances[
-            torch.bernoulli(fp_prob).bool()]
+            torch.bernoulli(fp_prob).bool()
+        ]
         num_fp = len(selected_active_track_instances)
 
         if len(inactive_instances) > 0 and num_fp > 0:
@@ -221,7 +235,8 @@ class QueryInteractionModule(QueryInteractionBase):
                 fp_track_instances = inactive_instances[fp_indexes]
 
             merged_track_instances = Instances.cat(
-                [active_track_instances, fp_track_instances])
+                [active_track_instances, fp_track_instances]
+            )
             return merged_track_instances
 
         return active_track_instances
@@ -229,26 +244,26 @@ class QueryInteractionModule(QueryInteractionBase):
     def _select_active_tracks(self, data: dict) -> Instances:
         track_instances: Instances = data["track_instances"]
         if self.training:
-            active_idxes = (track_instances.obj_idxes >=
-                            0) & (track_instances.iou > 0.5)
+            active_idxes = (track_instances.obj_idxes >= 0) & (
+                track_instances.iou > 0.5
+            )
             active_track_instances = track_instances[active_idxes]
             # set -2 instead of -1 to ensure that these tracks will not be selected in matching.
-            active_track_instances = self._random_drop_tracks(
-                active_track_instances)
+            active_track_instances = self._random_drop_tracks(active_track_instances)
             if self.fp_ratio > 0:
                 active_track_instances = self._add_fp_tracks(
-                    track_instances, active_track_instances)
+                    track_instances, active_track_instances
+                )
         else:
-            active_track_instances = track_instances[
-                track_instances.obj_idxes >= 0]
+            active_track_instances = track_instances[track_instances.obj_idxes >= 0]
 
         return active_track_instances
 
     def forward(self, data) -> Instances:
         active_track_instances = self._select_active_tracks(data)
-        active_track_instances = self._update_track_embedding(
-            active_track_instances)
+        active_track_instances = self._update_track_embedding(active_track_instances)
         init_track_instances: Instances = data["init_track_instances"]
         merged_track_instances = Instances.cat(
-            [init_track_instances, active_track_instances])
+            [init_track_instances, active_track_instances]
+        )
         return merged_track_instances

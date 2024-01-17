@@ -6,11 +6,11 @@ import torch.nn.functional as F
 @MATCH_COST.register_module()
 class BBox3DL1Cost(object):
     """BBox3DL1Cost.
-     Args:
-         weight (int | float, optional): loss_weight
+    Args:
+        weight (int | float, optional): loss_weight
     """
 
-    def __init__(self, weight=1.):
+    def __init__(self, weight=1.0):
         self.weight = weight
 
     def __call__(self, bbox_pred, gt_bboxes):
@@ -32,22 +32,22 @@ class BBox3DL1Cost(object):
 class DiceCost(object):
     """IoUCost.
 
-     Args:
-         iou_mode (str, optional): iou mode such as 'iou' | 'giou'
-         weight (int | float, optional): loss weight
+    Args:
+        iou_mode (str, optional): iou mode such as 'iou' | 'giou'
+        weight (int | float, optional): loss weight
 
-     Examples:
-         >>> from mmdet.core.bbox.match_costs.match_cost import IoUCost
-         >>> import torch
-         >>> self = IoUCost()
-         >>> bboxes = torch.FloatTensor([[1,1, 2, 2], [2, 2, 3, 4]])
-         >>> gt_bboxes = torch.FloatTensor([[0, 0, 2, 4], [1, 2, 3, 4]])
-         >>> self(bboxes, gt_bboxes)
-         tensor([[-0.1250,  0.1667],
-                [ 0.1667, -0.5000]])
+    Examples:
+        >>> from mmdet.core.bbox.match_costs.match_cost import IoUCost
+        >>> import torch
+        >>> self = IoUCost()
+        >>> bboxes = torch.FloatTensor([[1,1, 2, 2], [2, 2, 3, 4]])
+        >>> gt_bboxes = torch.FloatTensor([[0, 0, 2, 4], [1, 2, 3, 4]])
+        >>> self(bboxes, gt_bboxes)
+        tensor([[-0.1250,  0.1667],
+               [ 0.1667, -0.5000]])
     """
 
-    def __init__(self, weight=1.):
+    def __init__(self, weight=1.0):
         self.weight = weight
         self.count = 0
 
@@ -70,7 +70,9 @@ class DiceCost(object):
         N2, H2, W2 = target.shape
 
         if H1 != H2 or W1 != W2:
-            target = F.interpolate(target.unsqueeze(0), size=(H1, W1), mode='bilinear').squeeze(0)
+            target = F.interpolate(
+                target.unsqueeze(0), size=(H1, W1), mode="bilinear"
+            ).squeeze(0)
 
         input = input.contiguous().view(N1, -1)[:, None, :]
         target = target.contiguous().view(N2, -1)[None, :, :]

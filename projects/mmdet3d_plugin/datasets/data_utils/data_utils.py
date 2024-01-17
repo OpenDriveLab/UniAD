@@ -15,11 +15,11 @@ def output_to_nusc_box(detection):
     Returns:
         list[:obj:`NuScenesBox`]: List of standard NuScenesBoxes.
     """
-    box3d = detection['boxes_3d']
-    scores = detection['scores_3d'].numpy()
-    labels = detection['labels_3d'].numpy()
-    if 'track_ids' in detection:
-        ids = detection['track_ids'].numpy()
+    box3d = detection["boxes_3d"]
+    scores = detection["scores_3d"].numpy()
+    labels = detection["labels_3d"].numpy()
+    if "track_ids" in detection:
+        ids = detection["track_ids"].numpy()
     else:
         ids = np.ones_like(labels)
 
@@ -44,7 +44,8 @@ def output_to_nusc_box(detection):
             quat,
             label=labels[i],
             score=scores[i],
-            velocity=velocity)
+            velocity=velocity,
+        )
         box.token = ids[i]
         box_list.append(box)
     return box_list
@@ -63,14 +64,14 @@ def output_to_nusc_box_det(detection):
     Returns:
         list[:obj:`NuScenesBox`]: List of standard NuScenesBoxes.
     """
-    if 'boxes_3d_det' in detection:
-        box3d = detection['boxes_3d_det']
-        scores = detection['scores_3d_det'].numpy()
-        labels = detection['labels_3d_det'].numpy()
+    if "boxes_3d_det" in detection:
+        box3d = detection["boxes_3d_det"]
+        scores = detection["scores_3d_det"].numpy()
+        labels = detection["labels_3d_det"].numpy()
     else:
-        box3d = detection['boxes_3d']
-        scores = detection['scores_3d'].numpy()
-        labels = detection['labels_3d'].numpy()
+        box3d = detection["boxes_3d"]
+        scores = detection["scores_3d"].numpy()
+        labels = detection["labels_3d"].numpy()
 
     box_gravity_center = box3d.gravity_center.numpy()
     box_dims = box3d.dims.numpy()
@@ -89,16 +90,15 @@ def output_to_nusc_box_det(detection):
             quat,
             label=labels[i],
             score=scores[i],
-            velocity=velocity)
+            velocity=velocity,
+        )
         box_list.append(box)
     return box_list
 
 
-def lidar_nusc_box_to_global(info,
-                             boxes,
-                             classes,
-                             eval_configs,
-                             eval_version='detection_cvpr_2019'):
+def lidar_nusc_box_to_global(
+    info, boxes, classes, eval_configs, eval_version="detection_cvpr_2019"
+):
     """Convert the box from ego to global coordinate.
     Args:
         info (dict): Info for a specific sample data, including the
@@ -116,8 +116,8 @@ def lidar_nusc_box_to_global(info,
     keep_idx = []
     for i, box in enumerate(boxes):
         # Move box to ego vehicle coord system
-        box.rotate(Quaternion(info['lidar2ego_rotation']))
-        box.translate(np.array(info['lidar2ego_translation']))
+        box.rotate(Quaternion(info["lidar2ego_rotation"]))
+        box.translate(np.array(info["lidar2ego_translation"]))
         # filter det in ego.
         cls_range_map = eval_configs.class_range
         radius = np.linalg.norm(box.center[:2], 2)
@@ -125,33 +125,35 @@ def lidar_nusc_box_to_global(info,
         if radius > det_range:
             continue
         # Move box to global coord system
-        box.rotate(Quaternion(info['ego2global_rotation']))
-        box.translate(np.array(info['ego2global_translation']))
+        box.rotate(Quaternion(info["ego2global_rotation"]))
+        box.translate(np.array(info["ego2global_translation"]))
         box_list.append(box)
         keep_idx.append(i)
     return box_list, keep_idx
 
 
-def obtain_map_info(nusc,
-                    nusc_maps,
-                    sample,
-                    patch_size=(102.4, 102.4),
-                    canvas_size=(256, 256),
-                    layer_names=['lane_divider', 'road_divider'],
-                    thickness=10):
+def obtain_map_info(
+    nusc,
+    nusc_maps,
+    sample,
+    patch_size=(102.4, 102.4),
+    canvas_size=(256, 256),
+    layer_names=["lane_divider", "road_divider"],
+    thickness=10,
+):
     """
     Export 2d annotation from the info file and raw data.
     """
-    l2e_r = sample['lidar2ego_rotation']
-    l2e_t = sample['lidar2ego_translation']
-    e2g_r = sample['ego2global_rotation']
-    e2g_t = sample['ego2global_translation']
+    l2e_r = sample["lidar2ego_rotation"]
+    l2e_t = sample["lidar2ego_translation"]
+    e2g_r = sample["ego2global_rotation"]
+    e2g_t = sample["ego2global_translation"]
     l2e_r_mat = Quaternion(l2e_r).rotation_matrix
     e2g_r_mat = Quaternion(e2g_r).rotation_matrix
 
-    scene = nusc.get('scene', sample['scene_token'])
-    log = nusc.get('log', scene['log_token'])
-    nusc_map = nusc_maps[log['location']]
+    scene = nusc.get("scene", sample["scene_token"])
+    log = nusc.get("log", scene["log_token"])
+    nusc_map = nusc_maps[log["location"]]
     if layer_names is None:
         layer_names = nusc_map.non_geometric_layers
 
@@ -161,13 +163,15 @@ def obtain_map_info(nusc,
     patch_angle = math.degrees(Quaternion(matrix=l2g_r_mat).yaw_pitch_roll[0])
 
     map_mask = nusc_map.get_map_mask(
-        patch_box, patch_angle, layer_names, canvas_size=canvas_size)
+        patch_box, patch_angle, layer_names, canvas_size=canvas_size
+    )
     map_mask = map_mask[-2] | map_mask[-1]
     map_mask = map_mask[np.newaxis, :]
     map_mask = map_mask.transpose((2, 1, 0)).squeeze(2)  # (H, W, C)
 
-    erode = nusc_map.get_map_mask(patch_box, patch_angle, [
-                                  'drivable_area'], canvas_size=canvas_size)
+    erode = nusc_map.get_map_mask(
+        patch_box, patch_angle, ["drivable_area"], canvas_size=canvas_size
+    )
     erode = erode.transpose((2, 1, 0)).squeeze(2)
 
     map_mask = np.concatenate([erode[None], map_mask[None]], axis=0)

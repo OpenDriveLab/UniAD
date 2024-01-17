@@ -5,34 +5,41 @@ from shapely import affinity, ops
 from shapely.geometry import LineString, box, MultiPolygon, MultiLineString
 
 CLASS2LABEL = {
-    'road_divider': 0,
-    'lane_divider': 0,
-    'ped_crossing': 1,
-    'contours': 2,
-    'others': -1
+    "road_divider": 0,
+    "lane_divider": 0,
+    "ped_crossing": 1,
+    "contours": 2,
+    "others": -1,
 }
 
+
 class VectorizedLocalMap(object):
-    def __init__(self,
-                 dataroot,
-                 patch_size,
-                 canvas_size,
-                 line_classes=['road_divider', 'lane_divider'],
-                 ped_crossing_classes=['ped_crossing'],
-                 contour_classes=['road_segment', 'lane'],
-                 sample_dist=1,
-                 num_samples=250,
-                 padding=False,
-                 normalize=False,
-                 fixed_num=-1):
-        '''
+    def __init__(
+        self,
+        dataroot,
+        patch_size,
+        canvas_size,
+        line_classes=["road_divider", "lane_divider"],
+        ped_crossing_classes=["ped_crossing"],
+        contour_classes=["road_segment", "lane"],
+        sample_dist=1,
+        num_samples=250,
+        padding=False,
+        normalize=False,
+        fixed_num=-1,
+    ):
+        """
         Args:
             fixed_num = -1 : no fixed num
-        '''
+        """
         super().__init__()
         self.data_root = dataroot
-        self.MAPS = ['boston-seaport', 'singapore-hollandvillage',
-                     'singapore-onenorth', 'singapore-queenstown']
+        self.MAPS = [
+            "boston-seaport",
+            "singapore-hollandvillage",
+            "singapore-onenorth",
+            "singapore-queenstown",
+        ]
         self.line_classes = line_classes
         self.ped_crossing_classes = ped_crossing_classes
         self.polygon_classes = contour_classes
@@ -50,43 +57,53 @@ class VectorizedLocalMap(object):
         self.normalize = normalize
         self.fixed_num = fixed_num
 
-    def gen_vectorized_samples(self, location, ego2global_translation, ego2global_rotation):
+    def gen_vectorized_samples(
+        self, location, ego2global_translation, ego2global_rotation
+    ):
         map_pose = ego2global_translation[:2]
         rotation = Quaternion(ego2global_rotation)
 
         patch_box = (map_pose[0], map_pose[1], self.patch_size[0], self.patch_size[1])
         patch_angle = quaternion_yaw(rotation) / np.pi * 180
 
-        line_geom = self.get_map_geom(patch_box, patch_angle, self.line_classes, location)
+        line_geom = self.get_map_geom(
+            patch_box, patch_angle, self.line_classes, location
+        )
         line_vector_dict = self.line_geoms_to_vectors(line_geom)
 
-        ped_geom = self.get_map_geom(patch_box, patch_angle, self.ped_crossing_classes, location)
+        ped_geom = self.get_map_geom(
+            patch_box, patch_angle, self.ped_crossing_classes, location
+        )
         # ped_vector_list = self.ped_geoms_to_vectors(ped_geom)
-        ped_vector_list = self.line_geoms_to_vectors(ped_geom)['ped_crossing']
+        ped_vector_list = self.line_geoms_to_vectors(ped_geom)["ped_crossing"]
 
-        polygon_geom = self.get_map_geom(patch_box, patch_angle, self.polygon_classes, location)
+        polygon_geom = self.get_map_geom(
+            patch_box, patch_angle, self.polygon_classes, location
+        )
         poly_bound_list = self.poly_geoms_to_vectors(polygon_geom)
 
         vectors = []
         for line_type, vects in line_vector_dict.items():
             for line, length in vects:
-                vectors.append((line.astype(float), length, CLASS2LABEL.get(line_type, -1)))
+                vectors.append(
+                    (line.astype(float), length, CLASS2LABEL.get(line_type, -1))
+                )
 
         for ped_line, length in ped_vector_list:
-            vectors.append((ped_line.astype(float), length, CLASS2LABEL.get('ped_crossing', -1)))
+            vectors.append(
+                (ped_line.astype(float), length, CLASS2LABEL.get("ped_crossing", -1))
+            )
 
         for contour, length in poly_bound_list:
-            vectors.append((contour.astype(float), length, CLASS2LABEL.get('contours', -1)))
+            vectors.append(
+                (contour.astype(float), length, CLASS2LABEL.get("contours", -1))
+            )
 
         # filter out -1
         filtered_vectors = []
         for pts, pts_num, type in vectors:
             if type != -1:
-                filtered_vectors.append({
-                    'pts': pts,
-                    'pts_num': pts_num,
-                    'type': type
-                })
+                filtered_vectors.append({"pts": pts, "pts_num": pts_num, "type": type})
 
         return filtered_vectors
 
@@ -94,10 +111,14 @@ class VectorizedLocalMap(object):
         map_geom = []
         for layer_name in layer_names:
             if layer_name in self.line_classes:
-                geoms = self.map_explorer[location]._get_layer_line(patch_box, patch_angle, layer_name)
+                geoms = self.map_explorer[location]._get_layer_line(
+                    patch_box, patch_angle, layer_name
+                )
                 map_geom.append((layer_name, geoms))
             elif layer_name in self.polygon_classes:
-                geoms = self.map_explorer[location]._get_layer_polygon(patch_box, patch_angle, layer_name)
+                geoms = self.map_explorer[location]._get_layer_polygon(
+                    patch_box, patch_angle, layer_name
+                )
                 map_geom.append((layer_name, geoms))
             elif layer_name in self.ped_crossing_classes:
                 geoms = self.get_ped_crossing_line(patch_box, patch_angle, location)
@@ -109,10 +130,10 @@ class VectorizedLocalMap(object):
         line_vectors = []
         for line in line_geom:
             if not line.is_empty:
-                if line.geom_type == 'MultiLineString':
+                if line.geom_type == "MultiLineString":
                     for single_line in line.geoms:
                         line_vectors.append(self.sample_pts_from_line(single_line))
-                elif line.geom_type == 'LineString':
+                elif line.geom_type == "LineString":
                     line_vectors.append(self.sample_pts_from_line(line))
                 else:
                     raise NotImplementedError
@@ -129,7 +150,7 @@ class VectorizedLocalMap(object):
         local_patch = box(-max_x + 0.2, -max_y + 0.2, max_x - 0.2, max_y - 0.2)
         exteriors = []
         interiors = []
-        if union_segments.geom_type != 'MultiPolygon':
+        if union_segments.geom_type != "MultiPolygon":
             union_segments = MultiPolygon([union_segments])
         for poly in union_segments.geoms:
             exteriors.append(poly.exterior)
@@ -166,7 +187,7 @@ class VectorizedLocalMap(object):
     def ped_geoms_to_vectors(self, ped_geom):
         ped_geom = ped_geom[0][1]
         union_ped = ops.unary_union(ped_geom)
-        if union_ped.geom_type != 'MultiPolygon':
+        if union_ped.geom_type != "MultiPolygon":
             union_ped = MultiPolygon([union_ped])
 
         max_x = self.patch_size[1] / 2
@@ -185,12 +206,19 @@ class VectorizedLocalMap(object):
 
     def get_ped_crossing_line(self, patch_box, patch_angle, location):
         def add_line(poly_xy, idx, patch, patch_angle, patch_x, patch_y, line_list):
-            points = [(p0, p1) for p0, p1 in zip(poly_xy[0, idx:idx + 2], poly_xy[1, idx:idx + 2])]
+            points = [
+                (p0, p1)
+                for p0, p1 in zip(poly_xy[0, idx : idx + 2], poly_xy[1, idx : idx + 2])
+            ]
             line = LineString(points)
             line = line.intersection(patch)
             if not line.is_empty:
-                line = affinity.rotate(line, -patch_angle, origin=(patch_x, patch_y), use_radians=False)
-                line = affinity.affine_transform(line, [1.0, 0.0, 0.0, 1.0, -patch_x, -patch_y])
+                line = affinity.rotate(
+                    line, -patch_angle, origin=(patch_x, patch_y), use_radians=False
+                )
+                line = affinity.affine_transform(
+                    line, [1.0, 0.0, 0.0, 1.0, -patch_x, -patch_y]
+                )
                 line_list.append(line)
 
         patch_x = patch_box[0]
@@ -198,9 +226,11 @@ class VectorizedLocalMap(object):
 
         patch = NuScenesMapExplorer.get_patch_coord(patch_box, patch_angle)
         line_list = []
-        records = getattr(self.nusc_maps[location], 'ped_crossing')
+        records = getattr(self.nusc_maps[location], "ped_crossing")
         for record in records:
-            polygon = self.map_explorer[location].extract_polygon(record['polygon_token'])
+            polygon = self.map_explorer[location].extract_polygon(
+                record["polygon_token"]
+            )
             poly_xy = np.array(polygon.exterior.xy)
             dist = np.square(poly_xy[:, 1:] - poly_xy[:, :-1]).sum(0)
             x1, x2 = np.argsort(dist)[-2:]
@@ -213,14 +243,20 @@ class VectorizedLocalMap(object):
     def sample_pts_from_line(self, line):
         if self.fixed_num < 0:
             distances = np.arange(0, line.length, self.sample_dist)
-            sampled_points = np.array([list(line.interpolate(distance).coords) for distance in distances]).reshape(-1, 2)
+            sampled_points = np.array(
+                [list(line.interpolate(distance).coords) for distance in distances]
+            ).reshape(-1, 2)
         else:
             # fixed number of points, so distance is line.length / self.fixed_num
             distances = np.linspace(0, line.length, self.fixed_num)
-            sampled_points = np.array([list(line.interpolate(distance).coords) for distance in distances]).reshape(-1, 2)
+            sampled_points = np.array(
+                [list(line.interpolate(distance).coords) for distance in distances]
+            ).reshape(-1, 2)
 
         if self.normalize:
-            sampled_points = sampled_points / np.array([self.patch_size[1], self.patch_size[0]])
+            sampled_points = sampled_points / np.array(
+                [self.patch_size[1], self.patch_size[0]]
+            )
 
         num_valid = len(sampled_points)
 
@@ -236,11 +272,13 @@ class VectorizedLocalMap(object):
                 padding = np.zeros((self.num_samples - len(sampled_points), 2))
                 sampled_points = np.concatenate([sampled_points, padding], axis=0)
             else:
-                sampled_points = sampled_points[:self.num_samples, :]
+                sampled_points = sampled_points[: self.num_samples, :]
                 num_valid = self.num_samples
 
             if self.normalize:
-                sampled_points = sampled_points / np.array([self.patch_size[1], self.patch_size[0]])
+                sampled_points = sampled_points / np.array(
+                    [self.patch_size[1], self.patch_size[0]]
+                )
                 num_valid = len(sampled_points)
 
         return sampled_points, num_valid

@@ -1,8 +1,8 @@
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 # UniAD: Planning-oriented Autonomous Driving (https://arxiv.org/abs/2212.10156)  #
 # Source code: https://github.com/OpenDriveLab/UniAD                              #
 # Copyright (c) OpenDriveLab. All rights reserved.                                #
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -22,7 +22,9 @@ class CollisionNonlinearOptimizer:
     :param dt: timestep (sec)
     """
 
-    def __init__(self, trajectory_len: int, dt: float, sigma, alpha_collision, obj_pixel_pos):
+    def __init__(
+        self, trajectory_len: int, dt: float, sigma, alpha_collision, obj_pixel_pos
+    ):
         """
         :param trajectory_len: the length of trajectory to be optimized.
         :param dt: the time interval between trajectory points.
@@ -49,7 +51,9 @@ class CollisionNonlinearOptimizer:
         self._set_objective()
 
         # Set default solver options (quiet)
-        self._optimizer.solver("ipopt", {"ipopt.print_level": 0, "print_time": 0, "ipopt.sb": "yes"})
+        self._optimizer.solver(
+            "ipopt", {"ipopt.print_level": 0, "print_time": 0, "ipopt.sb": "yes"}
+        )
 
     def set_reference_trajectory(self, reference_trajectory: Sequence[Pose]) -> None:
         """
@@ -93,24 +97,29 @@ class CollisionNonlinearOptimizer:
         """Set the objective function. Use care when modifying these weights."""
         # Follow reference, minimize control rates and absolute inputs
         alpha_xy = 1.0
-        cost_stage = (
-            alpha_xy * sumsqr(self.ref_traj[:2, :] - vertcat(self.position_x, self.position_y))
+        cost_stage = alpha_xy * sumsqr(
+            self.ref_traj[:2, :] - vertcat(self.position_x, self.position_y)
         )
 
         alpha_collision = self.alpha_collision
-        
+
         cost_collision = 0
-        normalizer = 1/(2.507*self.sigma)
+        normalizer = 1 / (2.507 * self.sigma)
         # TODO: vectorize this
         for t in range(len(self.obj_pixel_pos)):
             x, y = self.position_x[t], self.position_y[t]
             for i in range(len(self.obj_pixel_pos[t])):
                 col_x, col_y = self.obj_pixel_pos[t][i]
-                cost_collision += alpha_collision * normalizer * exp(-((x - col_x)**2 + (y - col_y)**2)/2/self.sigma**2)
+                cost_collision += (
+                    alpha_collision
+                    * normalizer
+                    * exp(-((x - col_x) ** 2 + (y - col_y) ** 2) / 2 / self.sigma**2)
+                )
         self._optimizer.minimize(cost_stage + cost_collision)
 
     def _set_initial_guess(self, reference_trajectory: Sequence[Pose]) -> None:
         """Set a warm-start for the solver based on the reference trajectory."""
         # Initialize state guess based on reference
-        self._optimizer.set_initial(self.state[:2, :], DM(reference_trajectory).T)  # (x, y, yaw)
-
+        self._optimizer.set_initial(
+            self.state[:2, :], DM(reference_trajectory).T
+        )  # (x, y, yaw)

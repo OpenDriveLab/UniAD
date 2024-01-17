@@ -35,9 +35,18 @@ from nuscenes.eval.common.data_classes import EvalBoxes
 from nuscenes.eval.common.loaders import add_center_dist, filter_eval_boxes
 from nuscenes.eval.detection.algo import calc_ap, calc_tp
 from nuscenes.eval.detection.constants import TP_METRICS
-from nuscenes.eval.detection.data_classes import DetectionConfig, DetectionMetrics, DetectionBox, \
-    DetectionMetricDataList
-from nuscenes.eval.detection.render import summary_plot, class_pr_curve, dist_pr_curve, visualize_sample
+from nuscenes.eval.detection.data_classes import (
+    DetectionConfig,
+    DetectionMetrics,
+    DetectionBox,
+    DetectionMetricDataList,
+)
+from nuscenes.eval.detection.render import (
+    summary_plot,
+    class_pr_curve,
+    dist_pr_curve,
+    visualize_sample,
+)
 from nuscenes.eval.common.utils import quaternion_yaw, Quaternion
 from mmdet3d.core.bbox.iou_calculators import BboxOverlaps3D
 from IPython import embed
@@ -51,37 +60,58 @@ from nuscenes import NuScenes
 from nuscenes.eval.common.data_classes import EvalBoxes
 from nuscenes.eval.common.render import setup_axis
 from nuscenes.eval.common.utils import boxes_to_sensor
-from nuscenes.eval.detection.constants import TP_METRICS, DETECTION_NAMES, DETECTION_COLORS, TP_METRICS_UNITS, \
-    PRETTY_DETECTION_NAMES, PRETTY_TP_METRICS
-from nuscenes.eval.detection.data_classes import DetectionMetrics, DetectionMetricData, DetectionMetricDataList
+from nuscenes.eval.detection.constants import (
+    TP_METRICS,
+    DETECTION_NAMES,
+    DETECTION_COLORS,
+    TP_METRICS_UNITS,
+    PRETTY_DETECTION_NAMES,
+    PRETTY_TP_METRICS,
+)
+from nuscenes.eval.detection.data_classes import (
+    DetectionMetrics,
+    DetectionMetricData,
+    DetectionMetricDataList,
+)
 from nuscenes.utils.data_classes import LidarPointCloud
 from nuscenes.utils.geometry_utils import view_points
-from .eval_utils import load_prediction, load_gt, accumulate, accumulate_motion, \
-    DetectionMotionBox, DetectionMotionBox_modified, DetectionMotionMetricData, \
-    DetectionMotionMetrics, DetectionMotionMetricDataList
+from .eval_utils import (
+    load_prediction,
+    load_gt,
+    accumulate,
+    accumulate_motion,
+    DetectionMotionBox,
+    DetectionMotionBox_modified,
+    DetectionMotionMetricData,
+    DetectionMotionMetrics,
+    DetectionMotionMetricDataList,
+)
 from .metric_utils import traj_fde
 from prettytable import PrettyTable
 
 TP_METRICS = [
-    'trans_err',
-    'scale_err',
-    'orient_err',
-    'vel_err',
-    'attr_err',
-    'min_ade_err',
-    'min_fde_err',
-    'miss_rate_err']
-TP_TRAJ_METRICS = ['min_ade_err', 'min_fde_err', 'miss_rate_err']
+    "trans_err",
+    "scale_err",
+    "orient_err",
+    "vel_err",
+    "attr_err",
+    "min_ade_err",
+    "min_fde_err",
+    "miss_rate_err",
+]
+TP_TRAJ_METRICS = ["min_ade_err", "min_fde_err", "miss_rate_err"]
 Axis = Any
 
 
-def class_tp_curve(md_list: DetectionMetricDataList,
-                   metrics: DetectionMetrics,
-                   detection_name: str,
-                   min_recall: float,
-                   dist_th_tp: float,
-                   savepath: str = None,
-                   ax: Axis = None) -> None:
+def class_tp_curve(
+    md_list: DetectionMetricDataList,
+    metrics: DetectionMetrics,
+    detection_name: str,
+    min_recall: float,
+    dist_th_tp: float,
+    savepath: str = None,
+    ax: Axis = None,
+) -> None:
     """
     Plot the true positive curve for the specified class.
     :param md_list: DetectionMetricDataList instance.
@@ -100,11 +130,19 @@ def class_tp_curve(md_list: DetectionMetricDataList,
         # For traffic_cone and barrier only a subset of the metrics are
         # plotted.
         rel_metrics = [
-            m for m in TP_METRICS if not np.isnan(
-                metrics.get_label_tp(
-                    detection_name, m))]
-        ylimit = max([max(getattr(md, metric)[min_recall_ind:md.max_recall_ind + 1])
-                     for metric in rel_metrics]) * 1.1
+            m
+            for m in TP_METRICS
+            if not np.isnan(metrics.get_label_tp(detection_name, m))
+        ]
+        ylimit = (
+            max(
+                [
+                    max(getattr(md, metric)[min_recall_ind : md.max_recall_ind + 1])
+                    for metric in rel_metrics
+                ]
+            )
+            * 1.1
+        )
     else:
         ylimit = 1.0
 
@@ -112,10 +150,11 @@ def class_tp_curve(md_list: DetectionMetricDataList,
     if ax is None:
         ax = setup_axis(
             title=PRETTY_DETECTION_NAMES[detection_name],
-            xlabel='Recall',
-            ylabel='Error',
+            xlabel="Recall",
+            ylabel="Error",
             xlim=1,
-            min_recall=min_recall)
+            min_recall=min_recall,
+        )
     ax.set_ylim(0, ylimit)
 
     # Plot the recall vs. error curve for each tp metric.
@@ -124,36 +163,40 @@ def class_tp_curve(md_list: DetectionMetricDataList,
 
         # Plot only if we have valid data.
         if tp is not np.nan and min_recall_ind <= md.max_recall_ind:
-            recall, error = md.recall[:md.max_recall_ind +
-                                      1], getattr(md, metric)[:md.max_recall_ind + 1]
+            recall, error = (
+                md.recall[: md.max_recall_ind + 1],
+                getattr(md, metric)[: md.max_recall_ind + 1],
+            )
         else:
             recall, error = [], []
 
         # Change legend based on tp value
         if tp is np.nan:
-            label = '{}: n/a'.format(PRETTY_TP_METRICS[metric])
+            label = "{}: n/a".format(PRETTY_TP_METRICS[metric])
         elif min_recall_ind > md.max_recall_ind:
-            label = '{}: nan'.format(PRETTY_TP_METRICS[metric])
+            label = "{}: nan".format(PRETTY_TP_METRICS[metric])
         else:
-            label = '{}: {:.2f} ({})'.format(
-                PRETTY_TP_METRICS[metric], tp, TP_METRICS_UNITS[metric])
-        if metric == 'trans_err':
-            label += f' ({md.max_recall_ind})'  # add recall
-            print(f'Recall: {detection_name}: {md.max_recall_ind/100}')
+            label = "{}: {:.2f} ({})".format(
+                PRETTY_TP_METRICS[metric], tp, TP_METRICS_UNITS[metric]
+            )
+        if metric == "trans_err":
+            label += f" ({md.max_recall_ind})"  # add recall
+            print(f"Recall: {detection_name}: {md.max_recall_ind/100}")
         ax.plot(recall, error, label=label)
-    ax.axvline(x=md.max_recall, linestyle='-.', color=(0, 0, 0, 0.3))
-    ax.legend(loc='best')
+    ax.axvline(x=md.max_recall, linestyle="-.", color=(0, 0, 0, 0.3))
+    ax.legend(loc="best")
 
     if savepath is not None:
         plt.savefig(savepath)
         plt.close()
 
 
-def center_in_image(box,
-                    intrinsic: np.ndarray,
-                    imsize: Tuple[int,
-                                  int],
-                    vis_level: int = BoxVisibility.ANY) -> bool:
+def center_in_image(
+    box,
+    intrinsic: np.ndarray,
+    imsize: Tuple[int, int],
+    vis_level: int = BoxVisibility.ANY,
+) -> bool:
     """
     Check if a box is visible inside an image without accounting for occlusions.
     :param box: The box to be checked.
@@ -166,8 +209,7 @@ def center_in_image(box,
     center_3d = box.center.reshape(3, 1)
     center_img = view_points(center_3d, intrinsic, normalize=True)[:2, :]
 
-    visible = np.logical_and(
-        center_img[0, :] > 0, center_img[0, :] < imsize[0])
+    visible = np.logical_and(center_img[0, :] > 0, center_img[0, :] < imsize[0])
     visible = np.logical_and(visible, center_img[1, :] < imsize[1])
     visible = np.logical_and(visible, center_img[1, :] > 0)
     visible = np.logical_and(visible, center_3d[2, :] > 1)
@@ -185,11 +227,12 @@ def center_in_image(box,
         raise ValueError("vis_level: {} not valid".format(vis_level))
 
 
-def exist_corners_in_image_but_not_all(box,
-                                       intrinsic: np.ndarray,
-                                       imsize: Tuple[int,
-                                                     int],
-                                       vis_level: int = BoxVisibility.ANY) -> bool:
+def exist_corners_in_image_but_not_all(
+    box,
+    intrinsic: np.ndarray,
+    imsize: Tuple[int, int],
+    vis_level: int = BoxVisibility.ANY,
+) -> bool:
     """
     Check if a box is visible in images but not all corners in image .
     :param box: The box to be checked.
@@ -202,8 +245,7 @@ def exist_corners_in_image_but_not_all(box,
     corners_3d = box.corners()
     corners_img = view_points(corners_3d, intrinsic, normalize=True)[:2, :]
 
-    visible = np.logical_and(
-        corners_img[0, :] > 0, corners_img[0, :] < imsize[0])
+    visible = np.logical_and(corners_img[0, :] > 0, corners_img[0, :] < imsize[0])
     visible = np.logical_and(visible, corners_img[1, :] < imsize[1])
     visible = np.logical_and(visible, corners_img[1, :] > 0)
     visible = np.logical_and(visible, corners_3d[2, :] > 1)
@@ -217,10 +259,9 @@ def exist_corners_in_image_but_not_all(box,
         return False
 
 
-def filter_eval_boxes_by_id(nusc: NuScenes,
-                            eval_boxes: EvalBoxes,
-                            id=None,
-                            verbose: bool = False) -> EvalBoxes:
+def filter_eval_boxes_by_id(
+    nusc: NuScenes, eval_boxes: EvalBoxes, id=None, verbose: bool = False
+) -> EvalBoxes:
     """
     Applies filtering to boxes. Distance, bike-racks and points per box.
     :param nusc: An instance of the NuScenes class.
@@ -232,7 +273,6 @@ def filter_eval_boxes_by_id(nusc: NuScenes,
     # Accumulators for number of filtered boxes.
     total, anns_filter = 0, 0
     for ind, sample_token in enumerate(eval_boxes.sample_tokens):
-
         # Filter on anns
         total += len(eval_boxes[sample_token])
         filtered_boxes = []
@@ -250,9 +290,8 @@ def filter_eval_boxes_by_id(nusc: NuScenes,
 
 
 def filter_eval_boxes_by_visibility(
-        ori_eval_boxes: EvalBoxes,
-        visibility=None,
-        verbose: bool = False) -> EvalBoxes:
+    ori_eval_boxes: EvalBoxes, visibility=None, verbose: bool = False
+) -> EvalBoxes:
     """
     Applies filtering to boxes. Distance, bike-racks and points per box.
     :param nusc: An instance of the NuScenes class.
@@ -281,10 +320,7 @@ def filter_eval_boxes_by_visibility(
     return eval_boxes
 
 
-def filter_by_sample_token(
-        ori_eval_boxes,
-        valid_sample_tokens=[],
-        verbose=False):
+def filter_by_sample_token(ori_eval_boxes, valid_sample_tokens=[], verbose=False):
     eval_boxes = copy.deepcopy(ori_eval_boxes)
     for sample_token in eval_boxes.sample_tokens:
         if sample_token not in valid_sample_tokens:
@@ -292,9 +328,9 @@ def filter_by_sample_token(
     return eval_boxes
 
 
-def filter_eval_boxes_by_overlap(nusc: NuScenes,
-                                 eval_boxes: EvalBoxes,
-                                 verbose: bool = False) -> EvalBoxes:
+def filter_eval_boxes_by_overlap(
+    nusc: NuScenes, eval_boxes: EvalBoxes, verbose: bool = False
+) -> EvalBoxes:
     """
     Applies filtering to boxes. basedon overlap .
     :param nusc: An instance of the NuScenes class.
@@ -303,64 +339,63 @@ def filter_eval_boxes_by_overlap(nusc: NuScenes,
     """
 
     # Accumulators for number of filtered boxes.
-    cams = ['CAM_FRONT',
-            'CAM_FRONT_RIGHT',
-            'CAM_BACK_RIGHT',
-            'CAM_BACK',
-            'CAM_BACK_LEFT',
-            'CAM_FRONT_LEFT']
+    cams = [
+        "CAM_FRONT",
+        "CAM_FRONT_RIGHT",
+        "CAM_BACK_RIGHT",
+        "CAM_BACK",
+        "CAM_BACK_LEFT",
+        "CAM_FRONT_LEFT",
+    ]
 
     total, anns_filter = 0, 0
     for ind, sample_token in enumerate(eval_boxes.sample_tokens):
-
         # Filter on anns
         total += len(eval_boxes[sample_token])
-        sample_record = nusc.get('sample', sample_token)
+        sample_record = nusc.get("sample", sample_token)
         filtered_boxes = []
         for box in eval_boxes[sample_token]:
             count = 0
             for cam in cams:
-                '''
+                """
                 copy-paste form nuscens
-                '''
-                sample_data_token = sample_record['data'][cam]
-                sd_record = nusc.get('sample_data', sample_data_token)
+                """
+                sample_data_token = sample_record["data"][cam]
+                sd_record = nusc.get("sample_data", sample_data_token)
                 cs_record = nusc.get(
-                    'calibrated_sensor',
-                    sd_record['calibrated_sensor_token'])
-                sensor_record = nusc.get('sensor', cs_record['sensor_token'])
-                pose_record = nusc.get('ego_pose', sd_record['ego_pose_token'])
-                cam_intrinsic = np.array(cs_record['camera_intrinsic'])
-                imsize = (sd_record['width'], sd_record['height'])
+                    "calibrated_sensor", sd_record["calibrated_sensor_token"]
+                )
+                sensor_record = nusc.get("sensor", cs_record["sensor_token"])
+                pose_record = nusc.get("ego_pose", sd_record["ego_pose_token"])
+                cam_intrinsic = np.array(cs_record["camera_intrinsic"])
+                imsize = (sd_record["width"], sd_record["height"])
                 new_box = Box(
                     box.translation,
                     box.size,
-                    Quaternion(
-                        box.rotation),
+                    Quaternion(box.rotation),
                     name=box.detection_name,
-                    token='')
+                    token="",
+                )
 
                 # Move box to ego vehicle coord system.
-                new_box.translate(-np.array(pose_record['translation']))
-                new_box.rotate(Quaternion(pose_record['rotation']).inverse)
+                new_box.translate(-np.array(pose_record["translation"]))
+                new_box.rotate(Quaternion(pose_record["rotation"]).inverse)
 
                 #  Move box to sensor coord system.
-                new_box.translate(-np.array(cs_record['translation']))
-                new_box.rotate(Quaternion(cs_record['rotation']).inverse)
+                new_box.translate(-np.array(cs_record["translation"]))
+                new_box.rotate(Quaternion(cs_record["rotation"]).inverse)
 
                 if center_in_image(
-                        new_box,
-                        cam_intrinsic,
-                        imsize,
-                        vis_level=BoxVisibility.ANY):
+                    new_box, cam_intrinsic, imsize, vis_level=BoxVisibility.ANY
+                ):
                     count += 1
                 # if exist_corners_in_image_but_not_all(new_box, cam_intrinsic, imsize, vis_level=BoxVisibility.ANY):
                 #    count += 1
 
             if count > 1:
-                with open('center_overlap.txt', 'a') as f:
+                with open("center_overlap.txt", "a") as f:
                     try:
-                        f.write(box.token + '\n')
+                        f.write(box.token + "\n")
                     except BaseException:
                         pass
                 filtered_boxes.append(box)
@@ -381,18 +416,19 @@ class MotionEval(NuScenesEval):
     Dummy class for backward-compatibility. Same as DetectionEval.
     """
 
-    def __init__(self,
-                 nusc: NuScenes,
-                 config: DetectionConfig,
-                 result_path: str,
-                 eval_set: str,
-                 output_dir: str = None,
-                 verbose: bool = True,
-                 overlap_test=False,
-                 eval_mask=False,
-                 data_infos=None,
-                 category_convert_type='motion_category',
-                 ):
+    def __init__(
+        self,
+        nusc: NuScenes,
+        config: DetectionConfig,
+        result_path: str,
+        eval_set: str,
+        output_dir: str = None,
+        verbose: bool = True,
+        overlap_test=False,
+        eval_mask=False,
+        data_infos=None,
+        category_convert_type="motion_category",
+    ):
         """
         Initialize a DetectionEval object.
         :param nusc: A NuScenes object.
@@ -413,11 +449,10 @@ class MotionEval(NuScenesEval):
         self.eval_mask = eval_mask
         self.data_infos = data_infos
         # Check result file exists.
-        assert os.path.exists(
-            result_path), 'Error: The result file does not exist!'
+        assert os.path.exists(result_path), "Error: The result file does not exist!"
 
         # Make dirs.
-        self.plot_dir = os.path.join(self.output_dir, 'plots')
+        self.plot_dir = os.path.join(self.output_dir, "plots")
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
         if not os.path.isdir(self.plot_dir):
@@ -425,18 +460,25 @@ class MotionEval(NuScenesEval):
 
         # Load data.
         if verbose:
-            print('Initializing nuScenes detection evaluation')
-        self.pred_boxes, self.meta = load_prediction(self.result_path, self.cfg.max_boxes_per_sample, DetectionMotionBox,
-                                                     verbose=verbose, category_convert_type=category_convert_type)
+            print("Initializing nuScenes detection evaluation")
+        self.pred_boxes, self.meta = load_prediction(
+            self.result_path,
+            self.cfg.max_boxes_per_sample,
+            DetectionMotionBox,
+            verbose=verbose,
+            category_convert_type=category_convert_type,
+        )
         self.gt_boxes = load_gt(
             self.nusc,
             self.eval_set,
             DetectionMotionBox_modified,
             verbose=verbose,
-            category_convert_type=category_convert_type)
+            category_convert_type=category_convert_type,
+        )
 
-        assert set(self.pred_boxes.sample_tokens) == set(self.gt_boxes.sample_tokens), \
-            "Samples in split doesn't match samples in predictions."
+        assert set(self.pred_boxes.sample_tokens) == set(
+            self.gt_boxes.sample_tokens
+        ), "Samples in split doesn't match samples in predictions."
 
         # Add center distances.
         self.pred_boxes = add_center_dist(nusc, self.pred_boxes)
@@ -445,20 +487,22 @@ class MotionEval(NuScenesEval):
         # Filter boxes (distance, points per box, etc.).
 
         if verbose:
-            print('Filtering predictions')
+            print("Filtering predictions")
         self.pred_boxes = filter_eval_boxes(
-            nusc, self.pred_boxes, self.cfg.class_range, verbose=verbose)
+            nusc, self.pred_boxes, self.cfg.class_range, verbose=verbose
+        )
         if verbose:
-            print('Filtering ground truth annotations')
+            print("Filtering ground truth annotations")
         self.gt_boxes = filter_eval_boxes(
-            nusc, self.gt_boxes, self.cfg.class_range, verbose=verbose)
+            nusc, self.gt_boxes, self.cfg.class_range, verbose=verbose
+        )
 
         if self.overlap_test:
-            self.pred_boxes = filter_eval_boxes_by_overlap(
-                self.nusc, self.pred_boxes)
+            self.pred_boxes = filter_eval_boxes_by_overlap(self.nusc, self.pred_boxes)
 
             self.gt_boxes = filter_eval_boxes_by_overlap(
-                self.nusc, self.gt_boxes, verbose=True)
+                self.nusc, self.gt_boxes, verbose=True
+            )
 
         self.all_gt = copy.deepcopy(self.gt_boxes)
         self.all_preds = copy.deepcopy(self.pred_boxes)
@@ -466,20 +510,20 @@ class MotionEval(NuScenesEval):
 
         self.index_map = {}
         for scene in nusc.scene:
-            first_sample_token = scene['first_sample_token']
-            sample = nusc.get('sample', first_sample_token)
+            first_sample_token = scene["first_sample_token"]
+            sample = nusc.get("sample", first_sample_token)
             self.index_map[first_sample_token] = 1
             index = 2
-            while sample['next'] != '':
-                sample = nusc.get('sample', sample['next'])
-                self.index_map[sample['token']] = index
+            while sample["next"] != "":
+                sample = nusc.get("sample", sample["next"])
+                self.index_map[sample["token"]] = index
                 index += 1
 
-    def update_gt(self, type_='vis', visibility='1', index=1):
-        if type_ == 'vis':
+    def update_gt(self, type_="vis", visibility="1", index=1):
+        if type_ == "vis":
             self.visibility_test = True
             if self.visibility_test:
-                '''[{'description': 'visibility of whole object is between 0 and 40%',
+                """[{'description': 'visibility of whole object is between 0 and 40%',
                 'token': '1',
                 'level': 'v0-40'},
                 {'description': 'visibility of whole object is between 40 and 60%',
@@ -490,26 +534,23 @@ class MotionEval(NuScenesEval):
                 'level': 'v60-80'},
                 {'description': 'visibility of whole object is between 80 and 100%',
                 'token': '4',
-                'level': 'v80-100'}]'''
+                'level': 'v80-100'}]"""
 
                 self.gt_boxes = filter_eval_boxes_by_visibility(
-                    self.all_gt, visibility, verbose=True)
+                    self.all_gt, visibility, verbose=True
+                )
 
-        elif type_ == 'ord':
-
+        elif type_ == "ord":
             valid_tokens = [
-                key for (
-                    key,
-                    value) in self.index_map.items() if value == index]
+                key for (key, value) in self.index_map.items() if value == index
+            ]
             # from IPython import embed
             # embed()
             self.gt_boxes = filter_by_sample_token(self.all_gt, valid_tokens)
-            self.pred_boxes = filter_by_sample_token(
-                self.all_preds, valid_tokens)
+            self.pred_boxes = filter_by_sample_token(self.all_preds, valid_tokens)
         self.sample_tokens = self.gt_boxes.sample_tokens
 
-    def evaluate(self) -> Tuple[DetectionMotionMetrics,
-                                DetectionMotionMetricDataList]:
+    def evaluate(self) -> Tuple[DetectionMotionMetrics, DetectionMotionMetricDataList]:
         """
         Performs the actual evaluation.
         :return: A tuple of high-level and the raw metric data.
@@ -520,7 +561,7 @@ class MotionEval(NuScenesEval):
         # Step 1: Accumulate metric data for all classes and distance thresholds.
         # -----------------------------------
         if self.verbose:
-            print('Accumulating metric data...')
+            print("Accumulating metric data...")
         metric_data_list = DetectionMotionMetricDataList()
 
         # print(self.cfg.dist_fcn_callable, self.cfg.dist_ths)
@@ -529,14 +570,19 @@ class MotionEval(NuScenesEval):
         for class_name in self.cfg.class_names:
             for dist_th in self.cfg.dist_ths:
                 md, _, _, _ = accumulate(
-                    self.gt_boxes, self.pred_boxes, class_name, self.cfg.dist_fcn_callable, dist_th)
+                    self.gt_boxes,
+                    self.pred_boxes,
+                    class_name,
+                    self.cfg.dist_fcn_callable,
+                    dist_th,
+                )
                 metric_data_list.set(class_name, dist_th, md)
 
         # -----------------------------------
         # Step 2: Calculate metrics from the data.
         # -----------------------------------
         if self.verbose:
-            print('Calculating metrics...')
+            print("Calculating metrics...")
         metrics = DetectionMotionMetrics(self.cfg)
 
         traj_metrics = {}
@@ -544,19 +590,21 @@ class MotionEval(NuScenesEval):
             # Compute APs.
             for dist_th in self.cfg.dist_ths:
                 metric_data = metric_data_list[(class_name, dist_th)]
-                ap = calc_ap(
-                    metric_data,
-                    self.cfg.min_recall,
-                    self.cfg.min_precision)
+                ap = calc_ap(metric_data, self.cfg.min_recall, self.cfg.min_precision)
                 metrics.add_label_ap(class_name, dist_th, ap)
             # Compute TP metrics.
             for metric_name in TP_METRICS:
-                metric_data = metric_data_list[(
-                    class_name, self.cfg.dist_th_tp)]
-                if class_name in ['traffic_cone'] and metric_name in [
-                        'attr_err', 'vel_err', 'orient_err']:
+                metric_data = metric_data_list[(class_name, self.cfg.dist_th_tp)]
+                if class_name in ["traffic_cone"] and metric_name in [
+                    "attr_err",
+                    "vel_err",
+                    "orient_err",
+                ]:
                     tp = np.nan
-                elif class_name in ['barrier'] and metric_name in ['attr_err', 'vel_err']:
+                elif class_name in ["barrier"] and metric_name in [
+                    "attr_err",
+                    "vel_err",
+                ]:
                     tp = np.nan
                 else:
                     tp = calc_tp(metric_data, self.cfg.min_recall, metric_name)
@@ -573,7 +621,8 @@ class MotionEval(NuScenesEval):
         return metrics, metric_data_list
 
     def evaluate_motion(
-            self) -> Tuple[DetectionMotionMetrics, DetectionMotionMetricDataList]:
+        self,
+    ) -> Tuple[DetectionMotionMetrics, DetectionMotionMetricDataList]:
         """
         Performs the actual evaluation.
         :return: A tuple of high-level and the raw metric data.
@@ -588,20 +637,27 @@ class MotionEval(NuScenesEval):
         # Step 1: Accumulate metric data for all classes and distance thresholds.
         # -----------------------------------
         if self.verbose:
-            print('Accumulating metric data...')
+            print("Accumulating metric data...")
         metric_data_list = DetectionMotionMetricDataList()
 
         for class_name in self.cfg.class_names:
             for dist_th in self.cfg.dist_ths:
                 md, _, _, _ = accumulate_motion(
-                    self.gt_boxes, self.pred_boxes, class_name, self.cfg.dist_fcn_callable, traj_fde, dist_th, traj_dist_th)
+                    self.gt_boxes,
+                    self.pred_boxes,
+                    class_name,
+                    self.cfg.dist_fcn_callable,
+                    traj_fde,
+                    dist_th,
+                    traj_dist_th,
+                )
                 metric_data_list.set(class_name, dist_th, md)
 
         # -----------------------------------
         # Step 2: Calculate metrics from the data.
         # -----------------------------------
         if self.verbose:
-            print('Calculating metrics...')
+            print("Calculating metrics...")
         metrics = DetectionMotionMetrics(self.cfg)
 
         traj_metrics = {}
@@ -609,19 +665,21 @@ class MotionEval(NuScenesEval):
             # Compute APs.
             for dist_th in self.cfg.dist_ths:
                 metric_data = metric_data_list[(class_name, dist_th)]
-                ap = calc_ap(
-                    metric_data,
-                    self.cfg.min_recall,
-                    self.cfg.min_precision)
+                ap = calc_ap(metric_data, self.cfg.min_recall, self.cfg.min_precision)
                 metrics.add_label_ap(class_name, dist_th, ap)
             # Compute TP metrics.
             for metric_name in TP_METRICS:
-                metric_data = metric_data_list[(
-                    class_name, self.cfg.dist_th_tp)]
-                if class_name in ['traffic_cone'] and metric_name in [
-                        'attr_err', 'vel_err', 'orient_err']:
+                metric_data = metric_data_list[(class_name, self.cfg.dist_th_tp)]
+                if class_name in ["traffic_cone"] and metric_name in [
+                    "attr_err",
+                    "vel_err",
+                    "orient_err",
+                ]:
                     tp = np.nan
-                elif class_name in ['barrier'] and metric_name in ['attr_err', 'vel_err']:
+                elif class_name in ["barrier"] and metric_name in [
+                    "attr_err",
+                    "vel_err",
+                ]:
                     tp = np.nan
                 else:
                     tp = calc_tp(metric_data, self.cfg.min_recall, metric_name)
@@ -638,7 +696,8 @@ class MotionEval(NuScenesEval):
         return metrics, metric_data_list
 
     def evaluate_epa(
-            self) -> Tuple[DetectionMotionMetrics, DetectionMotionMetricDataList]:
+        self,
+    ) -> Tuple[DetectionMotionMetrics, DetectionMotionMetricDataList]:
         """
         Performs the actual evaluation.
         :return: A tuple of high-level and the raw metric data.
@@ -653,25 +712,37 @@ class MotionEval(NuScenesEval):
         # Step 1: Accumulate metric data for all classes and distance thresholds.
         # -----------------------------------
         if self.verbose:
-            print('Accumulating metric data...')
+            print("Accumulating metric data...")
         metric_data_list = DetectionMotionMetricDataList()
 
         for class_name in self.cfg.class_names:
             for dist_th in self.cfg.dist_ths:
                 md, N_det_tp, N_det_fp, N_det_gt = accumulate(
-                    self.gt_boxes, self.pred_boxes, class_name, self.cfg.dist_fcn_callable, dist_th)
+                    self.gt_boxes,
+                    self.pred_boxes,
+                    class_name,
+                    self.cfg.dist_fcn_callable,
+                    dist_th,
+                )
                 md, N_det_traj_tp, N_det_traj_fp, N_det_traj_gt = accumulate_motion(
-                    self.gt_boxes, self.pred_boxes, class_name, self.cfg.dist_fcn_callable, traj_fde, dist_th, traj_dist_th)
+                    self.gt_boxes,
+                    self.pred_boxes,
+                    class_name,
+                    self.cfg.dist_fcn_callable,
+                    traj_fde,
+                    dist_th,
+                    traj_dist_th,
+                )
                 metric_data_list.set(class_name, dist_th, md)
                 EPA = (N_det_traj_tp - 0.5 * N_det_fp) / (N_det_gt + 1e-5)
                 print(N_det_traj_tp, N_det_fp, N_det_gt)
-                print('EPA ', class_name, EPA)
+                print("EPA ", class_name, EPA)
 
         # -----------------------------------
         # Step 2: Calculate metrics from the data.
         # -----------------------------------
         if self.verbose:
-            print('Calculating metrics...')
+            print("Calculating metrics...")
         metrics = DetectionMotionMetrics(self.cfg)
 
         traj_metrics = {}
@@ -679,19 +750,21 @@ class MotionEval(NuScenesEval):
             # Compute APs.
             for dist_th in self.cfg.dist_ths:
                 metric_data = metric_data_list[(class_name, dist_th)]
-                ap = calc_ap(
-                    metric_data,
-                    self.cfg.min_recall,
-                    self.cfg.min_precision)
+                ap = calc_ap(metric_data, self.cfg.min_recall, self.cfg.min_precision)
                 metrics.add_label_ap(class_name, dist_th, ap)
             # Compute TP metrics.
             for metric_name in TP_METRICS:
-                metric_data = metric_data_list[(
-                    class_name, self.cfg.dist_th_tp)]
-                if class_name in ['traffic_cone'] and metric_name in [
-                        'attr_err', 'vel_err', 'orient_err']:
+                metric_data = metric_data_list[(class_name, self.cfg.dist_th_tp)]
+                if class_name in ["traffic_cone"] and metric_name in [
+                    "attr_err",
+                    "vel_err",
+                    "orient_err",
+                ]:
                     tp = np.nan
-                elif class_name in ['barrier'] and metric_name in ['attr_err', 'vel_err']:
+                elif class_name in ["barrier"] and metric_name in [
+                    "attr_err",
+                    "vel_err",
+                ]:
                     tp = np.nan
                 else:
                     tp = calc_tp(metric_data, self.cfg.min_recall, metric_name)
@@ -707,10 +780,12 @@ class MotionEval(NuScenesEval):
 
         return metrics, metric_data_list
 
-    def main(self,
-             plot_examples: int = 0,
-             render_curves: bool = True,
-             eval_mode: str = 'standard') -> Dict[str, Any]:
+    def main(
+        self,
+        plot_examples: int = 0,
+        render_curves: bool = True,
+        eval_mode: str = "standard",
+    ) -> Dict[str, Any]:
         """
         Main function that loads the evaluation code, visualizes samples, runs the evaluation and renders stat plots.
         :param plot_examples: How many example visualizations to write to disk.
@@ -725,24 +800,26 @@ class MotionEval(NuScenesEval):
             sample_tokens = sample_tokens[:plot_examples]
 
             # Visualize samples.
-            example_dir = os.path.join(self.output_dir, 'examples')
+            example_dir = os.path.join(self.output_dir, "examples")
             if not os.path.isdir(example_dir):
                 os.mkdir(example_dir)
             for sample_token in sample_tokens:
-                visualize_sample(self.nusc,
-                                 sample_token,
-                                 self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                                 # Don't render test GT.
-                                 self.pred_boxes,
-                                 eval_range=max(self.cfg.class_range.values()),
-                                 savepath=os.path.join(example_dir, '{}.png'.format(sample_token)))
+                visualize_sample(
+                    self.nusc,
+                    sample_token,
+                    self.gt_boxes if self.eval_set != "test" else EvalBoxes(),
+                    # Don't render test GT.
+                    self.pred_boxes,
+                    eval_range=max(self.cfg.class_range.values()),
+                    savepath=os.path.join(example_dir, "{}.png".format(sample_token)),
+                )
 
         # Run evaluation.
-        if eval_mode == 'motion_map':
+        if eval_mode == "motion_map":
             metrics, metric_data_list = self.evaluate_motion()
-        elif eval_mode == 'standard':
+        elif eval_mode == "standard":
             metrics, metric_data_list = self.evaluate()
-        elif eval_mode == 'epa':
+        elif eval_mode == "epa":
             metrics, metric_data_list = self.evaluate_epa()
         else:
             raise NotImplementedError
@@ -752,57 +829,63 @@ class MotionEval(NuScenesEval):
 
         # Dump the metric data, meta and metrics to disk.
         if self.verbose:
-            print('Saving metrics to: %s' % self.output_dir)
+            print("Saving metrics to: %s" % self.output_dir)
         metrics_summary = metrics.serialize()
-        metrics_summary['meta'] = self.meta.copy()
-        with open(os.path.join(self.output_dir, 'metrics_summary.json'), 'w') as f:
+        metrics_summary["meta"] = self.meta.copy()
+        with open(os.path.join(self.output_dir, "metrics_summary.json"), "w") as f:
             json.dump(metrics_summary, f, indent=2)
-        with open(os.path.join(self.output_dir, 'metrics_details.json'), 'w') as f:
+        with open(os.path.join(self.output_dir, "metrics_details.json"), "w") as f:
             json.dump(metric_data_list.serialize(), f, indent=2)
 
         # Print high-level metrics.
-        print('mAP: %.4f' % (metrics_summary['mean_ap']))
+        print("mAP: %.4f" % (metrics_summary["mean_ap"]))
         err_name_mapping = {
-            'trans_err': 'mATE',
-            'scale_err': 'mASE',
-            'orient_err': 'mAOE',
-            'vel_err': 'mAVE',
-            'attr_err': 'mAAE'
+            "trans_err": "mATE",
+            "scale_err": "mASE",
+            "orient_err": "mAOE",
+            "vel_err": "mAVE",
+            "attr_err": "mAAE",
         }
-        for tp_name, tp_val in metrics_summary['tp_errors'].items():
-            print('%s: %.4f' % (err_name_mapping[tp_name], tp_val))
-        print('NDS: %.4f' % (metrics_summary['nd_score']))
-        print('Eval time: %.1fs' % metrics_summary['eval_time'])
+        for tp_name, tp_val in metrics_summary["tp_errors"].items():
+            print("%s: %.4f" % (err_name_mapping[tp_name], tp_val))
+        print("NDS: %.4f" % (metrics_summary["nd_score"]))
+        print("Eval time: %.1fs" % metrics_summary["eval_time"])
 
         # Print per-class metrics.
         print()
-        print('Per-class results:')
-        print('Object Class\tAP\tATE\tASE\tAOE\tAVE\tAAE')
-        class_aps = metrics_summary['mean_dist_aps']
-        class_tps = metrics_summary['label_tp_errors']
+        print("Per-class results:")
+        print("Object Class\tAP\tATE\tASE\tAOE\tAVE\tAAE")
+        class_aps = metrics_summary["mean_dist_aps"]
+        class_tps = metrics_summary["label_tp_errors"]
         for class_name in class_aps.keys():
-            print('%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f'
-                  % (class_name, class_aps[class_name],
-                     class_tps[class_name]['trans_err'],
-                     class_tps[class_name]['scale_err'],
-                     class_tps[class_name]['orient_err'],
-                     class_tps[class_name]['vel_err'],
-                     class_tps[class_name]['attr_err']))
+            print(
+                "%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f"
+                % (
+                    class_name,
+                    class_aps[class_name],
+                    class_tps[class_name]["trans_err"],
+                    class_tps[class_name]["scale_err"],
+                    class_tps[class_name]["orient_err"],
+                    class_tps[class_name]["vel_err"],
+                    class_tps[class_name]["attr_err"],
+                )
+            )
 
         return metrics_summary
 
-    def render(self, metrics: DetectionMetrics,
-               md_list: DetectionMetricDataList) -> None:
+    def render(
+        self, metrics: DetectionMetrics, md_list: DetectionMetricDataList
+    ) -> None:
         """
         Renders various PR and TP curves.
         :param metrics: DetectionMetrics instance.
         :param md_list: DetectionMetricDataList instance.
         """
         if self.verbose:
-            print('Rendering PR and TP curves')
+            print("Rendering PR and TP curves")
 
         def savepath(name):
-            return os.path.join(self.plot_dir, name + '.pdf')
+            return os.path.join(self.plot_dir, name + ".pdf")
 
         summary_plot(
             md_list,
@@ -810,7 +893,8 @@ class MotionEval(NuScenesEval):
             min_precision=self.cfg.min_precision,
             min_recall=self.cfg.min_recall,
             dist_th_tp=self.cfg.dist_th_tp,
-            savepath=savepath('summary'))
+            savepath=savepath("summary"),
+        )
 
         for detection_name in self.cfg.class_names:
             class_pr_curve(
@@ -819,9 +903,8 @@ class MotionEval(NuScenesEval):
                 detection_name,
                 self.cfg.min_precision,
                 self.cfg.min_recall,
-                savepath=savepath(
-                    detection_name +
-                    '_pr'))
+                savepath=savepath(detection_name + "_pr"),
+            )
 
             class_tp_curve(
                 md_list,
@@ -829,9 +912,8 @@ class MotionEval(NuScenesEval):
                 detection_name,
                 self.cfg.min_recall,
                 self.cfg.dist_th_tp,
-                savepath=savepath(
-                    detection_name +
-                    '_tp'))
+                savepath=savepath(detection_name + "_tp"),
+            )
 
         for dist_th in self.cfg.dist_ths:
             dist_pr_curve(
@@ -840,9 +922,8 @@ class MotionEval(NuScenesEval):
                 dist_th,
                 self.cfg.min_precision,
                 self.cfg.min_recall,
-                savepath=savepath(
-                    'dist_pr_' +
-                    str(dist_th)))
+                savepath=savepath("dist_pr_" + str(dist_th)),
+            )
 
 
 def print_traj_metrics(metrics):
@@ -852,53 +933,64 @@ def print_traj_metrics(metrics):
     for class_name in metrics.keys():
         row_data = [class_name]
         for m in TP_TRAJ_METRICS:
-            row_data.append('%.4f' % metrics[class_name][m])
+            row_data.append("%.4f" % metrics[class_name][m])
         x.add_row(row_data)
     print(x)
 
 
 if __name__ == "__main__":
-
     # Settings.
     parser = argparse.ArgumentParser(
-        description='Evaluate nuScenes detection results.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        description="Evaluate nuScenes detection results.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("result_path", type=str, help="The submission as a JSON file.")
     parser.add_argument(
-        'result_path',
+        "--output_dir",
         type=str,
-        help='The submission as a JSON file.')
+        default="~/nuscenes-metrics",
+        help="Folder to store result metrics, graphs and example visualizations.",
+    )
     parser.add_argument(
-        '--output_dir',
+        "--eval_set",
         type=str,
-        default='~/nuscenes-metrics',
-        help='Folder to store result metrics, graphs and example visualizations.')
+        default="val",
+        help="Which dataset split to evaluate on, train, val or test.",
+    )
     parser.add_argument(
-        '--eval_set',
+        "--dataroot",
         type=str,
-        default='val',
-        help='Which dataset split to evaluate on, train, val or test.')
-    parser.add_argument('--dataroot', type=str, default='data/nuscenes',
-                        help='Default nuScenes data directory.')
+        default="data/nuscenes",
+        help="Default nuScenes data directory.",
+    )
     parser.add_argument(
-        '--version',
+        "--version",
         type=str,
-        default='v1.0-trainval',
-        help='Which version of the nuScenes dataset to evaluate on, e.g. v1.0-trainval.')
+        default="v1.0-trainval",
+        help="Which version of the nuScenes dataset to evaluate on, e.g. v1.0-trainval.",
+    )
     parser.add_argument(
-        '--config_path',
+        "--config_path",
         type=str,
-        default='',
-        help='Path to the configuration file.'
-        'If no path given, the CVPR 2019 configuration will be used.')
+        default="",
+        help="Path to the configuration file."
+        "If no path given, the CVPR 2019 configuration will be used.",
+    )
     parser.add_argument(
-        '--plot_examples',
+        "--plot_examples",
         type=int,
         default=0,
-        help='How many example visualizations to write to disk.')
-    parser.add_argument('--render_curves', type=int, default=1,
-                        help='Whether to render PR and TP curves to disk.')
-    parser.add_argument('--verbose', type=int, default=1,
-                        help='Whether to print to stdout.')
+        help="How many example visualizations to write to disk.",
+    )
+    parser.add_argument(
+        "--render_curves",
+        type=int,
+        default=1,
+        help="Whether to render PR and TP curves to disk.",
+    )
+    parser.add_argument(
+        "--verbose", type=int, default=1, help="Whether to print to stdout."
+    )
     args = parser.parse_args()
 
     result_path_ = os.path.expanduser(args.result_path)
@@ -911,10 +1003,10 @@ if __name__ == "__main__":
     render_curves_ = bool(args.render_curves)
     verbose_ = bool(args.verbose)
 
-    if config_path == '':
-        cfg_ = config_factory('detection_cvpr_2019')
+    if config_path == "":
+        cfg_ = config_factory("detection_cvpr_2019")
     else:
-        with open(config_path, 'r') as _f:
+        with open(config_path, "r") as _f:
             cfg_ = DetectionConfig.deserialize(json.load(_f))
 
     nusc_ = NuScenes(version=version_, verbose=verbose_, dataroot=dataroot_)
@@ -924,10 +1016,9 @@ if __name__ == "__main__":
         result_path=result_path_,
         eval_set=eval_set_,
         output_dir=output_dir_,
-        verbose=verbose_)
-    for vis in ['1', '2', '3', '4']:
-        nusc_eval.update_gt(type_='vis', visibility=vis)
-        print(f'================ {vis} ===============')
-        nusc_eval.main(
-            plot_examples=plot_examples_,
-            render_curves=render_curves_)
+        verbose=verbose_,
+    )
+    for vis in ["1", "2", "3", "4"]:
+        nusc_eval.update_gt(type_="vis", visibility=vis)
+        print(f"================ {vis} ===============")
+        nusc_eval.main(plot_examples=plot_examples_, render_curves=render_curves_)

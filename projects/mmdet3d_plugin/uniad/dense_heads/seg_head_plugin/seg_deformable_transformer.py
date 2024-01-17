@@ -7,12 +7,13 @@ import copy
 import torch
 import torch.nn as nn
 from mmcv.cnn import build_activation_layer, build_norm_layer, xavier_init
-from mmcv.cnn.bricks.registry import (TRANSFORMER_LAYER,
-                                      TRANSFORMER_LAYER_SEQUENCE)
-from mmcv.cnn.bricks.transformer import (BaseTransformerLayer,
-                                         MultiScaleDeformableAttention,
-                                         TransformerLayerSequence,
-                                         build_transformer_layer_sequence)
+from mmcv.cnn.bricks.registry import TRANSFORMER_LAYER, TRANSFORMER_LAYER_SEQUENCE
+from mmcv.cnn.bricks.transformer import (
+    BaseTransformerLayer,
+    MultiScaleDeformableAttention,
+    TransformerLayerSequence,
+    build_transformer_layer_sequence,
+)
 from mmcv.runner.base_module import BaseModule
 from torch.nn.init import normal_
 
@@ -22,6 +23,7 @@ from torch import einsum
 
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
+
 
 # Copy-paste from defromable detr in mmdet.
 @TRANSFORMER.register_module()
@@ -36,11 +38,14 @@ class SegDeformableTransformer(Transformer):
         two_stage_num_proposals (int): Number of proposals when set
             `as_two_stage` as True. Default: 300.
     """
-    def __init__(self,
-                 as_two_stage=False,
-                 num_feature_levels=4,
-                 two_stage_num_proposals=300,
-                 **kwargs):
+
+    def __init__(
+        self,
+        as_two_stage=False,
+        num_feature_levels=4,
+        two_stage_num_proposals=300,
+        **kwargs
+    ):
         super(SegDeformableTransformer, self).__init__(**kwargs)
         self.fp16_enabled = False
         self.as_two_stage = as_two_stage
@@ -52,13 +57,13 @@ class SegDeformableTransformer(Transformer):
     def init_layers(self):
         """Initialize layers of the DeformableDetrTransformer."""
         self.level_embeds = nn.Parameter(
-            torch.Tensor(self.num_feature_levels, self.embed_dims))
+            torch.Tensor(self.num_feature_levels, self.embed_dims)
+        )
 
         if self.as_two_stage:
             self.enc_output = nn.Linear(self.embed_dims, self.embed_dims)
             self.enc_output_norm = nn.LayerNorm(self.embed_dims)
-            self.pos_trans = nn.Linear(self.embed_dims * 2,
-                                       self.embed_dims * 2)
+            self.pos_trans = nn.Linear(self.embed_dims * 2, self.embed_dims * 2)
             self.pos_trans_norm = nn.LayerNorm(self.embed_dims * 2)
         else:
             self.reference_points = nn.Linear(self.embed_dims, 2)
@@ -75,11 +80,10 @@ class SegDeformableTransformer(Transformer):
                 except:
                     m.init_weights()
         if not self.as_two_stage:
-            xavier_init(self.reference_points, distribution='uniform', bias=0.)
+            xavier_init(self.reference_points, distribution="uniform", bias=0.0)
         normal_(self.level_embeds)
 
-    def gen_encoder_output_proposals(self, memory, memory_padding_mask,
-                                     spatial_shapes):
+    def gen_encoder_output_proposals(self, memory, memory_padding_mask, spatial_shapes):
         """Generate proposals from encoded memory.
 
         Args:
@@ -108,46 +112,43 @@ class SegDeformableTransformer(Transformer):
         proposals = []
         _cur = 0
         for lvl, (H, W) in enumerate(spatial_shapes):
-            mask_flatten_ = memory_padding_mask[:, _cur:(_cur + H * W)].view(
-                N, H, W, 1)
+            mask_flatten_ = memory_padding_mask[:, _cur : (_cur + H * W)].view(
+                N, H, W, 1
+            )
             valid_H = torch.sum(~mask_flatten_[:, :, 0, 0], 1)
             valid_W = torch.sum(~mask_flatten_[:, 0, :, 0], 1)
 
             grid_y, grid_x = torch.meshgrid(
-                torch.linspace(0,
-                               H - 1,
-                               H,
-                               dtype=torch.float32,
-                               device=memory.device),
-                torch.linspace(0,
-                               W - 1,
-                               W,
-                               dtype=torch.float32,
-                               device=memory.device))
+                torch.linspace(0, H - 1, H, dtype=torch.float32, device=memory.device),
+                torch.linspace(0, W - 1, W, dtype=torch.float32, device=memory.device),
+            )
             grid = torch.cat([grid_x.unsqueeze(-1), grid_y.unsqueeze(-1)], -1)
 
-            scale = torch.cat([valid_W.unsqueeze(-1),
-                               valid_H.unsqueeze(-1)], 1).view(N, 1, 1, 2)
+            scale = torch.cat([valid_W.unsqueeze(-1), valid_H.unsqueeze(-1)], 1).view(
+                N, 1, 1, 2
+            )
             grid = (grid.unsqueeze(0).expand(N, -1, -1, -1) + 0.5) / scale
             wh = torch.ones_like(grid) * 0.05 * (2.0**lvl)
             proposal = torch.cat((grid, wh), -1).view(N, -1, 4)
             proposals.append(proposal)
-            _cur += (H * W)
+            _cur += H * W
         output_proposals = torch.cat(proposals, 1)
-        output_proposals_valid = ((output_proposals > 0.01) &
-                                  (output_proposals < 0.99)).all(-1,
-                                                                 keepdim=True)
+        output_proposals_valid = (
+            (output_proposals > 0.01) & (output_proposals < 0.99)
+        ).all(-1, keepdim=True)
         output_proposals = torch.log(output_proposals / (1 - output_proposals))
         output_proposals = output_proposals.masked_fill(
-            memory_padding_mask.unsqueeze(-1), float('inf'))
+            memory_padding_mask.unsqueeze(-1), float("inf")
+        )
         output_proposals = output_proposals.masked_fill(
-            ~output_proposals_valid, float('inf'))
+            ~output_proposals_valid, float("inf")
+        )
 
         output_memory = memory
         output_memory = output_memory.masked_fill(
-            memory_padding_mask.unsqueeze(-1), float(0))
-        output_memory = output_memory.masked_fill(~output_proposals_valid,
-                                                  float(0))
+            memory_padding_mask.unsqueeze(-1), float(0)
+        )
+        output_memory = output_memory.masked_fill(~output_proposals_valid, float(0))
         output_memory = self.enc_output_norm(self.enc_output(output_memory))
         return output_memory, output_proposals
 
@@ -172,20 +173,11 @@ class SegDeformableTransformer(Transformer):
         for lvl, (H, W) in enumerate(spatial_shapes):
             #  TODO  check this 0.5
             ref_y, ref_x = torch.meshgrid(
-                torch.linspace(0.5,
-                               H - 0.5,
-                               H,
-                               dtype=torch.float32,
-                               device=device),
-                torch.linspace(0.5,
-                               W - 0.5,
-                               W,
-                               dtype=torch.float32,
-                               device=device))
-            ref_y = ref_y.reshape(-1)[None] / (valid_ratios[:, None, lvl, 1] *
-                                               H)
-            ref_x = ref_x.reshape(-1)[None] / (valid_ratios[:, None, lvl, 0] *
-                                               W)
+                torch.linspace(0.5, H - 0.5, H, dtype=torch.float32, device=device),
+                torch.linspace(0.5, W - 0.5, W, dtype=torch.float32, device=device),
+            )
+            ref_y = ref_y.reshape(-1)[None] / (valid_ratios[:, None, lvl, 1] * H)
+            ref_x = ref_x.reshape(-1)[None] / (valid_ratios[:, None, lvl, 0] * W)
             ref = torch.stack((ref_x, ref_y), -1)
             reference_points_list.append(ref)
         reference_points = torch.cat(reference_points_list, 1)
@@ -202,34 +194,34 @@ class SegDeformableTransformer(Transformer):
         valid_ratio = torch.stack([valid_ratio_w, valid_ratio_h], -1)
         return valid_ratio
 
-    def get_proposal_pos_embed(self,
-                               proposals,
-                               num_pos_feats=128,
-                               temperature=10000):
+    def get_proposal_pos_embed(self, proposals, num_pos_feats=128, temperature=10000):
         """Get the position embedding of proposal."""
         scale = 2 * math.pi
-        dim_t = torch.arange(num_pos_feats,
-                             dtype=torch.float32,
-                             device=proposals.device)
-        dim_t = temperature**(2 * (dim_t // 2) / num_pos_feats)
+        dim_t = torch.arange(
+            num_pos_feats, dtype=torch.float32, device=proposals.device
+        )
+        dim_t = temperature ** (2 * (dim_t // 2) / num_pos_feats)
         # N, L, 4
         proposals = proposals.sigmoid() * scale
         # N, L, 4, 128
         pos = proposals[:, :, :, None] / dim_t
         # N, L, 4, 64, 2
-        pos = torch.stack((pos[:, :, :, 0::2].sin(), pos[:, :, :, 1::2].cos()),
-                          dim=4).flatten(2)
+        pos = torch.stack(
+            (pos[:, :, :, 0::2].sin(), pos[:, :, :, 1::2].cos()), dim=4
+        ).flatten(2)
         return pos
 
-    @force_fp32(apply_to=('mlvl_feats', 'query_embed', 'mlvl_pos_embeds'))
-    def forward(self,
-                mlvl_feats,
-                mlvl_masks,
-                query_embed,
-                mlvl_pos_embeds,
-                reg_branches=None,
-                cls_branches=None,
-                **kwargs):
+    @force_fp32(apply_to=("mlvl_feats", "query_embed", "mlvl_pos_embeds"))
+    def forward(
+        self,
+        mlvl_feats,
+        mlvl_masks,
+        query_embed,
+        mlvl_pos_embeds,
+        reg_branches=None,
+        cls_branches=None,
+        **kwargs
+    ):
         """Forward function for `Transformer`.
 
         Args:
@@ -285,7 +277,8 @@ class SegDeformableTransformer(Transformer):
         lvl_pos_embed_flatten = []
         spatial_shapes = []
         for lvl, (feat, mask, pos_embed) in enumerate(
-                zip(mlvl_feats, mlvl_masks, mlvl_pos_embeds)):
+            zip(mlvl_feats, mlvl_masks, mlvl_pos_embeds)
+        ):
             bs, c, h, w = feat.shape
             spatial_shape = (h, w)
             spatial_shapes.append(spatial_shape)
@@ -299,59 +292,60 @@ class SegDeformableTransformer(Transformer):
         feat_flatten = torch.cat(feat_flatten, 1)
         mask_flatten = torch.cat(mask_flatten, 1)
         lvl_pos_embed_flatten = torch.cat(lvl_pos_embed_flatten, 1)
-        spatial_shapes = torch.as_tensor(spatial_shapes,
-                                         dtype=torch.long,
-                                         device=feat_flatten.device)
-        level_start_index = torch.cat((spatial_shapes.new_zeros(
-            (1, )), spatial_shapes.prod(1).cumsum(0)[:-1]))
-        valid_ratios = torch.stack(
-            [self.get_valid_ratio(m) for m in mlvl_masks], 1)
+        spatial_shapes = torch.as_tensor(
+            spatial_shapes, dtype=torch.long, device=feat_flatten.device
+        )
+        level_start_index = torch.cat(
+            (spatial_shapes.new_zeros((1,)), spatial_shapes.prod(1).cumsum(0)[:-1])
+        )
+        valid_ratios = torch.stack([self.get_valid_ratio(m) for m in mlvl_masks], 1)
 
-        reference_points = \
-            self.get_reference_points(spatial_shapes,
-                                      valid_ratios,
-                                      device=feat.device)
+        reference_points = self.get_reference_points(
+            spatial_shapes, valid_ratios, device=feat.device
+        )
 
         feat_flatten = feat_flatten.permute(1, 0, 2)  # (H*W, bs, embed_dims)
         lvl_pos_embed_flatten = lvl_pos_embed_flatten.permute(
-            1, 0, 2)  # (H*W, bs, embed_dims)
-        memory = self.encoder(query=feat_flatten,
-                              key=None,
-                              value=None,
-                              query_pos=lvl_pos_embed_flatten,
-                              query_key_padding_mask=mask_flatten,
-                              spatial_shapes=spatial_shapes,
-                              reference_points=reference_points,
-                              level_start_index=level_start_index,
-                              valid_ratios=valid_ratios,
-                              **kwargs)
+            1, 0, 2
+        )  # (H*W, bs, embed_dims)
+        memory = self.encoder(
+            query=feat_flatten,
+            key=None,
+            value=None,
+            query_pos=lvl_pos_embed_flatten,
+            query_key_padding_mask=mask_flatten,
+            spatial_shapes=spatial_shapes,
+            reference_points=reference_points,
+            level_start_index=level_start_index,
+            valid_ratios=valid_ratios,
+            **kwargs
+        )
 
         memory = memory.permute(1, 0, 2)
         bs, _, c = memory.shape
         if self.as_two_stage:
-            output_memory, output_proposals = \
-                self.gen_encoder_output_proposals(
-                    memory, mask_flatten, spatial_shapes)
-            enc_outputs_class = cls_branches[self.decoder.num_layers](
-                output_memory)
-            enc_outputs_coord_unact = \
-                reg_branches[
-                    self.decoder.num_layers](output_memory) + output_proposals
+            output_memory, output_proposals = self.gen_encoder_output_proposals(
+                memory, mask_flatten, spatial_shapes
+            )
+            enc_outputs_class = cls_branches[self.decoder.num_layers](output_memory)
+            enc_outputs_coord_unact = (
+                reg_branches[self.decoder.num_layers](output_memory) + output_proposals
+            )
 
             topk = self.two_stage_num_proposals
-            topk_proposals = torch.topk(enc_outputs_class[..., 0], topk,
-                                        dim=1)[1]
+            topk_proposals = torch.topk(enc_outputs_class[..., 0], topk, dim=1)[1]
             topk_coords_unact = torch.gather(
-                enc_outputs_coord_unact, 1,
-                topk_proposals.unsqueeze(-1).repeat(1, 1, 4))
+                enc_outputs_coord_unact, 1, topk_proposals.unsqueeze(-1).repeat(1, 1, 4)
+            )
             topk_coords_unact = topk_coords_unact.detach()
             reference_points = topk_coords_unact.sigmoid()
             init_reference_out = reference_points
             pos_trans_out = self.pos_trans_norm(
-                self.pos_trans(self.get_proposal_pos_embed(topk_coords_unact)))
+                self.pos_trans(self.get_proposal_pos_embed(topk_coords_unact))
+            )
             query_pos, query = torch.split(pos_trans_out, c, dim=2)
         else:
-            #print('query_embd',query_embed.shape, c)
+            # print('query_embd',query_embed.shape, c)
             # query_embed N *(2C)
             query_pos, query = torch.split(query_embed, c, dim=1)
             query_pos = query_pos.unsqueeze(0).expand(bs, -1, -1)
@@ -374,11 +368,23 @@ class SegDeformableTransformer(Transformer):
             level_start_index=level_start_index,
             valid_ratios=valid_ratios,
             reg_branches=reg_branches,
-            **kwargs)
+            **kwargs
+        )
         inter_references_out = inter_references
         if self.as_two_stage:
-            return (memory,lvl_pos_embed_flatten,mask_flatten,query_pos), inter_states, init_reference_out,\
-                inter_references_out, enc_outputs_class,\
-                enc_outputs_coord_unact
-        return (memory,lvl_pos_embed_flatten,mask_flatten,query_pos), inter_states, init_reference_out, \
-            inter_references_out, None, None
+            return (
+                (memory, lvl_pos_embed_flatten, mask_flatten, query_pos),
+                inter_states,
+                init_reference_out,
+                inter_references_out,
+                enc_outputs_class,
+                enc_outputs_coord_unact,
+            )
+        return (
+            (memory, lvl_pos_embed_flatten, mask_flatten, query_pos),
+            inter_states,
+            init_reference_out,
+            inter_references_out,
+            None,
+            None,
+        )

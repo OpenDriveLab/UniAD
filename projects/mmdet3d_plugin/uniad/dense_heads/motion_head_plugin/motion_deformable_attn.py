@@ -1,8 +1,8 @@
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 # UniAD: Planning-oriented Autonomous Driving (https://arxiv.org/abs/2212.10156)  #
 # Source code: https://github.com/OpenDriveLab/UniAD                              #
 # Copyright (c) OpenDriveLab. All rights reserved.                                #
-#---------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------#
 
 import copy
 import warnings
@@ -14,11 +14,17 @@ from einops import rearrange, repeat
 from mmcv.ops.multi_scale_deform_attn import multi_scale_deformable_attn_pytorch
 from mmcv.cnn import xavier_init, constant_init
 from mmcv.cnn.bricks.registry import ATTENTION, TRANSFORMER_LAYER
-from mmcv.cnn.bricks.transformer import build_attention, build_feedforward_network, build_norm_layer
+from mmcv.cnn.bricks.transformer import (
+    build_attention,
+    build_feedforward_network,
+    build_norm_layer,
+)
 from mmcv.cnn.bricks.drop import build_dropout
 from mmcv.runner.base_module import BaseModule, ModuleList, Sequential
 from mmcv.utils import ConfigDict, deprecated_api_warning
-from projects.mmdet3d_plugin.uniad.modules.multi_scale_deformable_attn_function import MultiScaleDeformableAttnFunction_fp32
+from projects.mmdet3d_plugin.uniad.modules.multi_scale_deformable_attn_function import (
+    MultiScaleDeformableAttnFunction_fp32,
+)
 
 
 @TRANSFORMER_LAYER.register_module()
@@ -56,62 +62,69 @@ class MotionTransformerAttentionLayer(BaseModule):
             or (n, batch, embed_dim). Default to False.
     """
 
-    def __init__(self,
-                 attn_cfgs=None,
-                 ffn_cfgs=dict(
-                     type='FFN',
-                     embed_dims=256,
-                     feedforward_channels=1024,
-                     num_fcs=2,
-                     ffn_drop=0.,
-                     act_cfg=dict(type='ReLU', inplace=True),
-                 ),
-                 operation_order=None,
-                 norm_cfg=dict(type='LN'),
-                 init_cfg=None,
-                 batch_first=False,
-                 **kwargs):
-
+    def __init__(
+        self,
+        attn_cfgs=None,
+        ffn_cfgs=dict(
+            type="FFN",
+            embed_dims=256,
+            feedforward_channels=1024,
+            num_fcs=2,
+            ffn_drop=0.0,
+            act_cfg=dict(type="ReLU", inplace=True),
+        ),
+        operation_order=None,
+        norm_cfg=dict(type="LN"),
+        init_cfg=None,
+        batch_first=False,
+        **kwargs,
+    ):
         deprecated_args = dict(
-            feedforward_channels='feedforward_channels',
-            ffn_dropout='ffn_drop',
-            ffn_num_fcs='num_fcs')
+            feedforward_channels="feedforward_channels",
+            ffn_dropout="ffn_drop",
+            ffn_num_fcs="num_fcs",
+        )
         for ori_name, new_name in deprecated_args.items():
             if ori_name in kwargs:
                 warnings.warn(
-                    f'The arguments `{ori_name}` in BaseTransformerLayer '
-                    f'has been deprecated, now you should set `{new_name}` '
-                    f'and other FFN related arguments '
-                    f'to a dict named `ffn_cfgs`. ', DeprecationWarning)
+                    f"The arguments `{ori_name}` in BaseTransformerLayer "
+                    f"has been deprecated, now you should set `{new_name}` "
+                    f"and other FFN related arguments "
+                    f"to a dict named `ffn_cfgs`. ",
+                    DeprecationWarning,
+                )
                 ffn_cfgs[new_name] = kwargs[ori_name]
 
         super().__init__(init_cfg)
 
         self.batch_first = batch_first
 
-        num_attn = operation_order.count('self_attn') + operation_order.count(
-            'cross_attn')
+        num_attn = operation_order.count("self_attn") + operation_order.count(
+            "cross_attn"
+        )
         if isinstance(attn_cfgs, dict):
             attn_cfgs = [copy.deepcopy(attn_cfgs) for _ in range(num_attn)]
         else:
-            assert num_attn == len(attn_cfgs), f'The length ' \
-                f'of attn_cfg {num_attn} is ' \
-                f'not consistent with the number of attention' \
-                f'in operation_order {operation_order}.'
+            assert num_attn == len(attn_cfgs), (
+                f"The length "
+                f"of attn_cfg {num_attn} is "
+                f"not consistent with the number of attention"
+                f"in operation_order {operation_order}."
+            )
 
         self.num_attn = num_attn
         self.operation_order = operation_order
         self.norm_cfg = norm_cfg
-        self.pre_norm = operation_order[0] == 'norm'
+        self.pre_norm = operation_order[0] == "norm"
         self.attentions = ModuleList()
 
         index = 0
         for operation_name in operation_order:
-            if operation_name in ['self_attn', 'cross_attn']:
-                if 'batch_first' in attn_cfgs[index]:
-                    assert self.batch_first == attn_cfgs[index]['batch_first']
+            if operation_name in ["self_attn", "cross_attn"]:
+                if "batch_first" in attn_cfgs[index]:
+                    assert self.batch_first == attn_cfgs[index]["batch_first"]
                 else:
-                    attn_cfgs[index]['batch_first'] = self.batch_first
+                    attn_cfgs[index]["batch_first"] = self.batch_first
                 attention = build_attention(attn_cfgs[index])
                 # Some custom attentions used as `self_attn`
                 # or `cross_attn` can have different behavior.
@@ -122,36 +135,38 @@ class MotionTransformerAttentionLayer(BaseModule):
         self.embed_dims = self.attentions[0].embed_dims
 
         self.ffns = ModuleList()
-        num_ffns = operation_order.count('ffn')
+        num_ffns = operation_order.count("ffn")
         if isinstance(ffn_cfgs, dict):
             ffn_cfgs = ConfigDict(ffn_cfgs)
         if isinstance(ffn_cfgs, dict):
             ffn_cfgs = [copy.deepcopy(ffn_cfgs) for _ in range(num_ffns)]
         assert len(ffn_cfgs) == num_ffns
         for ffn_index in range(num_ffns):
-            if 'embed_dims' not in ffn_cfgs[ffn_index]:
-                ffn_cfgs[ffn_index]['embed_dims'] = self.embed_dims
+            if "embed_dims" not in ffn_cfgs[ffn_index]:
+                ffn_cfgs[ffn_index]["embed_dims"] = self.embed_dims
             else:
-                assert ffn_cfgs[ffn_index]['embed_dims'] == self.embed_dims
+                assert ffn_cfgs[ffn_index]["embed_dims"] == self.embed_dims
             self.ffns.append(
-                build_feedforward_network(ffn_cfgs[ffn_index],
-                                          dict(type='FFN')))
+                build_feedforward_network(ffn_cfgs[ffn_index], dict(type="FFN"))
+            )
 
         self.norms = ModuleList()
-        num_norms = operation_order.count('norm')
+        num_norms = operation_order.count("norm")
         for _ in range(num_norms):
             self.norms.append(build_norm_layer(norm_cfg, self.embed_dims)[1])
 
-    def forward(self,
-                query,
-                key=None,
-                value=None,
-                query_pos=None,
-                key_pos=None,
-                attn_masks=None,
-                query_key_padding_mask=None,
-                key_padding_mask=None,
-                **kwargs):
+    def forward(
+        self,
+        query,
+        key=None,
+        value=None,
+        query_pos=None,
+        key_pos=None,
+        attn_masks=None,
+        query_key_padding_mask=None,
+        key_padding_mask=None,
+        **kwargs,
+    ):
         """Forward function for `TransformerDecoderLayer`.
         **kwargs contains some specific arguments of attentions.
         Args:
@@ -187,19 +202,21 @@ class MotionTransformerAttentionLayer(BaseModule):
         if attn_masks is None:
             attn_masks = [None for _ in range(self.num_attn)]
         elif isinstance(attn_masks, torch.Tensor):
-            attn_masks = [
-                copy.deepcopy(attn_masks) for _ in range(self.num_attn)
-            ]
-            warnings.warn(f'Use same attn_mask in all attentions in '
-                          f'{self.__class__.__name__} ')
+            attn_masks = [copy.deepcopy(attn_masks) for _ in range(self.num_attn)]
+            warnings.warn(
+                f"Use same attn_mask in all attentions in "
+                f"{self.__class__.__name__} "
+            )
         else:
-            assert len(attn_masks) == self.num_attn, f'The length of ' \
-                        f'attn_masks {len(attn_masks)} must be equal ' \
-                        f'to the number of attention in ' \
-                        f'operation_order {self.num_attn}'
+            assert len(attn_masks) == self.num_attn, (
+                f"The length of "
+                f"attn_masks {len(attn_masks)} must be equal "
+                f"to the number of attention in "
+                f"operation_order {self.num_attn}"
+            )
 
         for layer in self.operation_order:
-            if layer == 'self_attn':
+            if layer == "self_attn":
                 temp_key = temp_value = query
                 query = self.attentions[attn_index](
                     query,
@@ -210,15 +227,16 @@ class MotionTransformerAttentionLayer(BaseModule):
                     key_pos=query_pos,
                     attn_mask=attn_masks[attn_index],
                     key_padding_mask=query_key_padding_mask,
-                    **kwargs)
+                    **kwargs,
+                )
                 attn_index += 1
                 identity = query
 
-            elif layer == 'norm':
+            elif layer == "norm":
                 query = self.norms[norm_index](query)
                 norm_index += 1
 
-            elif layer == 'cross_attn':
+            elif layer == "cross_attn":
                 query = self.attentions[attn_index](
                     query,
                     key,
@@ -228,16 +246,17 @@ class MotionTransformerAttentionLayer(BaseModule):
                     key_pos=key_pos,
                     attn_mask=attn_masks[attn_index],
                     key_padding_mask=key_padding_mask,
-                    **kwargs)
+                    **kwargs,
+                )
                 attn_index += 1
                 identity = query
 
-            elif layer == 'ffn':
-                query = self.ffns[ffn_index](
-                    query, identity if self.pre_norm else None)
+            elif layer == "ffn":
+                query = self.ffns[ffn_index](query, identity if self.pre_norm else None)
                 ffn_index += 1
 
         return query
+
 
 @ATTENTION.register_module()
 class MotionDeformableAttention(BaseModule):
@@ -267,24 +286,28 @@ class MotionDeformableAttention(BaseModule):
             Default: None.
     """
 
-    def __init__(self,
-                 embed_dims=256,
-                 num_heads=8,
-                 num_levels=4,
-                 num_points=4,
-                 num_steps=1,
-                 sample_index=-1,
-                 im2col_step=64,
-                 dropout=0.1,
-                 bev_range=[-51.2, -51.2, -5.0, 51.2, 51.2, 3.0],
-                 voxel_size=[0.2, 0.2, 8],
-                 batch_first=True,
-                 norm_cfg=None,
-                 init_cfg=None):
+    def __init__(
+        self,
+        embed_dims=256,
+        num_heads=8,
+        num_levels=4,
+        num_points=4,
+        num_steps=1,
+        sample_index=-1,
+        im2col_step=64,
+        dropout=0.1,
+        bev_range=[-51.2, -51.2, -5.0, 51.2, 51.2, 3.0],
+        voxel_size=[0.2, 0.2, 8],
+        batch_first=True,
+        norm_cfg=None,
+        init_cfg=None,
+    ):
         super().__init__(init_cfg)
         if embed_dims % num_heads != 0:
-            raise ValueError(f'embed_dims must be divisible by num_heads, '
-                             f'but got {embed_dims} and {num_heads}')
+            raise ValueError(
+                f"embed_dims must be divisible by num_heads, "
+                f"but got {embed_dims} and {num_heads}"
+            )
         dim_per_head = embed_dims // num_heads
         self.norm_cfg = norm_cfg
         self.dropout = nn.Dropout(dropout)
@@ -297,16 +320,17 @@ class MotionDeformableAttention(BaseModule):
         def _is_power_of_2(n):
             if (not isinstance(n, int)) or (n < 0):
                 raise ValueError(
-                    'invalid input for _is_power_of_2: {} (type: {})'.format(
-                        n, type(n)))
+                    "invalid input for _is_power_of_2: {} (type: {})".format(n, type(n))
+                )
             return (n & (n - 1) == 0) and n != 0
 
         if not _is_power_of_2(dim_per_head):
             warnings.warn(
                 "You'd better set embed_dims in "
-                'MultiScaleDeformAttention to make '
-                'the dimension of each attention head a power of 2 '
-                'which is more efficient in our CUDA implementation.')
+                "MultiScaleDeformAttention to make "
+                "the dimension of each attention head a power of 2 "
+                "which is more efficient in our CUDA implementation."
+            )
 
         self.im2col_step = im2col_step
         self.embed_dims = embed_dims
@@ -316,51 +340,58 @@ class MotionDeformableAttention(BaseModule):
         self.num_steps = num_steps
         self.sample_index = sample_index
         self.sampling_offsets = nn.Linear(
-            embed_dims, num_heads * num_steps * num_levels * num_points * 2)
-        self.attention_weights = nn.Linear(embed_dims,
-                                           num_heads * num_steps * num_levels * num_points)
+            embed_dims, num_heads * num_steps * num_levels * num_points * 2
+        )
+        self.attention_weights = nn.Linear(
+            embed_dims, num_heads * num_steps * num_levels * num_points
+        )
         self.value_proj = nn.Linear(embed_dims, embed_dims)
-        self.output_proj = Sequential(nn.Linear(num_steps*embed_dims, embed_dims),
-                                      nn.LayerNorm(embed_dims),
-                                      nn.ReLU(inplace=True)
-                                     )
+        self.output_proj = Sequential(
+            nn.Linear(num_steps * embed_dims, embed_dims),
+            nn.LayerNorm(embed_dims),
+            nn.ReLU(inplace=True),
+        )
         self.init_weights()
 
     def init_weights(self):
         """Default initialization for Parameters of Module."""
-        constant_init(self.sampling_offsets, 0.)
-        thetas = torch.arange(
-            self.num_heads,
-            dtype=torch.float32) * (2.0 * math.pi / self.num_heads)
+        constant_init(self.sampling_offsets, 0.0)
+        thetas = torch.arange(self.num_heads, dtype=torch.float32) * (
+            2.0 * math.pi / self.num_heads
+        )
         grid_init = torch.stack([thetas.cos(), thetas.sin()], -1)
-        grid_init = (grid_init /
-                     grid_init.abs().max(-1, keepdim=True)[0]).view(
-            self.num_heads, 1, 1, 1,
-            2).repeat(1, self.num_steps, self.num_levels, self.num_points, 1)
+        grid_init = (
+            (grid_init / grid_init.abs().max(-1, keepdim=True)[0])
+            .view(self.num_heads, 1, 1, 1, 2)
+            .repeat(1, self.num_steps, self.num_levels, self.num_points, 1)
+        )
         for i in range(self.num_points):
             grid_init[:, :, :, i, :] *= i + 1
 
         self.sampling_offsets.bias.data = grid_init.view(-1)
-        constant_init(self.attention_weights, val=0., bias=0.)
-        xavier_init(self.value_proj, distribution='uniform', bias=0.)
-        xavier_init(self.output_proj, distribution='uniform', bias=0.)
+        constant_init(self.attention_weights, val=0.0, bias=0.0)
+        xavier_init(self.value_proj, distribution="uniform", bias=0.0)
+        xavier_init(self.output_proj, distribution="uniform", bias=0.0)
         self._is_init = True
 
-    @deprecated_api_warning({'residual': 'identity'},
-                            cls_name='MultiScaleDeformableAttention')
-    def forward(self,
-                query,
-                key=None,
-                value=None,
-                identity=None,
-                query_pos=None,
-                key_padding_mask=None,
-                spatial_shapes=None,
-                level_start_index=None,
-                bbox_results=None,
-                reference_trajs=None,
-                flag='decoder',
-                **kwargs):
+    @deprecated_api_warning(
+        {"residual": "identity"}, cls_name="MultiScaleDeformableAttention"
+    )
+    def forward(
+        self,
+        query,
+        key=None,
+        value=None,
+        identity=None,
+        query_pos=None,
+        key_padding_mask=None,
+        spatial_shapes=None,
+        level_start_index=None,
+        bbox_results=None,
+        reference_trajs=None,
+        flag="decoder",
+        **kwargs,
+    ):
         """Forward Function of MultiScaleDeformAttention.
 
         Args:
@@ -405,7 +436,7 @@ class MotionDeformableAttention(BaseModule):
         if query_pos is not None:
             query = query + query_pos
         query = torch.flatten(query, start_dim=1, end_dim=2)
-        
+
         value = value.permute(1, 0, 2)
         bs, num_value, _ = value.shape
         assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
@@ -415,55 +446,100 @@ class MotionDeformableAttention(BaseModule):
             value = value.masked_fill(key_padding_mask[..., None], 0.0)
         value = value.view(bs, num_value, self.num_heads, -1)
         sampling_offsets = self.sampling_offsets(query).view(
-            bs, num_query, self.num_heads, self.num_steps, self.num_levels, self.num_points, 2)
+            bs,
+            num_query,
+            self.num_heads,
+            self.num_steps,
+            self.num_levels,
+            self.num_points,
+            2,
+        )
         attention_weights = self.attention_weights(query).view(
-            bs, num_query, self.num_heads, self.num_steps, self.num_levels * self.num_points)
+            bs,
+            num_query,
+            self.num_heads,
+            self.num_steps,
+            self.num_levels * self.num_points,
+        )
         attention_weights = attention_weights.softmax(-1)
 
-        attention_weights = attention_weights.view(bs, num_query,
-                                                   self.num_heads,
-                                                   self.num_steps,
-                                                   self.num_levels,
-                                                   self.num_points)
+        attention_weights = attention_weights.view(
+            bs,
+            num_query,
+            self.num_heads,
+            self.num_steps,
+            self.num_levels,
+            self.num_points,
+        )
         # bs, n_query, n_head, n_steps, N_level, N_points, 2
         # BS NUM_AGENT NUM_MODE 12 NUM_LEVEL  2
         if reference_trajs.shape[-1] == 2:
             reference_trajs = reference_trajs[:, :, :, [self.sample_index], :, :]
-            reference_trajs_ego = self.agent_coords_to_ego_coords(copy.deepcopy(reference_trajs), bbox_results).detach()
-            reference_trajs_ego = torch.flatten(reference_trajs_ego, start_dim=1, end_dim=2)
+            reference_trajs_ego = self.agent_coords_to_ego_coords(
+                copy.deepcopy(reference_trajs), bbox_results
+            ).detach()
+            reference_trajs_ego = torch.flatten(
+                reference_trajs_ego, start_dim=1, end_dim=2
+            )
             reference_trajs_ego = reference_trajs_ego[:, :, None, :, :, None, :]
             reference_trajs_ego[..., 0] -= self.bev_range[0]
             reference_trajs_ego[..., 1] -= self.bev_range[1]
-            reference_trajs_ego[..., 0] /= (self.bev_range[3] - self.bev_range[0])
-            reference_trajs_ego[..., 1] /= (self.bev_range[4] - self.bev_range[1])
+            reference_trajs_ego[..., 0] /= self.bev_range[3] - self.bev_range[0]
+            reference_trajs_ego[..., 1] /= self.bev_range[4] - self.bev_range[1]
             offset_normalizer = torch.stack(
-                [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1)
-            sampling_locations = reference_trajs_ego \
-                + sampling_offsets \
+                [spatial_shapes[..., 1], spatial_shapes[..., 0]], -1
+            )
+            sampling_locations = (
+                reference_trajs_ego
+                + sampling_offsets
                 / offset_normalizer[None, None, None, None, :, None, :]
+            )
 
-            sampling_locations = rearrange(sampling_locations, 'bs nq nh ns nl np c -> bs nq ns nh nl np c') # permute([0,1,3,2,4,5,6])
-            attention_weights = rearrange(attention_weights, 'bs nq nh ns nl np -> bs nq ns nh nl np') #.permute([0,1,3,2,4,5])
-            sampling_locations = sampling_locations.reshape(bs, num_query*self.num_steps, self.num_heads, self.num_levels, self.num_points, 2)
-            attention_weights = attention_weights.reshape(bs, num_query*self.num_steps, self.num_heads, self.num_levels, self.num_points)
+            sampling_locations = rearrange(
+                sampling_locations, "bs nq nh ns nl np c -> bs nq ns nh nl np c"
+            )  # permute([0,1,3,2,4,5,6])
+            attention_weights = rearrange(
+                attention_weights, "bs nq nh ns nl np -> bs nq ns nh nl np"
+            )  # .permute([0,1,3,2,4,5])
+            sampling_locations = sampling_locations.reshape(
+                bs,
+                num_query * self.num_steps,
+                self.num_heads,
+                self.num_levels,
+                self.num_points,
+                2,
+            )
+            attention_weights = attention_weights.reshape(
+                bs,
+                num_query * self.num_steps,
+                self.num_heads,
+                self.num_levels,
+                self.num_points,
+            )
 
         else:
             raise ValueError(
-                f'Last dim of reference_trajs must be'
-                f' 2 or 4, but get {reference_trajs.shape[-1]} instead.')
+                f"Last dim of reference_trajs must be"
+                f" 2 or 4, but get {reference_trajs.shape[-1]} instead."
+            )
         if torch.cuda.is_available() and value.is_cuda:
-
             # using fp16 deformable attention is unstable because it performs many sum operations
             if value.dtype == torch.float16:
                 MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
             else:
                 MultiScaleDeformableAttnFunction = MultiScaleDeformableAttnFunction_fp32
             output = MultiScaleDeformableAttnFunction.apply(
-                value, spatial_shapes, level_start_index, sampling_locations,
-                attention_weights, self.im2col_step)
+                value,
+                spatial_shapes,
+                level_start_index,
+                sampling_locations,
+                attention_weights,
+                self.im2col_step,
+            )
         else:
             output = multi_scale_deformable_attn_pytorch(
-                value, spatial_shapes, sampling_locations, attention_weights)
+                value, spatial_shapes, sampling_locations, attention_weights
+            )
         output = output.view(bs, num_query, self.num_steps, -1)
         output = torch.flatten(output, start_dim=2, end_dim=3)
         output = self.output_proj(output)
@@ -480,11 +556,14 @@ class MotionDeformableAttention(BaseModule):
             batch_reference_trajs += det_centers[:, None, None, None, :2]
             reference_trajs_ego.append(batch_reference_trajs)
         return torch.stack(reference_trajs_ego)
-    
+
     def rot_2d(self, yaw):
         sy, cy = torch.sin(yaw), torch.cos(yaw)
-        out = torch.stack([torch.stack([cy, -sy]), torch.stack([sy, cy])]).permute([2,0,1])
+        out = torch.stack([torch.stack([cy, -sy]), torch.stack([sy, cy])]).permute(
+            [2, 0, 1]
+        )
         return out
+
 
 @ATTENTION.register_module()
 class CustomModeMultiheadAttention(BaseModule):
@@ -507,23 +586,27 @@ class CustomModeMultiheadAttention(BaseModule):
              Default to False.
     """
 
-    def __init__(self,
-                 embed_dims,
-                 num_heads,
-                 attn_drop=0.,
-                 proj_drop=0.,
-                 dropout_layer=dict(type='Dropout', drop_prob=0.),
-                 init_cfg=None,
-                 **kwargs):
+    def __init__(
+        self,
+        embed_dims,
+        num_heads,
+        attn_drop=0.0,
+        proj_drop=0.0,
+        dropout_layer=dict(type="Dropout", drop_prob=0.0),
+        init_cfg=None,
+        **kwargs,
+    ):
         super().__init__(init_cfg)
-        if 'dropout' in kwargs:
+        if "dropout" in kwargs:
             warnings.warn(
-                'The arguments `dropout` in MultiheadAttention '
-                'has been deprecated, now you can separately '
-                'set `attn_drop`(float), proj_drop(float), '
-                'and `dropout_layer`(dict) ', DeprecationWarning)
-            attn_drop = kwargs['dropout']
-            dropout_layer['drop_prob'] = kwargs.pop('dropout')
+                "The arguments `dropout` in MultiheadAttention "
+                "has been deprecated, now you can separately "
+                "set `attn_drop`(float), proj_drop(float), "
+                "and `dropout_layer`(dict) ",
+                DeprecationWarning,
+            )
+            attn_drop = kwargs["dropout"]
+            dropout_layer["drop_prob"] = kwargs.pop("dropout")
 
         self.embed_dims = embed_dims
         self.num_heads = num_heads
@@ -531,21 +614,23 @@ class CustomModeMultiheadAttention(BaseModule):
         self.attn = nn.MultiheadAttention(embed_dims, num_heads, attn_drop, **kwargs)
 
         self.proj_drop = nn.Dropout(proj_drop)
-        self.dropout_layer = build_dropout(
-            dropout_layer) if dropout_layer else nn.Identity()
+        self.dropout_layer = (
+            build_dropout(dropout_layer) if dropout_layer else nn.Identity()
+        )
 
-    @deprecated_api_warning({'residual': 'identity'},
-                            cls_name='MultiheadAttention')
-    def forward(self,
-                query,
-                key=None,
-                value=None,
-                identity=None,
-                query_pos=None,
-                key_pos=None,
-                attn_mask=None,
-                key_padding_mask=None,
-                **kwargs):
+    @deprecated_api_warning({"residual": "identity"}, cls_name="MultiheadAttention")
+    def forward(
+        self,
+        query,
+        key=None,
+        value=None,
+        identity=None,
+        query_pos=None,
+        key_pos=None,
+        attn_mask=None,
+        key_padding_mask=None,
+        **kwargs,
+    ):
         """Forward function for `MultiheadAttention`.
         **kwargs allow passing a more general data flow when combining
         with other operations in `transformerlayer`.
@@ -597,8 +682,10 @@ class CustomModeMultiheadAttention(BaseModule):
                 if query_pos.shape == key.shape:
                     key_pos = query_pos
                 else:
-                    warnings.warn(f'position encoding of key is'
-                                  f'missing in {self.__class__.__name__}.')
+                    warnings.warn(
+                        f"position encoding of key is"
+                        f"missing in {self.__class__.__name__}."
+                    )
         if query_pos is not None:
             query = query + query_pos
         if key_pos is not None:
@@ -614,7 +701,7 @@ class CustomModeMultiheadAttention(BaseModule):
         key = torch.flatten(key, start_dim=0, end_dim=1)
         value = torch.flatten(value, start_dim=0, end_dim=1)
         identity = torch.flatten(identity, start_dim=0, end_dim=1)
-        
+
         query = query.transpose(0, 1)
         key = key.transpose(0, 1)
         value = value.transpose(0, 1)
@@ -624,7 +711,8 @@ class CustomModeMultiheadAttention(BaseModule):
             key=key,
             value=value,
             attn_mask=attn_mask,
-            key_padding_mask=key_padding_mask)[0]
+            key_padding_mask=key_padding_mask,
+        )[0]
 
         out = out.transpose(0, 1)
         out = identity + self.dropout_layer(self.proj_drop(out))
