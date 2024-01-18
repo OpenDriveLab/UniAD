@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 import uuid
+from mmcv.utils import build_from_cfg
+from mmdet3d.datasets.pipelines import Compose
+from copy import deepcopy
 from mmdet3d.models import build_model
 from mmdet3d.core.bbox import LiDARInstance3DBoxes
 from mmcv.runner import load_checkpoint
@@ -47,18 +50,26 @@ from projects.mmdet3d_plugin.datasets.nuscenes_e2e_dataset import (
 
 @dataclass
 class UniADInferenceInput:
-    imgs: np.ndarray  # shape: (1, n-cams (6), 3, h (900), w (1600)) | images without any preprocessing
-    pose: np.ndarray  # shape: (3, 4) | lidar pose in global frame
-    lidar2img: np.ndarray  # shape: (n-cams (6), 4, 4) | lidar2img transformation matrix, i.e., lidar2cam @ cam2img
-    timestamp: float  # timestamp of the current frame in seconds
-    can_bus_signals: np.ndarray  # shape: (18,) | see above for details
-    command: int  # 0: right, 1: left, 2: straight
+    imgs: np.ndarray
+    """shape: (n-cams (6), 3, h (900), w (1600)) | images without any preprocessing. should be in RGB order"""
+    pose: np.ndarray
+    """shape: (3, 4) | lidar pose in global frame"""
+    lidar2img: np.ndarray
+    """shape: (n-cams (6), 4, 4) | lidar2img transformation matrix, i.e., lidar2cam @ cam2img"""
+    timestamp: float
+    """timestamp of the current frame in seconds"""
+    can_bus_signals: np.ndarray
+    """shape: (18,) | see above for details"""
+    command: int
+    """0: right, 1: left, 2: straight"""
 
 
 @dataclass
 class UniADInferenceOutput:
-    trajectory: np.ndarray  # shape: (n-future (6), 2) | predicted trajectory in the ego-frame @ 2Hz
-    aux_outputs: Optional[Dict] = None  # aux outputs such as objects
+    trajectory: np.ndarray
+    """shape: (n-future (6), 2) | predicted trajectory in the ego-frame @ 2Hz"""
+    aux_outputs: Optional[Dict] = None
+    """aux outputs such as objects, tracks, segmentation and motion forecast"""
 
 
 class UniADRunner:
@@ -77,9 +88,16 @@ class UniADRunner:
         self.device = device
         self.scene_token = uuid.uuid4()
 
+        inference_pipeline = build_from_cfg(config.inference_pipeline)
+        self.preproc_pipeline = Compose(inference_pipeline)
+
     def reset(self):
         # making a new scene token for each new scene. these are used in the model.
         self.scene_token = uuid.uuid4()
+
+    def preproc(self, input: UniADInferenceInput):
+        # TODO: make torch version of the preproc pipeline instead of using mmcv version'
+        raise NotImplementedError
 
     def forward_inference(
         self, input: UniADInferenceInput, command: int = 2
@@ -98,33 +116,53 @@ class UniADRunner:
             img-shape: torch.Size([1, 6, 3, 900, 1600])
             l2g_t-shape: torch.Size([1, 3])
             l2g_r_mat-shape: torch.Size([1, 3, 3])
-            img_metas-keys: dict_keys(['filename', 'ori_shape', 'img_shape', 'lidar2img', 'pad_shape', 'scale_factor', 'flip', 'pcd_horizontal_flip', 'pcd_vertical_flip', 'box_mode_3d', 'box_type_3d', 'img_norm_cfg', 'sample_idx', 'prev_idx', 'next_idx', 'pcd_scale_factor', 'pts_filename', 'scene_token', 'can_bus'])
-            img metas-len: 1
             timestamp: tensor([1.5357e+09], device='cuda:4', dtype=torch.float64)
 
         """
-        img = torch.from_numpy(input.imgs).to(self.device)
-        l2g_t = torch.from_numpy(input.pose[:3, 3]).to(self.device)
-        l2g_r_mat = torch.from_numpy(input.pose[:3, :3]).to(self.device)
-        timestamp = torch.from_numpy(np.array([input.timestamp])).to(self.device)
+        # input to preproc shoudl be dict(img=imgs) where imgs: n x h x w x c in bgr format
+        # permute rgb -> bgr
+        imgs = input.imgs[:, ::-1, :, :]
+        # flip nchw to nhwc
+        imgs = np.moveaxis(imgs, 1, -1)
+        preproc_input = dict(img=imgs)
+        # run it through the inference pipeline (which is same as eval pipeline except not loading annotations)
+        preproc_output = self.preproc_pipeline(preproc_input)
+        # collect in array as will convert to tensor, but currently it is a list of arrays (n, h, w, c)
+        imgs = np.array(preproc_output["img"])
+        # move back to the nchw format
+        imgs = np.moveaxis(imgs, -1, 1)
+        # convert to tensor and move to device
+        imgs = torch.from_numpy(imgs).to(self.device)
+        # img should be (1, n, 3, h, w)
+        imgs = imgs.unsqueeze(0)
+        # move other input to the device as well
+        l2g_t = (
+            torch.from_numpy(input.pose[:3, 3]).to(self.device).unsqueeze(0)
+        )  # should be 1x3
+        l2g_r_mat = (
+            torch.from_numpy(input.pose[:3, :3]).to(self.device).unsqueeze(0)
+        )  # should be 1x3x3
+        timestamp = (
+            torch.from_numpy(np.array([input.timestamp])).to(self.device).unsqueeze(0)
+        )
 
+        # we need to emulate the img_metas here in order to run the model.
         img_metas = {
             "scene_token": self.scene_token,
             "can_bus": input.can_bus_signals,
             "lidar2img": input.lidar2img,  # lidar2cam @ cam2img
-            "img_shape": [(928, 1600)] * 6,
+            "img_shape": preproc_output["img_shape"],
             # we need this as they are used in the model somewhere.
             "box_type_3d": LiDARInstance3DBoxes,
         }
-        # we need to emulate the img_metas here in order to run the model. The following fields are used when traversing down this function
-        # -
+
         outs_track = self.model.simple_test_track(
-            img, l2g_t, l2g_r_mat, img_metas, timestamp
+            imgs, l2g_t, l2g_r_mat, img_metas, timestamp
         )
-        outs_track = self.model.upsample_bev_if_tiny(outs_track[0])
+        outs_track[0] = self.model.upsample_bev_if_tiny(outs_track[0])
 
         # get the bev embedding
-        bev_embed = outs_track["bev_embed"]
+        bev_embed = outs_track[0]["bev_embed"]
 
         # get the segmentation result using the bev embedding
         outs_seg = self.model.seg_head.forward(bev_embed)
@@ -133,7 +171,7 @@ class UniADRunner:
         _, outs_motion = self.model.motion_head.forward_test(
             bev_embed, outs_track, outs_seg
         )
-        outs_motion["bev_pos"] = outs_track["bev_pos"]
+        outs_motion["bev_pos"] = outs_track[0]["bev_pos"]
 
         # get the occ result
         occ_no_query = outs_motion["track_query"].shape[1] == 0
@@ -227,7 +265,7 @@ class UniADRunner:
 
 
 if __name__ == "__main__":
-    config = Config.fromfile("/UniAD/projects/configs/stage2_e2e/base_e2e.py")
+    config = Config.fromfile("/UniAD/projects/configs/stage2_e2e/inference_e2e.py")
     model = build_model(config.model, train_cfg=None, test_cfg=config.get("test_cfg"))
 
     print("done")
