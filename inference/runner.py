@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 import uuid
-from mmcv.utils import build_from_cfg
 from mmdet3d.datasets.pipelines import Compose
-from copy import deepcopy
+from mmdet.datasets.builder import PIPELINES
 from mmdet3d.models import build_model
 from mmdet3d.core.bbox import LiDARInstance3DBoxes
 from mmcv.runner import load_checkpoint
@@ -16,6 +15,7 @@ from projects.mmdet3d_plugin.uniad.detectors.uniad_e2e import UniAD
 from projects.mmdet3d_plugin.datasets.nuscenes_e2e_dataset import (
     quaternion_yaw,
 )
+from tools.data_converter.uniad_nuscenes_converter import _get_can_bus_info
 
 # NOTE: this is what they do to the can bus signals
 # in preproc of the dataset
@@ -55,7 +55,7 @@ class UniADInferenceInput:
     pose: np.ndarray
     """shape: (3, 4) | lidar pose in global frame"""
     lidar2img: np.ndarray
-    """shape: (n-cams (6), 4, 4) | lidar2img transformation matrix, i.e., lidar2cam @ cam2img"""
+    """shape: (n-cams (6), 4, 4) | lidar2img transformation matrix, i.e., lidar2cam @ camera2img"""
     timestamp: float
     """timestamp of the current frame in seconds"""
     can_bus_signals: np.ndarray
@@ -75,6 +75,7 @@ class UniADInferenceOutput:
 class UniADRunner:
     def __init__(self, config_path: str, checkpoint_path: str, device: torch.device):
         config = Config.fromfile(config_path)
+        self.config = config
 
         self.model: UniAD = build_model(
             config.model, train_cfg=None, test_cfg=config.get("test_cfg")
@@ -82,14 +83,13 @@ class UniADRunner:
 
         self.model.eval()
         # load the checkpoint
-        _ = load_checkpoint(self.model, checkpoint_path, map_location="cpu")
+        if checkpoint_path is not None:
+            _ = load_checkpoint(self.model, checkpoint_path, map_location="cpu")
         # do more stuff here maybe?
         self.model = self.model.to(device)
         self.device = device
-        self.scene_token = uuid.uuid4()
-
-        inference_pipeline = build_from_cfg(config.inference_pipeline)
-        self.preproc_pipeline = Compose(inference_pipeline)
+        self.preproc_pipeline = Compose(config.inference_pipeline)
+        self.reset()
 
     def reset(self):
         # making a new scene token for each new scene. these are used in the model.
@@ -109,14 +109,6 @@ class UniADRunner:
         Args:
             inputs: UniADInferenceInput
             command: int, 0: right, 1: left, 2: straight
-
-        """
-
-        """
-            img-shape: torch.Size([1, 6, 3, 900, 1600])
-            l2g_t-shape: torch.Size([1, 3])
-            l2g_r_mat-shape: torch.Size([1, 3, 3])
-            timestamp: tensor([1.5357e+09], device='cuda:4', dtype=torch.float64)
 
         """
         # input to preproc shoudl be dict(img=imgs) where imgs: n x h x w x c in bgr format
@@ -150,7 +142,7 @@ class UniADRunner:
         img_metas = {
             "scene_token": self.scene_token,
             "can_bus": input.can_bus_signals,
-            "lidar2img": input.lidar2img,  # lidar2cam @ cam2img
+            "lidar2img": input.lidar2img,  # lidar2cam @ camera2img
             "img_shape": preproc_output["img_shape"],
             # we need this as they are used in the model somewhere.
             "box_type_3d": LiDARInstance3DBoxes,
@@ -265,7 +257,93 @@ class UniADRunner:
 
 
 if __name__ == "__main__":
-    config = Config.fromfile("/UniAD/projects/configs/stage2_e2e/inference_e2e.py")
-    model = build_model(config.model, train_cfg=None, test_cfg=config.get("test_cfg"))
+    # config = Config.fromfile("/UniAD/projects/configs/stage2_e2e/inference_e2e.py")
+    # model = build_model(config.model, train_cfg=None, test_cfg=config.get("test_cfg"))
+    # preproc_pipeline = Compose(config.inference_pipeline)
 
-    print("done")
+    # maybe try with this sample token
+    # 30e55a3ec6184d8cb1944b39ba19d622
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    runner = UniADRunner(
+        config_path="/UniAD/projects/configs/stage2_e2e/inference_e2e.py",
+        checkpoint_path=None,
+        device=torch.device(device),
+    )
+
+    # only load this for testing
+    from nuscenes.nuscenes import NuScenes
+    from nuscenes.can_bus.can_bus_api import NuScenesCanBus
+    import matplotlib.pyplot as plt
+
+    # load the first surround-cam in nusc mini
+    nusc = NuScenes(version="v1.0-mini", dataroot="/data/nuscenes")
+    nusc_can = NuScenesCanBus(dataroot="/data/nuscenes")
+    scene = "scene-0061"
+
+    # get the first sample in the scene
+    sample_token = nusc.get("sample", scene)["first_sample_token"]
+    sample = nusc.get("sample", sample_token)
+    timestamp = sample["timestamp"]
+    # get the cameras for this sample
+    camera_types = [
+        "CAM_FRONT",
+        "CAM_FRONT_RIGHT",
+        "CAM_FRONT_LEFT",
+        "CAM_BACK",
+        "CAM_BACK_LEFT",
+        "CAM_BACK_RIGHT",
+    ]
+
+    # ego pose via lidar sensor sample data
+    lidar_token = sample["data"]["LIDAR_TOP"]
+    lidar_sample_data = nusc.get("sample_data", lidar_token)
+    ego_pose = nusc.get("ego_pose", lidar_sample_data["ego_pose_token"])
+    ego_translation = np.array(ego_pose["translation"])
+    ego_rotation_quat = Quaternion(array=ego_pose["rotation"])
+    ego2global = np.eye(4)
+    ego2global[:3, 3] = ego_translation
+    ego2global[:3, :3] = ego_rotation_quat.rotation_matrix
+
+    # get cameras
+    camera_tokens = [sample["data"][camera_type] for camera_type in camera_types]
+    cams = [nusc.get_sample_data(cam_token) for cam_token in camera_tokens]
+    image_filepaths = [cam[0] for cam in cams]
+    cam_instrinsics = [np.array(cam[2]) for cam in cams]
+    camera2img = []
+    for i in range(len(camera_types)):
+        c2i = np.eye(4)
+        c2i[:3, :3] = cam_instrinsics[i]
+        camera2img.append(c2i)
+
+    # load the images in rgb hwc format
+    images = ...
+
+    # get the calibration for each camera
+    camera_calibs = [nusc.get("calibrated_sensor", token) for token in camera_tokens]
+    # get the lidar calibration
+    lidar_calib = nusc.get("calibrated_sensor", sample["data"]["LIDAR_TOP"])
+
+    ego_pose = nusc.get("ego_pose", sample["ego_pose_token"])
+
+    lidar2camera = ...  # fix this
+
+    lidar2img = ...  # fix this
+
+    lidar2ego = ...  # fix this
+    lidar2global = lidar2ego @ ego2global
+
+    # get the canbus signals
+    canbus_signals = _get_can_bus_info(nusc, nusc_can, sample)
+
+    inference_input = UniADInferenceInput(
+        imgs=images,
+        pose=lidar2global,
+        lidar2img=lidar2img,
+        timestamp=timestamp,
+        can_bus_signals=canbus_signals,
+    )
+
+    plan = runner.forward_inference(inference_input, command=2)
+    # plot in bev
+    fig, ax = plt.subplots(1, 1)
+    # do stuff here
