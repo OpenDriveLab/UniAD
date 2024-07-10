@@ -141,9 +141,18 @@ Please consider citing our paper if the project helps your research with the fol
 
 
 ## See Also
-- [GenAD](https://github.com/OpenDriveLab/DriveAGI): Generalized Predictive Model for Autonomous Driving (CVPR'24, Highlight ⭐)
-![opendv](sources/opendv_dataset.png)
+[GenAD](https://github.com/OpenDriveLab/DriveAGI): Generalized Predictive Model for Autonomous Driving (CVPR'24, Highlight ⭐)
+
+<div id="top" align="center">
+<p align="center">
+<img src="sources/opendv_dataset.png" width="1000px" >
+</p>
+</div>
 
 
-- [Vista](https://github.com/OpenDriveLab/Vista): A Generalizable Driving World Model with High Fidelity and Versatile Controllability 🌏
-![opendv](sources/vista.gif)
+[Vista](https://github.com/OpenDriveLab/Vista): A Generalizable Driving World Model with High Fidelity and Versatile Controllability 🌏
+<div id="top" align="center">
+<p align="center">
+<img src="sources/vista.gif" width="1000px" >
+</p>
+</div>
