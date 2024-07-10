@@ -60,7 +60,7 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 
 
 - **`2023/03/29`** Code & model initial release `v1.0`.
-- **`2023/03/21`** :rocket::rocket: UniAD is accepted by CVPR 2023, as an **Award Candidate** (12 out of 2360 accepted papers)!
+- **`2023/03/21`** 🌟🌟 UniAD is accepted by CVPR 2023, as an **Award Candidate** (12 out of 2360 accepted papers)!
 - **`2022/12/21`** UniAD [paper](https://arxiv.org/abs/2212.10156) is available on arXiv.
 
 
@@ -131,10 +131,19 @@ Please consider citing our paper if the project helps your research with the fol
  year={2023},
 }
 ```
-## Related resources
+## Related Resources
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-- [BEVFormer](https://github.com/fundamentalvision/BEVFormer) (:rocket:Ours!)
-- [ST-P3](https://github.com/OpenPerceptionX/ST-P3) (:rocket:Ours!)
+- [BEVFormer](https://github.com/fundamentalvision/BEVFormer) (Ours!)
+- [ST-P3](https://github.com/OpenPerceptionX/ST-P3) (Ours!)
 - [FIERY](https://github.com/wayveai/fiery)
 - [MOTR](https://github.com/megvii-research/MOTR)
+
+
+## See Also
+- [GenAD](https://github.com/OpenDriveLab/DriveAGI): Generalized Predictive Model for Autonomous Driving (CVPR'24, Highlight ⭐)
+![opendv](sources/opendv_dataset.png)
+
+
+- [Vista](https://github.com/OpenDriveLab/Vista): A Generalizable Driving World Model with High Fidelity and Versatile Controllability 🌏
+![opendv](sources/vista.gif)
