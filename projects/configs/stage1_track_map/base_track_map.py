@@ -66,7 +66,7 @@ use_col_optim = True
 # there exists multiple interpretations of the planning metric, where it differs between uniad and stp3/vad
 # uniad: computed at a particular time (e.g., L2 distance between the predicted and ground truth future trajectory at time 3.0s)
 # stp3: computed as the average up to a particular time (e.g., average L2 distance between the predicted and ground truth future trajectory up to 3.0s)
-planning_metric_strategy = "uniad"  # uniad or stp3
+planning_evaluation_strategy = "uniad"  # uniad or stp3
 
 ### Occ args ### 
 occflow_grid_conf = {
