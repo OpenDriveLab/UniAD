@@ -122,7 +122,9 @@ All assets and code are under the [Apache 2.0 license](./LICENSE) unless specifi
 
 ## Citation <a name="citation"></a>
 
-Please consider citing our paper if the project helps your research with the following BibTex:
+
+If you find our project useful for your research, please consider citing our paper and codebase with the following BibTeX:
+
 
 ```bibtex
 @inproceedings{hu2023_uniad,
@@ -130,6 +132,13 @@ Please consider citing our paper if the project helps your research with the fol
  author={Yihan Hu and Jiazhi Yang and Li Chen and Keyu Li and Chonghao Sima and Xizhou Zhu and Siqi Chai and Senyao Du and Tianwei Lin and Wenhai Wang and Lewei Lu and Xiaosong Jia and Qiang Liu and Jifeng Dai and Yu Qiao and Hongyang Li},
  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
  year={2023},
+}
+
+@misc{contributors2023_uniadrepo,
+  title={Planning-oriented Autonomous Driving},
+  author={UniAD contributors},
+  howpublished={\url{https://github.com/OpenDriveLab/UniAD}},
+  year={2023}
 }
 ```
 ## Related Resources
