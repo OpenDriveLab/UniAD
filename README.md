@@ -133,7 +133,9 @@ If you find our project useful for your research, please consider citing our pap
  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
  year={2023},
 }
+```
 
+```bibtex
 @misc{contributors2023_uniadrepo,
   title={Planning-oriented Autonomous Driving},
   author={UniAD contributors},
