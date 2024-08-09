@@ -39,7 +39,7 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 5. [TODO List](#todos)
 6. [License](#license)
 7. [Citation](#citation)
-8. [See Also](#see)
+8. [🔥 See Also: GenAD & Vista](#see)
 
 ## Highlights <a name="high"></a>
 
