@@ -152,7 +152,10 @@ If you find our project useful for your research, please consider citing our pap
 - [MOTR](https://github.com/megvii-research/MOTR)
 
 
-## See Also  <a name="see"></a>
+## 🔥 See Also  <a name="see"></a>
+We are thrilled to launch our recent line of works: [GenAD](https://arxiv.org/abs/2403.09630) and [Vista](https://arxiv.org/abs/2405.17398), to advance  **driving world models** with the **largest driving video dataset** collected from the web - [OpenDV](https://github.com/OpenDriveLab/DriveAGI/tree/main/opendv).
+
+
 [GenAD](https://github.com/OpenDriveLab/DriveAGI): Generalized Predictive Model for Autonomous Driving (CVPR'24, Highlight ⭐)
 
 <div id="top" align="center">
