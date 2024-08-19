@@ -156,7 +156,7 @@ If you find our project useful for your research, please consider citing our pap
 We are thrilled to launch our recent line of works: [GenAD](https://arxiv.org/abs/2403.09630) and [Vista](https://arxiv.org/abs/2405.17398), to advance  **driving world models** with the **largest driving video dataset** collected from the web - [OpenDV](https://github.com/OpenDriveLab/DriveAGI/tree/main/opendv).
 
 
-[GenAD](https://github.com/OpenDriveLab/DriveAGI): Generalized Predictive Model for Autonomous Driving (CVPR'24, Highlight ⭐)
+[GenAD](https://github.com/OpenDriveLab/DriveAGI): **Generalized Predictive Model for Autonomous Driving** (CVPR'24, Highlight ⭐)
 
 <div id="top" align="center">
 <p align="center">
@@ -165,7 +165,7 @@ We are thrilled to launch our recent line of works: [GenAD](https://arxiv.org/ab
 </div>
 
 
-[Vista](https://github.com/OpenDriveLab/Vista): A Generalizable Driving World Model with High Fidelity and Versatile Controllability 🌏
+[Vista](https://github.com/OpenDriveLab/Vista): **A Generalizable Driving World Model with High Fidelity and Versatile Controllability** 🌏
 <div id="top" align="center">
 <p align="center">
 <img src="sources/vista.gif" width="1000px" >
