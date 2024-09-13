@@ -25,7 +25,7 @@ class UniADTrack(MVXTwoStageDetector):
     """UniAD tracking part
     """
     def __init__(
-        self, 
+        self,
         use_grid_mask=False,
         img_backbone=None,
         img_neck=None,
@@ -70,6 +70,7 @@ class UniADTrack(MVXTwoStageDetector):
         freeze_img_neck=False,
         freeze_bn=False,
         freeze_bev_encoder=False,
+        freeze_pts_bbox_head = False,
         queue_length=3,
     ):
         super(UniADTrack, self).__init__(
@@ -92,17 +93,26 @@ class UniADTrack(MVXTwoStageDetector):
         self.vehicle_id_list = vehicle_id_list
         self.pc_range = pc_range
         self.queue_length = queue_length
+
+        #------------------对于Frozen的设置-----------------
         if freeze_img_backbone:
             if freeze_bn:
-                self.img_backbone.eval()
+                self.img_backbone.eval() #评估模式即停止在推理过程中动态更新，为了保证冻结参数时能够稳定的推理？
             for param in self.img_backbone.parameters():
                 param.requires_grad = False
-        
+
         if freeze_img_neck:
             if freeze_bn:
                 self.img_neck.eval()
             for param in self.img_neck.parameters():
                 param.requires_grad = False
+        
+        #---------------------
+        if freeze_pts_bbox_head:
+            if freeze_bn:
+                self.pts_bbox_head.eval()
+            for param in self.pts_bbox_head.parameters():
+                param.requires_grad = False       
 
         # temporal
         self.video_test_mode = video_test_mode
@@ -157,14 +167,17 @@ class UniADTrack(MVXTwoStageDetector):
         assert img.dim() == 5
         B, N, C, H, W = img.size()
         img = img.reshape(B * N, C, H, W)
+        #--------对图片做mask处理-------
         if self.use_grid_mask:
             img = self.grid_mask(img)
-        img_feats = self.img_backbone(img)
+        #--------使用img_backbone提取图片特征--------
+        img_feats = self.img_backbone(img)  #这里的输出img_feats是tuple类型
         if isinstance(img_feats, dict):
             img_feats = list(img_feats.values())
+        #-------对img_backbone的输出再使用img_neck,进一步提取不同尺度特征-----
         if self.with_img_neck:
             img_feats = self.img_neck(img_feats)
-
+        #-------将提取的特征重新调整形状------
         img_feats_reshaped = []
         for img_feat in img_feats:
             _, c, h, w = img_feat.size()
@@ -267,7 +280,7 @@ class UniADTrack(MVXTwoStageDetector):
 
         ref_pts = reference_points @ l2g_r1 + l2g_t1 - l2g_t2
 
-        g2l_r = torch.linalg.inv(l2g_r2).type(torch.float)
+        g2l_r = torch.linalg.inv(l2g_r2.cpu()).cuda().type(torch.float)
 
         ref_pts = ref_pts @ g2l_r
 
@@ -327,30 +340,32 @@ class UniADTrack(MVXTwoStageDetector):
                 img_metas = [each[i] for each in img_metas_list]
                 img_feats = [each_scale[:, i] for each_scale in img_feats_list]
                 prev_bev, _ = self.pts_bbox_head.get_bev_features(
-                    mlvl_feats=img_feats, 
-                    img_metas=img_metas, 
+                    mlvl_feats=img_feats,
+                    img_metas=img_metas,
                     prev_bev=prev_bev)
         self.train()
         return prev_bev
 
     # Generate bev using bev_encoder in BEVFormer
     def get_bevs(self, imgs, img_metas, prev_img=None, prev_img_metas=None, prev_bev=None):
+        #-------如果上一帧存在(意思当前帧不是第一帧的话)，那就用上一帧的数据计算出上一帧对应的bev feature-------
         if prev_img is not None and prev_img_metas is not None:
             assert prev_bev is None
             prev_bev = self.get_history_bev(prev_img, prev_img_metas)
-
+        #-------提取当前帧的图像特征-------
         img_feats = self.extract_img_feat(img=imgs)
-        if self.freeze_bev_encoder:
+        #-------BEVencoder: 算出当前帧对应的BEV feature-------
+        if self.freeze_bev_encoder:  #如果是Stage2:则把BEV encoder给frozen，不求梯度，不更新参数 
             with torch.no_grad():
                 bev_embed, bev_pos = self.pts_bbox_head.get_bev_features(
                     mlvl_feats=img_feats, img_metas=img_metas, prev_bev=prev_bev)
         else:
             bev_embed, bev_pos = self.pts_bbox_head.get_bev_features(
                     mlvl_feats=img_feats, img_metas=img_metas, prev_bev=prev_bev)
-        
+        #-------调整一下形状--------
         if bev_embed.shape[1] == self.bev_h * self.bev_w:
             bev_embed = bev_embed.permute(1, 0, 2)
-        
+
         assert bev_embed.shape[0] == self.bev_h * self.bev_w
         return bev_embed, bev_pos
 
@@ -382,11 +397,15 @@ class UniADTrack(MVXTwoStageDetector):
                 so no need to call velocity update
         """
         # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
+        #------------------这里才是开始整个Uniad的backbone部分，即CNN-FPN-BEVFormer-------------
+        #------------------计算得到BEV feature，即bev_embed---------------
         bev_embed, bev_pos = self.get_bevs(
             img, img_metas,
             prev_img=prev_img, prev_img_metas=prev_img_metas,
         )
 
+        #-----------------Trackformer的detetion部分: 从前面提取的bev feature来计算得出detection结果--------------
+        #---pts: points---
         det_output = self.pts_bbox_head.get_detections(
             bev_embed,
             object_query_embeds=track_instances.query,
@@ -394,6 +413,7 @@ class UniADTrack(MVXTwoStageDetector):
             img_metas=img_metas,
         )
 
+        #det_output是一个字典，根据keys索引出如下信息
         output_classes = det_output["all_cls_scores"]
         output_coords = det_output["all_bbox_preds"]
         output_past_trajs = det_output["all_past_traj_preds"]
@@ -411,9 +431,9 @@ class UniADTrack(MVXTwoStageDetector):
         with torch.no_grad():
             track_scores = output_classes[-1, 0, :].sigmoid().max(dim=-1).values
 
-        # Step-1 Update track instances with current prediction
+        #-----Step-1 Update track instances with current prediction-----
         # [nb_dec, bs, num_query, xxx]
-        nb_dec = output_classes.size(0)
+        nb_dec = output_classes.size(0)  #解码器的层数，表示有多少次解码操作或迭代
 
         # the track id will be assigned by the matcher.
         track_instances_list = [
@@ -440,7 +460,7 @@ class UniADTrack(MVXTwoStageDetector):
         track_instances.ref_pts[...,:2] = ref_pts[...,:2]
 
         track_instances_list.append(track_instances)
-        
+
         for i in range(nb_dec):
             track_instances = track_instances_list[i]
 
@@ -450,6 +470,7 @@ class UniADTrack(MVXTwoStageDetector):
             track_instances.pred_past_trajs = output_past_trajs[i, 0]  # [300,past_steps, 2]
 
             out["track_instances"] = track_instances
+            #----------------matcher---------------
             track_instances, matched_indices = self.criterion.match_for_single_frame(
                 out, i, if_step=(i == (nb_dec - 1))
             )
@@ -457,12 +478,13 @@ class UniADTrack(MVXTwoStageDetector):
             all_matched_indices.append(matched_indices)
             all_instances_pred_logits.append(output_classes[i, 0])
             all_instances_pred_boxes.append(output_coords[i, 0])   # Not used
-        
+
+        #-------------这里就是QIM中的object entrance and exit机制实现---------
         active_index = (track_instances.obj_idxes>=0) & (track_instances.iou >= self.gt_iou_threshold) & (track_instances.matched_gt_idxes >=0)
         out.update(self.select_active_track_query(track_instances, active_index, img_metas))
         out.update(self.select_sdc_track_query(track_instances[900], img_metas))
-        
-        # memory bank 
+
+        # memory bank：是用于存储和管理过去帧中的目标特征的结构
         if self.memory_bank is not None:
             track_instances = self.memory_bank(track_instances)
         # Step-2 Update track instances using matcher
@@ -479,7 +501,7 @@ class UniADTrack(MVXTwoStageDetector):
         result_dict["track_query_embeddings"] = track_instances.output_embedding[active_index][result_dict['bbox_index']][result_dict['mask']]
         result_dict["track_query_matched_idxes"] = track_instances.matched_gt_idxes[active_index][result_dict['bbox_index']][result_dict['mask']]
         return result_dict
-    
+
     def select_sdc_track_query(self, sdc_instance, img_metas):
         out = dict()
         result_dict = self._track_instances2results(sdc_instance, img_metas, with_mask=False)
@@ -508,11 +530,14 @@ class UniADTrack(MVXTwoStageDetector):
         Args:
         Returns:
         """
+        #--------------这里初始化track query-----------
         track_instances = self._generate_empty_tracks()
-        num_frame = img.size(1)
-        # init gt instances!
-        gt_instances_list = []
 
+        num_frame = img.size(1)
+
+
+        #---------init gt instances!---------
+        gt_instances_list = []
         for i in range(num_frame):
             gt_instances = Instances((1, 1))
             boxes = gt_bboxes_3d[0][i].tensor.to(img.device)
@@ -533,13 +558,17 @@ class UniADTrack(MVXTwoStageDetector):
 
         out = dict()
 
+        #----------遍历每一帧（包含6个视角共6张图），每次把一帧送入模型进行前行传播计算------
         for i in range(num_frame):
-            prev_img = img[:, :i, ...] if i != 0 else img[:, :1, ...]
+            prev_img = img[:, :i, ...] if i != 0 else img[:, :1, ...] #获取上一帧的图像数据
             prev_img_metas = copy.deepcopy(img_metas)
             # TODO: Generate prev_bev in an RNN way.
 
-            img_single = torch.stack([img_[i] for img_ in img], dim=0)
+            img_single = torch.stack([img_[i] for img_ in img], dim=0) #提取当前帧的单帧图像
             img_metas_single = [copy.deepcopy(img_metas[0][i])]
+
+            #---判断是否是最后一帧:如果当前帧是最后一帧，则旋转矩阵、平移向量和时间差设为 None---
+            #---否则，提取下一帧的旋转矩阵、平移向量和时间差---
             if i == num_frame - 1:
                 l2g_r2 = None
                 l2g_t2 = None
@@ -548,10 +577,13 @@ class UniADTrack(MVXTwoStageDetector):
                 l2g_r2 = l2g_r_mat[0][i + 1]
                 l2g_t2 = l2g_t[0][i + 1]
                 time_delta = timestamp[0][i + 1] - timestamp[0][i]
+            
             all_query_embeddings = []
             all_matched_idxes = []
             all_instances_pred_logits = []
             all_instances_pred_boxes = []
+
+            #--------调用单帧前向传播函数-------
             frame_res = self._forward_single_frame_train(
                 img_single,
                 img_metas_single,
@@ -570,13 +602,14 @@ class UniADTrack(MVXTwoStageDetector):
             )
             # all_query_embeddings: len=dec nums, N*256
             # all_matched_idxes: len=dec nums, N*2
+            #-------更新track query------
             track_instances = frame_res["track_instances"]
-        
+
         get_keys = ["bev_embed", "bev_pos",
                     "track_query_embeddings", "track_query_matched_idxes", "track_bbox_results",
                     "sdc_boxes_3d", "sdc_scores_3d", "sdc_track_scores", "sdc_track_bbox_results", "sdc_embedding"]
         out.update({k: frame_res[k] for k in get_keys})
-        
+
         losses = self.criterion.losses_dict
         return losses, out
 
@@ -653,7 +686,7 @@ class UniADTrack(MVXTwoStageDetector):
         # NOTE: You can replace BEVFormer with other BEV encoder and provide bev_embed here
         bev_embed, bev_pos = self.get_bevs(img, img_metas, prev_bev=prev_bev)
         det_output = self.pts_bbox_head.get_detections(
-            bev_embed, 
+            bev_embed,
             object_query_embeds=track_instances.query,
             ref_points=track_instances.ref_pts,
             img_metas=img_metas,
@@ -682,11 +715,11 @@ class UniADTrack(MVXTwoStageDetector):
         track_instances.pred_boxes = output_coords[-1, 0]  # [300, box_dim]
         track_instances.output_embedding = query_feats[-1][0]  # [300, feat_dim]
         track_instances.ref_pts = last_ref_pts[0]
-        # hard_code: assume the 901 query is sdc query 
+        # hard_code: assume the 901 query is sdc query
         track_instances.obj_idxes[900] = -2
         """ update track base """
         self.track_base.update(track_instances, None)
-       
+
         active_index = (track_instances.obj_idxes>=0) & (track_instances.scores >= self.track_base.filter_score_thresh)    # filter out sleep objects
         out.update(self.select_active_track_query(track_instances, active_index, img_metas))
         out.update(self.select_sdc_track_query(track_instances[track_instances.obj_idxes==-2], img_metas))
@@ -728,7 +761,7 @@ class UniADTrack(MVXTwoStageDetector):
             self.prev_bev = None
             track_instances = self._generate_empty_tracks()
             time_delta, l2g_r1, l2g_t1, l2g_r2, l2g_t2 = None, None, None, None, None
-            
+
         else:
             track_instances = self.test_track_instances
             time_delta = timestamp - self.timestamp
@@ -736,7 +769,7 @@ class UniADTrack(MVXTwoStageDetector):
             l2g_t1 = self.l2g_t
             l2g_r2 = l2g_r_mat
             l2g_t2 = l2g_t
-        
+
         """ get time_delta and l2g r/t infos """
         """ update frame info for next frame"""
         self.timestamp = timestamp
@@ -763,15 +796,15 @@ class UniADTrack(MVXTwoStageDetector):
 
         self.test_track_instances = track_instances
         results = [dict()]
-        get_keys = ["bev_embed", "bev_pos", 
-                    "track_query_embeddings", "track_bbox_results", 
+        get_keys = ["bev_embed", "bev_pos",
+                    "track_query_embeddings", "track_bbox_results",
                     "boxes_3d", "scores_3d", "labels_3d", "track_scores", "track_ids"]
         if self.with_motion_head:
             get_keys += ["sdc_boxes_3d", "sdc_scores_3d", "sdc_track_scores", "sdc_track_bbox_results", "sdc_embedding"]
         results[0].update({k: frame_res[k] for k in get_keys})
         results = self._det_instances2results(track_instances_fordet, results, img_metas)
         return results
-    
+
     def _track_instances2results(self, track_instances, img_metas, with_mask=True):
         bbox_dict = dict(
             cls_scores=track_instances.pred_logits,

@@ -188,14 +188,18 @@ class NuScenesE2EDataset(NuScenesDataset):
             prev_indexs_list = sorted(prev_indexs_list[1:], reverse=True)
             input_dict = self.get_data_info(index)
         else:
+            #---------预测肯定是在同一个scene中，每个sample就是一个frame--------
+            #--------一个batch包含self.queue_length个sample/frame-----------------
             # ensure the first and final frame in same scene
             final_index = index
             first_index = index - self.queue_length + 1
             if first_index < 0:
                 return None
+            #---------通过查看scene_token是否一致来确定是处于同一个scene-----------
             if self.data_infos[first_index]['scene_token'] != \
                     self.data_infos[final_index]['scene_token']:
                 return None
+            #---------retrieve current frame infos--------- e.g.:19436
             # current timestamp
             input_dict = self.get_data_info(final_index)
             prev_indexs_list = list(reversed(range(first_index, final_index)))
@@ -203,19 +207,35 @@ class NuScenesE2EDataset(NuScenesDataset):
             return None
         frame_idx = input_dict['frame_idx']
         scene_token = input_dict['scene_token']
-        self.pre_pipeline(input_dict)
-        example = self.pipeline(input_dict)
+        self.pre_pipeline(input_dict)         #给input_dict跟新了几个空的列表
+        example = self.pipeline(input_dict)   #这里让其经过train_data_pipeline，很多input_dict中的信息被去掉了
 
+        #-------------依然把input_dict中有关IMU的数据添加到exmaple中------------
+        example['current_frame_e2g_r'] = input_dict['ego2global_rotation']
+        example['future_frame_e2g_r'] = input_dict['future_frame_e2g_r']
+
+        # -------------取出 previous frame的IMU数据也更新到当前帧的信息中------------
+        if prev_indexs_list:
+            previous_frame_e2g_r = []
+            for i in prev_indexs_list:
+                prev_info = self.data_infos[i]
+                e2g_r = prev_info['ego2global_rotation']
+                previous_frame_e2g_r.append(e2g_r)
+            example['previous_frame_e2g_r'] = previous_frame_e2g_r
+        else:
+            example['previous_frame_e2g_r'] = None
+
+        #-------------确保3D标签、未来轨迹和过去轨迹的数据维度一致，数量能对上------------
         assert example['gt_labels_3d'].data.shape[0] == example['gt_fut_traj'].shape[0]
         assert example['gt_labels_3d'].data.shape[0] == example['gt_past_traj'].shape[0]
 
         if self.filter_empty_gt and \
                 (example is None or ~(example['gt_labels_3d']._data != -1).any()):
             return None
+        #-------------把example数据插入了队列头部-------------
         data_queue.insert(0, example)
 
-        # retrieve previous infos
-
+        #------------retrieve previous frame infos-------------e.g. 19435,19434
         for i in prev_indexs_list:
             if self.enbale_temporal_aug:
                 i = max(0, i)
@@ -232,6 +252,9 @@ class NuScenesE2EDataset(NuScenesDataset):
             assert example['gt_labels_3d'].data.shape[0] == example['gt_fut_traj'].shape[0]
             assert example['gt_labels_3d'].data.shape[0] == example['gt_past_traj'].shape[0]
             data_queue.insert(0, copy.deepcopy(example))
+        
+        #-----------把data_queue(一个list)中的信息拼在一起成为一个batch---------
+        #-----------如之前设置了len_queue = 3，即3帧的数据(e.g.19434，19435，19436)拼成一个batch-----------
         data_queue = self.union2one(data_queue)
         return data_queue
 
@@ -264,14 +287,15 @@ class NuScenesE2EDataset(NuScenesDataset):
         """
         convert sample dict into one single sample.
         """
+        #--------------把这几帧中的同一类型数据收集到同一个命名的列表中，并且有的数据转为tensor------------
+        #--------------如：len_queue = 3， 即这3帧的----------------
         imgs_list = [each['img'].data for each in queue]
         gt_labels_3d_list = [each['gt_labels_3d'].data for each in queue]
         gt_sdc_label_list = [each['gt_sdc_label'].data for each in queue]
         gt_inds_list = [to_tensor(each['gt_inds']) for each in queue]
         gt_bboxes_3d_list = [each['gt_bboxes_3d'].data for each in queue]
         gt_past_traj_list = [to_tensor(each['gt_past_traj']) for each in queue]
-        gt_past_traj_mask_list = [
-            to_tensor(each['gt_past_traj_mask']) for each in queue]
+        gt_past_traj_mask_list = [to_tensor(each['gt_past_traj_mask']) for each in queue]
         gt_sdc_bbox_list = [each['gt_sdc_bbox'].data for each in queue]
         l2g_r_mat_list = [to_tensor(each['l2g_r_mat']) for each in queue]
         l2g_t_list = [to_tensor(each['l2g_t']) for each in queue]
@@ -281,29 +305,34 @@ class NuScenesE2EDataset(NuScenesDataset):
         gt_sdc_fut_traj = to_tensor(queue[-1]['gt_sdc_fut_traj'])
         gt_sdc_fut_traj_mask = to_tensor(queue[-1]['gt_sdc_fut_traj_mask'])
         gt_future_boxes_list = queue[-1]['gt_future_boxes']
-        gt_future_labels_list = [to_tensor(each)
-                                 for each in queue[-1]['gt_future_labels']]
+        gt_future_labels_list = [to_tensor(each)for each in queue[-1]['gt_future_labels']]
+        #-------------汇总所有的IMU数据，汇总为list，内部的四元数转为tensor-------------
+        current_frame_e2g_r = [to_tensor(queue[-1]['current_frame_e2g_r'])]
+        previous_frame_e2g_r = [to_tensor(each)for each in queue[-1]['previous_frame_e2g_r']]
+        future_frame_e2g_r = [to_tensor(each)for each in queue[-1]['future_frame_e2g_r'][1:]]
 
         metas_map = {}
         prev_pos = None
         prev_angle = None
+        #-----------------计算每帧相对于前一帧的位置和角度的相对变化，都存在metas_map中-----------
         for i, each in enumerate(queue):
             metas_map[i] = each['img_metas'].data
-            if i == 0:
+            if i == 0: #处理第一帧
                 metas_map[i]['prev_bev'] = False
                 prev_pos = copy.deepcopy(metas_map[i]['can_bus'][:3])
                 prev_angle = copy.deepcopy(metas_map[i]['can_bus'][-1])
                 metas_map[i]['can_bus'][:3] = 0
                 metas_map[i]['can_bus'][-1] = 0
-            else:
+            else: #处理其他帧
                 metas_map[i]['prev_bev'] = True
                 tmp_pos = copy.deepcopy(metas_map[i]['can_bus'][:3])
                 tmp_angle = copy.deepcopy(metas_map[i]['can_bus'][-1])
-                metas_map[i]['can_bus'][:3] -= prev_pos
+                metas_map[i]['can_bus'][:3] -= prev_pos    #-----取的是差值-----
                 metas_map[i]['can_bus'][-1] -= prev_angle
                 prev_pos = copy.deepcopy(tmp_pos)
                 prev_angle = copy.deepcopy(tmp_angle)
-
+        #------------将前面处理和转换的数据汇总到队列的最后一个样本中------------
+        #--------并将这些数据存储在一个统一的数据容器 DataContainer中----------
         queue[-1]['img'] = DC(torch.stack(imgs_list),
                               cpu_only=False, stack=True)
         queue[-1]['img_metas'] = DC(metas_map, cpu_only=True)
@@ -323,6 +352,11 @@ class NuScenesE2EDataset(NuScenesDataset):
         queue['gt_past_traj_mask'] = DC(gt_past_traj_mask_list)
         queue['gt_future_boxes'] = DC(gt_future_boxes_list, cpu_only=True)
         queue['gt_future_labels'] = DC(gt_future_labels_list)
+        #----------------
+        queue['current_frame_e2g_r'] = DC(current_frame_e2g_r)
+        queue['previous_frame_e2g_r'] = DC(previous_frame_e2g_r)
+        queue['gt_future_frame_e2g_r'] = DC(future_frame_e2g_r)
+        del queue['future_frame_e2g_r']
         return queue
 
     def get_ann_info(self, index):
@@ -427,7 +461,7 @@ class NuScenesE2EDataset(NuScenesDataset):
                     from lidar to different cameras.
                 - ann_info (dict): Annotation info.
         """
-        info = self.data_infos[index]
+        info = self.data_infos[index] #就是从dataset.data_infos中去取各种需要的信息
 
         # semantic format
         lane_info = self.lane_infos[index] if self.lane_infos else None
@@ -477,6 +511,7 @@ class NuScenesE2EDataset(NuScenesDataset):
         gt_bboxes = torch.tensor(np.stack(gt_bboxes))
         gt_masks = torch.stack(gt_masks)
 
+        #----------------这个input_dict是本函数最终返回的字典------------
         # standard protocal modified from SECOND.Pytorch
         input_dict = dict(
             sample_idx=info['token'],
@@ -496,13 +531,16 @@ class NuScenesE2EDataset(NuScenesDataset):
             gt_lane_masks=gt_masks,
         )
 
+        #--------------------给input_dict加上lidar的R，T信息---------------------
         l2e_r = info['lidar2ego_rotation']
         l2e_t = info['lidar2ego_translation']
         e2g_r = info['ego2global_rotation']
         e2g_t = info['ego2global_translation']
+        #---------从四元数转换为旋转矩阵----------
         l2e_r_mat = Quaternion(l2e_r).rotation_matrix
         e2g_r_mat = Quaternion(e2g_r).rotation_matrix
 
+        #---------计算出lidar相对于global坐标系的R，T-----------
         l2g_r_mat = l2e_r_mat.T @ e2g_r_mat.T
         l2g_t = l2e_t @ e2g_r_mat.T + e2g_t
 
@@ -511,6 +549,7 @@ class NuScenesE2EDataset(NuScenesDataset):
                 l2g_r_mat=l2g_r_mat.astype(np.float32),
                 l2g_t=l2g_t.astype(np.float32)))
 
+        #--------------------给input_dict加上image信息---------------------
         if self.modality['use_camera']:
             image_paths = []
             lidar2img_rts = []
@@ -542,6 +581,7 @@ class NuScenesE2EDataset(NuScenesDataset):
                     lidar2cam=lidar2cam_rts,
                 ))
 
+        #--------------------给input_dict加上所有的label信息---------------------
         # if not self.test_mode:
         annos = self.get_ann_info(index)
         input_dict['ann_info'] = annos
@@ -550,17 +590,21 @@ class NuScenesE2EDataset(NuScenesDataset):
             input_dict['sdc_planning_mask'] = input_dict['ann_info']['sdc_planning_mask']
             input_dict['command'] = input_dict['ann_info']['command']
 
+        #--------计算这个sample的ego to global的R，T，patch_angle---------
+        #--------将这些信息更新到input_dict的['can_bus']中---------
         rotation = Quaternion(input_dict['ego2global_rotation'])
         translation = input_dict['ego2global_translation']
         can_bus = input_dict['can_bus']
         can_bus[:3] = translation
         can_bus[3:7] = rotation
+        #--使用 quaternion_yaw 函数从四元数中提取航向角（即车辆绕 z 轴的旋转角度）--
         patch_angle = quaternion_yaw(rotation) / np.pi * 180
         if patch_angle < 0:
             patch_angle += 360
         can_bus[-2] = patch_angle / 180 * np.pi
         can_bus[-1] = patch_angle
 
+        #------------当前的sample的索引是index,计算出前2个，以及未来6个索引值---------
         # TODO: Warp all those below occupancy-related codes into a function
         prev_indices, future_indices = self.occ_get_temporal_indices(
             index, self.occ_receptive_field, self.occ_n_future)
@@ -569,7 +613,6 @@ class NuScenesE2EDataset(NuScenesDataset):
         all_frames = prev_indices + [index] + future_indices
 
         # whether invalid frames is present
-        # 
         has_invalid_frame = -1 in all_frames[:self.occ_only_total_frames]
         # NOTE: This can only represent 7 frames in total as it influence evaluation
         input_dict['occ_has_invalid_frame'] = has_invalid_frame
@@ -578,15 +621,16 @@ class NuScenesE2EDataset(NuScenesDataset):
         # might have None if not in the same sequence
         future_frames = [index] + future_indices
 
+        #-------计算出所有的 l2e, e2g 的R，T对 index 和 future_indices-------
         # get lidar to ego to global transforms for each curr and fut index
-        occ_transforms = self.occ_get_transforms(
-            future_frames)  # might have None
+        occ_transforms = self.occ_get_transforms(future_frames)  # might have None
         input_dict.update(occ_transforms)
 
+
+        #------对 index 和 future_indices这几帧提取对应的label，更新到input_dict-------
         # for (current and) future frames, detection labels are needed
         # generate detection labels for current + future frames
-        input_dict['occ_future_ann_infos'] = \
-            self.get_future_detection_infos(future_frames)
+        input_dict['occ_future_ann_infos'] = self.get_future_detection_infos(future_frames)
         return input_dict
 
     def get_future_detection_infos(self, future_frames):
@@ -634,6 +678,8 @@ class NuScenesE2EDataset(NuScenesDataset):
         l2e_t_vecs = []
         e2g_r_mats = []
         e2g_t_vecs = []
+        #---------------------
+        future_frame_e2g_r = []
 
         for index in indices:
             if index == -1:
@@ -655,12 +701,15 @@ class NuScenesE2EDataset(NuScenesDataset):
                 l2e_t_vecs.append(torch.tensor(l2e_t).to(data_type))
                 e2g_r_mats.append(e2g_r_mat.to(data_type))
                 e2g_t_vecs.append(torch.tensor(e2g_t).to(data_type))
+                #-------------------
+                future_frame_e2g_r.append(e2g_r)
 
         res = {
             'occ_l2e_r_mats': l2e_r_mats,
             'occ_l2e_t_vecs': l2e_t_vecs,
             'occ_e2g_r_mats': e2g_r_mats,
             'occ_e2g_t_vecs': e2g_t_vecs,
+            'future_frame_e2g_r': future_frame_e2g_r,
         }
 
         return res
