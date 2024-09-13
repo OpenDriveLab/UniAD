@@ -472,6 +472,7 @@ model = dict(
         )
     ),
 )
+#-------------------------------------配置数据集路径---------------------------------------
 dataset_type = "NuScenesE2EDataset"
 data_root = "data/nuscenes/"
 info_root = "data/infos/"
@@ -596,7 +597,7 @@ test_pipeline = [
 ]
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=8,
+    workers_per_gpu=0,   #原本是8，表示每个 GPU 将分配 8 个数据加载进程来并行加载数据
     train=dict(
         type=dataset_type,
         file_client_args=file_client_args,

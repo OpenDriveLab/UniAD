@@ -205,23 +205,27 @@ class PansegformerHead(SegDETRHead):
                 `None` would be returned.
         """
         _, bs, _ = bev_embed.shape
-
+        #---对 bev_embed 进行 reshape 和 permute（调整形状），目的是将 4D 的特征图转化为 Transformer 可以接受的格式---
         mlvl_feats = [torch.reshape(bev_embed, (bs, self.bev_h, self.bev_w ,-1)).permute(0, 3, 1, 2)]
-        img_masks = mlvl_feats[0].new_zeros((bs, self.bev_h, self.bev_w))
+        img_masks = mlvl_feats[0].new_zeros((bs, self.bev_h, self.bev_w)) #初始化一个零掩码
 
-        hw_lvl = [feat_lvl.shape[-2:] for feat_lvl in mlvl_feats]
+        hw_lvl = [feat_lvl.shape[-2:] for feat_lvl in mlvl_feats]#保存每一层特征图的高和宽
         mlvl_masks = []
         mlvl_positional_encodings = []
         for feat in mlvl_feats:
+            #--对特征图进行插值生成对应尺寸的掩码，并转为布尔类型--
             mlvl_masks.append(
                 F.interpolate(img_masks[None],
                               size=feat.shape[-2:]).to(torch.bool).squeeze(0))
+            #--对生成的掩码计算位置编码，用于加入位置信息--
             mlvl_positional_encodings.append(
                 self.positional_encoding(mlvl_masks[-1]))
 
         query_embeds = None
         if not self.as_two_stage:
             query_embeds = self.query_embedding.weight
+        
+        #---将特征图、掩码、查询嵌入等信息传递给 Transformer 编码器-解码器模型---(Encoder + location decoder)
         (memory, memory_pos, memory_mask, query_pos), hs, init_reference, inter_references, \
         enc_outputs_class, enc_outputs_coord = self.transformer(
             mlvl_feats,
@@ -231,12 +235,16 @@ class PansegformerHead(SegDETRHead):
             reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
             cls_branches=self.cls_branches if self.as_two_stage else None  # noqa:E501
         )
-
+        #--memory编码器输出的全局特征。(Encoder的输出？)
+        #--hs: 解码器阶段的隐藏状态。  (Location Decoder的输出？)
+        #--init_reference 和 inter_references: 初始参考点和中间参考点，用于边界框回归。
+        #--enc_outputs_class 和 enc_outputs_coord: 编码器的分类和回归结果
         memory = memory.permute(1, 0, 2)
         query = hs[-1].permute(1, 0, 2)
         query_pos = query_pos.permute(1, 0, 2)
         memory_pos = memory_pos.permute(1, 0, 2)
 
+        #-------------Mask decoder---------------
         # we should feed these to mask deocder.
         args_tuple = [memory, memory_mask, memory_pos, query, None, query_pos, hw_lvl]
 
@@ -1084,7 +1092,8 @@ class PansegformerHead(SegDETRHead):
                 - losses_seg (torch.Tensor): Total segmentation loss.
                 - pred_seg_dict (dict): Dictionary of predicted segmentation outputs.
         """
-        pred_seg_dict = self(bev_feat)
+        #---------开始Mapformer/Panoptic,输入只需要BEVfeature-------
+        pred_seg_dict = self(bev_feat) 
         loss_inputs = [
             pred_seg_dict['outputs_classes'],
             pred_seg_dict['outputs_coords'],

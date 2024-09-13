@@ -31,8 +31,9 @@ def custom_train_detector(model,
     logger = get_root_logger(cfg.log_level)
 
     # prepare data loaders
-   
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
+
+    #---------------------------不会进入这个if--------------------------
     #assert len(dataset)==1s
     if 'imgs_per_gpu' in cfg.data:
         logger.warning('"imgs_per_gpu" is deprecated in MMDet V2.0. '
@@ -48,6 +49,7 @@ def custom_train_detector(model,
                 f'{cfg.data.imgs_per_gpu} in this experiments')
         cfg.data.samples_per_gpu = cfg.data.imgs_per_gpu
 
+    #-------------------------------建立dataloader对象，即实例化DataLoader类----------------------------
     data_loaders = [
         build_dataloader(
             ds,
@@ -79,6 +81,7 @@ def custom_train_detector(model,
                 broadcast_buffers=False,
                 find_unused_parameters=find_unused_parameters)
     else:
+        #-----将之前定义好的模型转换为MMDataParallel，torch.nn.DataParallel的mmcv修改版本-----
         model = MMDataParallel(
             model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
         if eval_model is not None:
@@ -86,9 +89,10 @@ def custom_train_detector(model,
                 eval_model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
 
 
-    # build runner
+    #-----------------------------------设置优化器---------------------------------
     optimizer = build_optimizer(model, cfg.optimizer)
 
+    #---------------------------cfg文件里面定义runner了，不会进if,会进else------------
     if 'runner' not in cfg:
         cfg.runner = {
             'type': 'EpochBasedRunner',
@@ -100,6 +104,8 @@ def custom_train_detector(model,
     else:
         if 'total_epochs' in cfg:
             assert cfg.total_epochs == cfg.runner.max_epochs
+    
+    #-------------eval_model = None,这个if也不会进-------------
     if eval_model is not None:
         runner = build_runner(
             cfg.runner,
@@ -111,6 +117,7 @@ def custom_train_detector(model,
                 logger=logger,
                 meta=meta))
     else:
+        #---------------------------在这里构建完整的runner-----------------------
         runner = build_runner(
             cfg.runner,
             default_args=dict(
@@ -123,6 +130,7 @@ def custom_train_detector(model,
     # an ugly workaround to make .log and .log.json filenames the same
     runner.timestamp = timestamp
 
+    #----------------------------设置模型参数是否启用16位浮点数来保存---------------------
     # fp16 setting
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
@@ -133,6 +141,8 @@ def custom_train_detector(model,
     else:
         optimizer_config = cfg.optimizer_config
 
+
+    #----------------------------有关Hook的一系列设置-----------------------
     # register hooks
     runner.register_training_hooks(cfg.lr_config, optimizer_config,
                                    cfg.checkpoint_config, cfg.log_config,
@@ -147,6 +157,7 @@ def custom_train_detector(model,
         if isinstance(runner, EpochBasedRunner):
             runner.register_hook(DistSamplerSeedHook())
 
+    #---------------------------val dataset的处理------------------------
     # register eval hooks
     if validate:
         # Support batch_size > 1 in validation
@@ -187,9 +198,12 @@ def custom_train_detector(model,
             hook = build_from_cfg(hook_cfg, HOOKS)
             runner.register_hook(hook, priority=priority)
 
+    #-------------------------设置是否接着之前保存的ckpt继续训练----------------------
     if cfg.resume_from and os.path.exists(cfg.resume_from):
         runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
+    
+    #----------------开始正式运行这个runner---------------
     runner.run(data_loaders, cfg.workflow)
 

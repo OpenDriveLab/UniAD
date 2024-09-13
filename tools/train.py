@@ -209,6 +209,7 @@ def main():
     meta['seed'] = args.seed
     meta['exp_name'] = osp.basename(args.config)
 
+    #--------------------------build model--------------------------
     model = build_model(
         cfg.model,
         train_cfg=cfg.get('train_cfg'),
@@ -216,7 +217,11 @@ def main():
     model.init_weights()
 
     logger.info(f'Model:\n{model}')
+
+    #--------------------------build dataset对象，即实例化对应的类--------------------------
     datasets = [build_dataset(cfg.data.train)]
+
+
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         # in case we use a dataset wrapper
@@ -242,11 +247,13 @@ def main():
             if hasattr(datasets[0], 'PALETTE') else None)
     # add an attribute for visualization convenience
     model.CLASSES = datasets[0].CLASSES
+
+    #--------------这句相当于这个工程自己定义的runner-------------
     custom_train_model(
         model,
         datasets,
         cfg,
-        distributed=distributed,
+        distributed=distributed, 
         validate=(not args.no_validate),
         timestamp=timestamp,
         meta=meta)

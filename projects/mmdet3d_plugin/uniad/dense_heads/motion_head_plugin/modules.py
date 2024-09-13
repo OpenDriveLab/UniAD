@@ -115,16 +115,16 @@ class MotionTransformerDecoder(BaseModule):
             # fuse intention embedding with query embedding
             query_embed = self.in_query_fuser(torch.cat([query_embed, query_embed_intention], dim=-1))
             
-            # interaction between agents
+            # interaction between agents---------agents & agents
             track_query_embed = self.track_agent_interaction_layers[lid](
                 query_embed, track_query, query_pos=track_query_pos_bc, key_pos=track_query_pos)
             
-            # interaction between agents and map
+            # interaction between agents and map----------agents & scenes
             map_query_embed = self.map_interaction_layers[lid](
                 query_embed, lane_query, query_pos=track_query_pos_bc, key_pos=lane_query_pos)
             
             # interaction between agents and bev, ie. interaction between agents and goals
-            # implemented with deformable transformer
+            # implemented with deformable transformer---------agents & goals
             bev_query_embed = self.bev_interaction_layers[lid](
                 query_embed,
                 value=bev_embed,

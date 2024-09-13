@@ -121,6 +121,7 @@ class PlanningHeadSingleMode(nn.Module):
 
         occ_mask = None
         
+        #---------------Planning--------------
         outs_planning = self(bev_embed, occ_mask, bev_pos, sdc_traj_query, sdc_track_query, command)
         loss_inputs = [sdc_planning, sdc_planning_mask, outs_planning, gt_future_boxes]
         losses = self.loss(*loss_inputs)
@@ -185,11 +186,14 @@ class PlanningHeadSingleMode(nn.Module):
         
         # plan_query: [1, 1, 256]
         # bev_feat: [40000, 1, 256]
+        #-------------BEV feature interation----------
         plan_query = self.attn_module(plan_query, bev_feat)   # [1, 1, 256]
         
         sdc_traj_all = self.reg_branch(plan_query).view((-1, self.planning_steps, 2))
         sdc_traj_all[...,:2] = torch.cumsum(sdc_traj_all[...,:2], dim=1)
         sdc_traj_all[0] = bivariate_gaussian_activation(sdc_traj_all[0])
+
+        #------------collision optimaizer------------
         if self.use_col_optim and not self.training:
             # post process, only used when testing
             assert occ_mask is not None

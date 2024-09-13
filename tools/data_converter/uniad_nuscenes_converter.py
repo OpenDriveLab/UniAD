@@ -22,7 +22,7 @@ nus_attributes = ('cycle.with_rider', 'cycle.without_rider',
                   'pedestrian.sitting_lying_down', 'vehicle.moving',
                   'vehicle.parked', 'vehicle.stopped', 'None')
 
-
+#-----------------------从对应的数据集生成蕴含其相关信息的.pkl文件，就是所谓的data info文件-----------
 def create_nuscenes_infos(root_path,
                           out_path,
                           can_bus_root_path,
@@ -44,14 +44,18 @@ def create_nuscenes_infos(root_path,
     from nuscenes.nuscenes import NuScenes
     from nuscenes.can_bus.can_bus_api import NuScenesCanBus
     print(version, root_path)
+    #--------通过 NuScenes 类实例化一个对象 nusc，加载指定版本的数据集------
     nusc = NuScenes(version=version, dataroot=root_path, verbose=True)
     nusc_can_bus = NuScenesCanBus(dataroot=can_bus_root_path)
+
+    #-------splits 模块包含预定义的数据集场景分割，这些分割定义了哪些场景用于训练、验证和测试-----
     from nuscenes.utils import splits
     available_vers = ['v1.0-trainval', 'v1.0-test', 'v1.0-mini']
+    #-------根据版本选择训练和验证场景-------
     assert version in available_vers
     if version == 'v1.0-trainval':
-        train_scenes = splits.train
-        val_scenes = splits.val
+        train_scenes = splits.train  #使用 splits.train 作为训练场景
+        val_scenes = splits.val      #使用 splits.val 作为验证场景
     elif version == 'v1.0-test':
         train_scenes = splits.test
         val_scenes = []
@@ -60,12 +64,14 @@ def create_nuscenes_infos(root_path,
         val_scenes = splits.mini_val
     else:
         raise ValueError('unknown')
+    #注意：splits.py是一个函数，函数里面定义了train, val, test这几个列表，内容是场景scene-ID
+    #这里可以直接用splits.train，splits.val，splits.test来访问/表示这几个列表
+
 
     # filter existing scenes.
     available_scenes = get_available_scenes(nusc)
     available_scene_names = [s['name'] for s in available_scenes]
-    train_scenes = list(
-        filter(lambda x: x in available_scene_names, train_scenes))
+    train_scenes = list(filter(lambda x: x in available_scene_names, train_scenes))
     val_scenes = list(filter(lambda x: x in available_scene_names, val_scenes))
     train_scenes = set([
         available_scenes[available_scene_names.index(s)]['token']

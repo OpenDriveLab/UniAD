@@ -92,7 +92,7 @@ model = dict(
         depth=101,
         num_stages=4,
         out_indices=(1, 2, 3),
-        frozen_stages=4,
+        frozen_stages=4,         #设置为 ResNet 的前 4 个阶段被冻结
         norm_cfg=dict(type="BN2d", requires_grad=False),
         norm_eval=True,
         style="caffe",
@@ -110,9 +110,9 @@ model = dict(
         num_outs=4,
         relu_before_extra_convs=True,
     ),
-    freeze_img_backbone=True,
+    freeze_img_backbone=True, #配置表明整个 img_backbone 被冻结
     freeze_img_neck=False,
-    freeze_bn=False,
+    freeze_bn=False,          #配置表明批归一化层（Batch Normalization, BN）不被冻结
     score_thresh=0.4,
     filter_score_thresh=0.35,
     qim_args=dict(

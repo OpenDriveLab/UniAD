@@ -132,6 +132,7 @@ class MotionHead(BaseMotionHead):
         
         memory, memory_mask, memory_pos, lane_query, _, lane_query_pos, hw_lvl = outs_seg['args_tuple']
 
+        #-------------Motionformer运算-------------
         outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
         loss_inputs = [gt_bboxes_3d, gt_fut_traj, gt_fut_traj_mask, outs_motion, all_matched_idxes, track_boxes]
         losses = self.loss(*loss_inputs)
@@ -297,7 +298,7 @@ class MotionHead(BaseMotionHead):
 
         outputs_traj_scores = []
         outputs_trajs = []
-
+        #------------------------------Motionformer计算---------------------------
         inter_states, inter_references = self.motionformer(
             track_query,  # B, A_track, D
             lane_query,  # B, M, D

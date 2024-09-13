@@ -128,7 +128,7 @@ class LoadAnnotations3D_E2E(LoadAnnotations3D):
         self.with_ins_inds_3d = with_ins_inds_3d
 
         self.ins_inds_add_1 = ins_inds_add_1
-    
+
     def _load_future_anns(self, results):
         """Private function to load 3D bounding box annotations.
 
@@ -149,7 +149,7 @@ class LoadAnnotations3D_E2E(LoadAnnotations3D):
             if ann_info is not None:
                 gt_bboxes_3d.append(ann_info['gt_bboxes_3d'])
                 gt_labels_3d.append(ann_info['gt_labels_3d'])
-                
+
                 ann_gt_inds = ann_info['gt_inds']
                 if self.ins_inds_add_1:
                     ann_gt_inds += 1
@@ -173,14 +173,14 @@ class LoadAnnotations3D_E2E(LoadAnnotations3D):
         # results['future_gt_valid_flag'] = gt_valid_flags
         results['future_gt_vis_tokens'] = gt_vis_tokens
 
-        return results 
-  
+        return results
+
     def _load_ins_inds_3d(self, results):
         ann_gt_inds = results['ann_info']['gt_inds'].copy() # TODO: note here
 
         # NOTE: Avoid gt_inds generated twice
         results['ann_info'].pop('gt_inds')
-        
+
         if self.ins_inds_add_1:
             ann_gt_inds += 1
         results['gt_inds'] = ann_gt_inds
@@ -188,16 +188,16 @@ class LoadAnnotations3D_E2E(LoadAnnotations3D):
 
     def __call__(self, results):
         results = super().__call__(results)
-        
+
         if self.with_future_anns:
             results = self._load_future_anns(results)
         if self.with_ins_inds_3d:
             results = self._load_ins_inds_3d(results)
-        
+
         # Generate ann for plan
         if 'occ_future_ann_infos_for_plan' in results.keys():
             results = self._load_future_anns_plan(results)
-        
+
         return results
 
     def __repr__(self):
@@ -205,5 +205,5 @@ class LoadAnnotations3D_E2E(LoadAnnotations3D):
         indent_str = '    '
         repr_str += f'{indent_str}with_future_anns={self.with_future_anns}, '
         repr_str += f'{indent_str}with_ins_inds_3d={self.with_ins_inds_3d}, '
-        
+
         return repr_str

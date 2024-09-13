@@ -166,6 +166,7 @@ class BEVFormerTrackHead(DETRHead):
         ref_points=None,
         img_metas=None,
     ):
+        #object_query_embeds就是object query
         assert bev_embed.shape[0] == self.bev_h * self.bev_w
         hs, init_reference, inter_references = self.transformer.get_states_and_refs(
             bev_embed,
@@ -181,18 +182,28 @@ class BEVFormerTrackHead(DETRHead):
         outputs_classes = []
         outputs_coords = []
         outputs_trajs = []
+        #-----------lvl是FPN提取出不同尺度的bev feature索引，这里遍历不同尺度-----------
         for lvl in range(hs.shape[0]):
+            #---如果是第一层 lvl == 0，则使用 ref_points.sigmoid() 作为参考点；
+            #---否则，使用 inter_references[lvl - 1]
             if lvl == 0:
                 # reference = init_reference
                 reference = ref_points.sigmoid()
             else:
                 reference = inter_references[lvl - 1]
                 # ref_size_base = inter_box_sizes[lvl - 1]
-            reference = inverse_sigmoid(reference)
+            
+            reference = inverse_sigmoid(reference) #将 sigmoid 输出的参考点转换回未归一化的值
+
+
+            #---将hs[lvl]通过分类分支，得到目标的类别预测---
             outputs_class = self.cls_branches[lvl](hs[lvl])
+            #---将hs[lvl]通过回归分支，得到目标的回归预测（包括位置和大小，xydxdyxdz）---
             tmp = self.reg_branches[lvl](hs[lvl])  # xydxdyxdz
+            #---通过轨迹回归分支，预测过去的轨迹，并调整形状以符合轨迹的步数---
             outputs_past_traj = self.past_traj_reg_branches[lvl](hs[lvl]).view(
                 tmp.shape[0], -1, self.past_steps + self.fut_steps, 2)
+            #---通过对参考点的预测进行修正，确保目标的坐标位置正确---
             # TODO: check the shape of reference
             assert reference.shape[-1] == 3
             tmp[..., 0:2] += reference[..., 0:2]
@@ -203,7 +214,7 @@ class BEVFormerTrackHead(DETRHead):
             last_ref_points = torch.cat(
                 [tmp[..., 0:2], tmp[..., 4:5]], dim=-1,
             )
-
+            #---将预测坐标从 [0,1] 的归一化范围转换回原始的物理坐标范围---
             tmp[..., 0:1] = (tmp[..., 0:1] * (self.pc_range[3] -
                              self.pc_range[0]) + self.pc_range[0])
             tmp[..., 1:2] = (tmp[..., 1:2] * (self.pc_range[4] -
@@ -219,6 +230,7 @@ class BEVFormerTrackHead(DETRHead):
             outputs_classes.append(outputs_class)
             outputs_coords.append(outputs_coord)
             outputs_trajs.append(outputs_past_traj)
+        #---将不同层次/尺度的预测结果堆叠在一起---
         outputs_classes = torch.stack(outputs_classes)
         outputs_coords = torch.stack(outputs_coords)
         outputs_trajs = torch.stack(outputs_trajs)
