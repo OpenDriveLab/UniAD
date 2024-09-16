@@ -2,8 +2,51 @@
     "version": "0.2.0",
     "configurations": [
         {
+            //这个是原本的调试配置
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+            
+        },
+        {
+            // 这个是Uniad: train.py的调试配置
+            "name": "Uniad Debugger: train.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home2/wzc/UniAD/tools/train.py",
+            "args": [
+                "/home2/wzc/UniAD/projects/configs/stage3_e2e_IMU/base_e2e_IMU.py",
+                "--gpus", 
+                "1"
+            ],
+            "env": {
+                "PYTHONPATH": "/home2/wzc/UniAD"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            // 这个是Uniad: train.py_stage1的调试配置
+            "name": "Uniad Debugger: train.py_stage1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home2/wzc/UniAD/tools/train.py",
+            "args": [
+                "/home2/wzc/UniAD/projects/configs/stage1_track_map/base_track_map.py",
+                "--gpus", 
+                "1"
+            ],
+            "env": {
+                "PYTHONPATH": "/home2/wzc/UniAD"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Python: Test",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/tools/test.py",
             "args": [
@@ -18,8 +61,6 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
-        {
-            
-        }
+
     ]
 }
