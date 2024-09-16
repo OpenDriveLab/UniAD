@@ -25,12 +25,14 @@ class UniAD(UniADTrack):
         occ_head=None,
         planning_head=None,
         freeze_uniad=None,
+        IMU_head=None,
         task_loss_weight=dict(
             track=1.0,
             map=1.0,
             motion=1.0,
             occ=1.0,
-            planning=1.0
+            planning=1.0,
+            IMU_predict=1.0,
         ),
         **kwargs,  #捕获多余的关键字参数，用于传递给父类 UniADTrack 的构造函数
     ):
@@ -57,11 +59,15 @@ class UniAD(UniADTrack):
             self.planning_head = build_head(planning_head)
             if freeze_uniad:
                 self.freeze_module(self.planning_head)
+        
+        #-----------------------------
+        if IMU_head:
+            self.IMU_head = build_head(IMU_head)
 
 
         self.task_loss_weight = task_loss_weight
         assert set(task_loss_weight.keys()) == \
-               {'track', 'occ', 'motion', 'map', 'planning'}
+               {'track', 'occ', 'motion', 'map', 'planning', 'IMU_predict'}
 
     #--------对于传入的模块执行参数frozen操作----------
     def freeze_module(self, module):
@@ -87,6 +93,12 @@ class UniAD(UniADTrack):
     @property
     def with_seg_head(self):
         return hasattr(self, 'seg_head') and self.seg_head is not None
+
+    #--------------------------
+    @property
+    def with_IMU_head(self):
+        return hasattr(self, 'IMU_head') and self.IMU_head is not None
+   
 
     def forward_dummy(self, img):
         dummy_metas = None
@@ -144,7 +156,7 @@ class UniAD(UniADTrack):
                       # fut gt for planning
                       gt_future_boxes=None,
 
-                      #data for IMU
+                      #data for IMU predict
                       current_frame_e2g_r = None,
                       previous_frame_e2g_r = None,
                       gt_future_frame_e2g_r = None,
@@ -198,7 +210,7 @@ class UniAD(UniADTrack):
         losses_track, outs_track = self.forward_track_train(img, gt_bboxes_3d, gt_labels_3d, gt_past_traj, gt_past_traj_mask, gt_inds, gt_sdc_bbox, gt_sdc_label,
                                                         l2g_t, l2g_r_mat, img_metas, timestamp)
         #-----为损失字典中的每个损失项添加前缀，并根据任务的损失权重对其进行加权-----
-        losses_track = self.loss_weighted_and_prefixed(losses_track, prefix='track')
+        # losses_track = self.loss_weighted_and_prefixed(losses_track, prefix='track')
         losses.update(losses_track)
         
         # Upsample bev for tiny version（如果使用的是bevformer_tiny版本）
@@ -213,9 +225,8 @@ class UniAD(UniADTrack):
         outs_seg = dict()
         if self.with_seg_head:          
             losses_seg, outs_seg = self.seg_head.forward_train(bev_embed, img_metas,
-                                                          gt_lane_labels, gt_lane_bboxes, gt_lane_masks)
-            
-            losses_seg = self.loss_weighted_and_prefixed(losses_seg, prefix='map')
+                                                          gt_lane_labels, gt_lane_bboxes, gt_lane_masks)         
+            # losses_seg = self.loss_weighted_and_prefixed(losses_seg, prefix='map')
             losses.update(losses_seg)
 
         #-----开始路径预测模块的前向传播计算，即Motionformer-----
@@ -231,7 +242,7 @@ class UniAD(UniADTrack):
             losses_motion = ret_dict_motion["losses"]
             outs_motion = ret_dict_motion["outs_motion"]
             outs_motion['bev_pos'] = bev_pos
-            losses_motion = self.loss_weighted_and_prefixed(losses_motion, prefix='motion')
+            # losses_motion = self.loss_weighted_and_prefixed(losses_motion, prefix='motion')
             losses.update(losses_motion)
 
         #-----开始占用网络预测模块的前向传播计算，即Occformer-----
@@ -251,7 +262,7 @@ class UniAD(UniADTrack):
                             gt_instance=gt_instance,
                             gt_img_is_valid=gt_occ_img_is_valid,
                         )
-            losses_occ = self.loss_weighted_and_prefixed(losses_occ, prefix='occ')
+            # losses_occ = self.loss_weighted_and_prefixed(losses_occ, prefix='occ')
             losses.update(losses_occ)
         
         #-----开始Plan预测模块的前向传播计算，即Planner-----
@@ -259,15 +270,16 @@ class UniAD(UniADTrack):
         if self.with_planning_head:
             outs_planning = self.planning_head.forward_train(bev_embed, outs_motion, sdc_planning, sdc_planning_mask, command, gt_future_boxes)
             losses_planning = outs_planning['losses']
-            losses_planning = self.loss_weighted_and_prefixed(losses_planning, prefix='planning')
+            # losses_planning = self.loss_weighted_and_prefixed(losses_planning, prefix='planning')
             losses.update(losses_planning)
         
-        #-----开始IMU预测部分的训练------
+        #-----开始IMU预测部分的训练, 即IMU_head/IMUformer------
+        if self.with_IMU_head:
+            outs_IMU = self.IMU_head.forward_train(bev_embed, outs_planning['outs_motion']['sdc_traj'], current_frame_e2g_r, previous_frame_e2g_r, gt_future_frame_e2g_r)
+            losses_IMU = outs_IMU['losses']
+            losses_IMU = self.loss_weighted_and_prefixed(losses_IMU, prefix='IMU_predict')
+            losses.update(losses_IMU)
 
-
-
-        
-        
         #----处理损失函数值中可能出现的NaN值，将其替换为0，以确保进一步的计算不会受到NaN值的影响----
         for k,v in losses.items():
             losses[k] = torch.nan_to_num(v)

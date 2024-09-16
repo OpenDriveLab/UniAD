@@ -1105,7 +1105,9 @@ class PansegformerHead(SegDETRHead):
             gt_lane_bboxes,
             gt_lane_masks
         ]
-        losses_seg = self.loss(*loss_inputs, img_metas=img_metas)
+        #--------阻止计算losses_seg-------
+        # losses_seg = self.loss(*loss_inputs, img_metas=img_metas)
+        losses_seg = {}
         return losses_seg, pred_seg_dict
 
     def _get_bboxes_single(self,

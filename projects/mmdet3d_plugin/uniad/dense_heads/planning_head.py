@@ -123,8 +123,11 @@ class PlanningHeadSingleMode(nn.Module):
         
         #---------------Planning--------------
         outs_planning = self(bev_embed, occ_mask, bev_pos, sdc_traj_query, sdc_track_query, command)
-        loss_inputs = [sdc_planning, sdc_planning_mask, outs_planning, gt_future_boxes]
-        losses = self.loss(*loss_inputs)
+
+        #----------阻止计算losses_planning----------
+        # loss_inputs = [sdc_planning, sdc_planning_mask, outs_planning, gt_future_boxes]
+        # losses = self.loss(*loss_inputs)
+        losses = {}
         ret_dict = dict(losses=losses, outs_motion=outs_planning)
         return ret_dict
 

@@ -610,7 +610,9 @@ class UniADTrack(MVXTwoStageDetector):
                     "sdc_boxes_3d", "sdc_scores_3d", "sdc_track_scores", "sdc_track_bbox_results", "sdc_embedding"]
         out.update({k: frame_res[k] for k in get_keys})
 
-        losses = self.criterion.losses_dict
+        #----------阻止计算losses_track-----------
+        # losses = self.criterion.losses_dict
+        losses = {}
         return losses, out
 
     def upsample_bev_if_tiny(self, outs_track):

@@ -299,7 +299,7 @@ class OccHead(BaseModule):
 
         ins_query = self.merge_queries(outs_dict, self.detach_query_pos)
 
-        # Forward the occ-flow model
+        #---Forward the occ-flow model: 输入经过occ模块计算预测的输出---
         mask_preds_batch, ins_seg_preds_batch = self(bev_feat, ins_query=ins_query)
         
         # Get pred and gt
@@ -317,12 +317,15 @@ class OccHead(BaseModule):
         past_valid = past_valid_mask.all(dim=1)
         future_frame_mask[~past_valid] = False
         
+        #-------------------------------loss计算处1-------------------------------
+        #---------阻止计算losses_occ---------
         # Calculate loss in the batch
         loss_dict = dict()
-        loss_dice = ins_seg_preds_batch.new_zeros(1)[0].float()
-        loss_mask = ins_seg_preds_batch.new_zeros(1)[0].float()
-        loss_aux_dice = ins_seg_preds_batch.new_zeros(1)[0].float()
-        loss_aux_mask = ins_seg_preds_batch.new_zeros(1)[0].float()
+        # loss_dice = ins_seg_preds_batch.new_zeros(1)[0].float()
+        # loss_mask = ins_seg_preds_batch.new_zeros(1)[0].float()
+        # loss_aux_dice = ins_seg_preds_batch.new_zeros(1)[0].float()
+        # loss_aux_mask = ins_seg_preds_batch.new_zeros(1)[0].float()
+        
 
         bs = ins_query.size(0)
         assert bs == 1
@@ -375,33 +378,35 @@ class OccHead(BaseModule):
             
             num_total_pos = ins_seg_preds.size(0)  # Check this line 
 
+            ##-------------------------------loss计算处2-------------------------------
             # loss for a sample in batch
             num_total_pos = ins_seg_preds.new_tensor([num_total_pos])
             num_total_pos = torch.clamp(reduce_mean(num_total_pos), min=1).item()
             
-            cur_dice_loss = self.loss_dice(
-                ins_seg_preds, ins_seg_targets_ordered, avg_factor=num_total_pos, frame_mask=frame_mask)
+            #------------阻止计算losses_occ-----------
+        #     cur_dice_loss = self.loss_dice(
+        #         ins_seg_preds, ins_seg_targets_ordered, avg_factor=num_total_pos, frame_mask=frame_mask)
 
-            cur_mask_loss = self.loss_mask(
-                ins_seg_preds, ins_seg_targets_ordered, frame_mask=frame_mask
-            )
+        #     cur_mask_loss = self.loss_mask(
+        #         ins_seg_preds, ins_seg_targets_ordered, frame_mask=frame_mask
+        #     )
 
-            cur_aux_dice_loss = self.loss_dice(
-                mask_preds, ins_seg_targets_ordered, avg_factor=num_total_pos, frame_mask=frame_mask
-            )
-            cur_aux_mask_loss = self.loss_mask(
-                mask_preds, ins_seg_targets_ordered, frame_mask=frame_mask
-            )
+        #     cur_aux_dice_loss = self.loss_dice(
+        #         mask_preds, ins_seg_targets_ordered, avg_factor=num_total_pos, frame_mask=frame_mask
+        #     )
+        #     cur_aux_mask_loss = self.loss_mask(
+        #         mask_preds, ins_seg_targets_ordered, frame_mask=frame_mask
+        #     )
 
-            loss_dice += cur_dice_loss
-            loss_mask += cur_mask_loss
-            loss_aux_dice += cur_aux_dice_loss * self.aux_loss_weight
-            loss_aux_mask += cur_aux_mask_loss * self.aux_loss_weight
+        #     loss_dice += cur_dice_loss
+        #     loss_mask += cur_mask_loss
+        #     loss_aux_dice += cur_aux_dice_loss * self.aux_loss_weight
+        #     loss_aux_mask += cur_aux_mask_loss * self.aux_loss_weight
 
-        loss_dict['loss_dice'] = loss_dice / bs
-        loss_dict['loss_mask'] = loss_mask / bs
-        loss_dict['loss_aux_dice'] = loss_aux_dice / bs
-        loss_dict['loss_aux_mask'] = loss_aux_mask / bs
+        # loss_dict['loss_dice'] = loss_dice / bs
+        # loss_dict['loss_mask'] = loss_mask / bs
+        # loss_dict['loss_aux_dice'] = loss_aux_dice / bs
+        # loss_dict['loss_aux_mask'] = loss_aux_mask / bs
 
         return loss_dict
 

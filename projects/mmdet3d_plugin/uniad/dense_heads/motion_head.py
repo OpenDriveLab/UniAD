@@ -134,8 +134,11 @@ class MotionHead(BaseMotionHead):
 
         #-------------Motionformer运算-------------
         outs_motion = self(bev_embed, track_query, lane_query, lane_query_pos, track_boxes)
-        loss_inputs = [gt_bboxes_3d, gt_fut_traj, gt_fut_traj_mask, outs_motion, all_matched_idxes, track_boxes]
-        losses = self.loss(*loss_inputs)
+
+        #------------阻止计算losses_motion-----------
+        # loss_inputs = [gt_bboxes_3d, gt_fut_traj, gt_fut_traj_mask, outs_motion, all_matched_idxes, track_boxes]
+        # losses = self.loss(*loss_inputs)
+        losses = {}
 
         def filter_vehicle_query(outs_motion, all_matched_idxes, gt_labels_3d, vehicle_id_list):
             query_label = gt_labels_3d[0][-1][all_matched_idxes[0]]

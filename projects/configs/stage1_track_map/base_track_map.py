@@ -46,7 +46,7 @@ _dim_half_ = _pos_dim_
 canvas_size = (bev_h_, bev_w_)
 
 # NOTE: You can change queue_length from 5 to 3 to save GPU memory, but at risk of performance drop.
-queue_length = 5  # each sequence contains `queue_length` frames.
+queue_length = 3  # each sequence contains `queue_length` frames.
 
 ### traj prediction args ###
 predict_steps = 12
@@ -482,7 +482,7 @@ test_pipeline = [
 ]
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=8,
+    workers_per_gpu=0,
     train=dict(
         type=dataset_type,
         file_client_args=file_client_args,
