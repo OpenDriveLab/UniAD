@@ -554,7 +554,7 @@ class NuScenesE2EDataset(NuScenesDataset):
         translation = input_dict['ego2global_translation']
         can_bus = input_dict['can_bus']
         can_bus[:3] = translation
-        can_bus[3:7] = rotation
+        can_bus[3:7] = rotation.q
         patch_angle = quaternion_yaw(rotation) / np.pi * 180
         if patch_angle < 0:
             patch_angle += 360
