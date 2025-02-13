@@ -96,6 +96,7 @@ def anchor_coordinate_transform(anchors, bbox_results, with_translation_transfor
         yaw = bboxes.yaw.to(transformed_anchors.device)
         bbox_centers = bboxes.gravity_center.to(transformed_anchors.device)
         if with_rotation_transform: 
+            # TODO(box3d): we have changed yaw to mmdet3d 1.0.0rc6 format, maybe we should change this.
             angle = yaw - 3.1415953 # num_agents, 1
             rot_yaw = rot_2d(angle) # num_agents, 2, 2
             rot_yaw = rot_yaw[:, None, None,:, :] # num_agents, 1, 1, 2, 2
@@ -129,6 +130,7 @@ def trajectory_coordinate_transform(trajectory, bbox_results, with_translation_t
         transformed_trajectory = trajectory[i,...]
         if with_rotation_transform:
             # we take negtive here, to reverse the trajectory back to ego centric coordinate
+            # TODO(box3d): we have changed yaw to mmdet3d 1.0.0rc6 format, maybe we should change this.
             angle = -(yaw - 3.1415953) 
             rot_yaw = rot_2d(angle)
             rot_yaw = rot_yaw[:,None, None,:, :] # A, 1, 1, 2, 2

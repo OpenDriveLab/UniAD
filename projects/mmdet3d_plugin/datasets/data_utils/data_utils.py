@@ -28,6 +28,7 @@ def output_to_nusc_box(detection):
     box_yaw = box3d.yaw.numpy()
     # TODO: check whether this is necessary
     # with dir_offset & dir_limit in the head
+    # TODO(box3d): convert bbox_yaw and bbox_dims to mmdet3d v1.0.0rc6 format.
     box_yaw = -box_yaw - np.pi / 2
 
     box_list = []
@@ -77,6 +78,7 @@ def output_to_nusc_box_det(detection):
     box_yaw = box3d.yaw.numpy()
     # TODO: check whether this is necessary
     # with dir_offset & dir_limit in the head
+    # TODO(box3d): convert bbox_yaw and bbox_dims to mmdet3d v1.0.0rc6 format.
     box_yaw = -box_yaw - np.pi / 2
 
     box_list = []

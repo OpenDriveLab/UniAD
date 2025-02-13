@@ -102,6 +102,7 @@ class AgentPredictionData:
         self.pred_label = pred_label
         self.pred_center = pred_center
         self.pred_dim = pred_dim
+        # TODO(box3d): we have changed yaw to mmdet3d 1.0.0rc6 format, maybe we should change this.
         self.pred_yaw = -pred_yaw-np.pi/2
         self.pred_vel = pred_vel
         self.pred_traj = pred_traj
