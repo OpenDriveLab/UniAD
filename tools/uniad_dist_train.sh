@@ -22,7 +22,7 @@ if [ ! -d ${WORK_DIR}logs ]; then
 fi
 
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
-python -m torch.distributed.launch \
+python -m torch.distributed.run \
     --nproc_per_node=${GPUS_PER_NODE} \
     --master_addr=${MASTER_ADDR} \
     --master_port=${MASTER_PORT} \
@@ -30,7 +30,7 @@ python -m torch.distributed.launch \
     --node_rank=${RANK} \
     $(dirname "$0")/train.py \
     $CFG \
-    --launcher pytorch ${@:3} \
+    ${@:3} \
     --deterministic \
     --work-dir ${WORK_DIR} \
     2>&1 | tee ${WORK_DIR}logs/train.$T

@@ -149,7 +149,7 @@ class NuScenesE2EDataset(NuScenesDataset):
         """
         if self.file_client_args['backend'] == 'disk':
             # data_infos = mmcv.load(ann_file)
-            data = pickle.loads(self.file_client.get(ann_file))
+            data = pickle.loads(self.file_client.get(ann_file.name))
             data_infos = list(
                 sorted(data['infos'], key=lambda e: e['timestamp']))
             data_infos = data_infos[::self.load_interval]
