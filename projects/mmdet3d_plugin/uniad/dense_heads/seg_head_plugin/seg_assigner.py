@@ -266,7 +266,7 @@ class HungarianAssigner_filter(BaseAssigner):
         cost = cls_cost + reg_cost + iou_cost 
         
         # 3. do Hungarian matching on CPU using linear_sum_assignment
-        cost = cost.detach().cpu()
+        cost = cost.detach()
 
         assigned_gt_inds[:] = 0
         #index_set = []
@@ -276,6 +276,7 @@ class HungarianAssigner_filter(BaseAssigner):
                               'to install scipy first.')
         result=None
         for i in range(min(self.max_pos, 300//num_gts)):
+            cost = cost.cpu()
             matched_row_inds, matched_col_inds = linear_sum_assignment(cost)
             
             matched_row_inds = torch.from_numpy(matched_row_inds).to(
@@ -283,7 +284,7 @@ class HungarianAssigner_filter(BaseAssigner):
             matched_col_inds = torch.from_numpy(matched_col_inds).to(
                 bbox_pred.device)     
             #print(matched_row_inds)
-                
+            cost = cost.to(bbox_pred.device)
             cost[matched_row_inds,:] = INF   
             #index_set.(matched_row_inds)
             #print('this mathed row inds ', len(matched_row_inds), i)

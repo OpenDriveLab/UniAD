@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Training",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/train.py",
+            "args": [
+                "./projects/configs/stage1_track_map/base_track_map.py", 
+                "--gpus",
+                "1",
+                "--deterministic",
+                "--work-dir",
+                "${workspaceFolder}/work_dirs/train1"
+            ],
+            "env": {
+                "MASTER_ADDR": "127.0.0.1",
+                "MASTER_PORT": "28596",
+                "PYTHONPATH": "${workspaceFolder}/..:${env:PYTHONPATH}"
+            },
+            "console": "integratedTerminal"
+        }
+    ]
+}
+
+
+
+// {
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "name": "Debug Evaluating",
+//             "type": "python",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/tools/test.py",
+//             "args": [
+//                 "./projects/configs/stage1_track_map/base_track_map.py", 
+//                 "./ckpts/uniad_base_track_map.pth",
+//                 "--show-dir",
+//                 "${workspaceFolder}/work_dirs/eval1"
+//             ],
+//             "env": {
+//                 "PYTHONPATH": "${workspaceFolder}/..:${env:PYTHONPATH}"
+//             },
+//             "console": "integratedTerminal"
+//         }
+//     ]
+// }
