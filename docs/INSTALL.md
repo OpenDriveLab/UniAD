@@ -3,14 +3,13 @@
 
 **a. Env: Create a conda virtual environment and activate it.**
 ```shell
-conda create -n uniad python=3.9 -y
-conda activate uniad
+conda create -n uniad2.0 python=3.8 -y
+conda activate uniad2.0
 ```
 
 **b. Torch: Install PyTorch and torchvision following the [official instructions](https://pytorch.org/).**
 ```shell
-conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
-pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 **c. GCC: Make sure gcc>=5 in conda env.**
@@ -31,10 +30,11 @@ export CUDA_HOME=YOUR_CUDA_PATH/
 
 **e. Install mmcv-series packages.**
 ```shell
-pip install mmcv-full==1.7.2 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1.0/index.html
-pip install mmdet==2.14.0
-pip install mmsegmentation==0.14.1
-pip install mmdet3d==1.0.0rc6
+git clone https://github.com/open-mmlab/mmcv.git & cd mmcv
+git checkout v1.6.0
+export MMCV_WITH_OPS=1
+pip install -v -e .
+pip install mmdet==2.26.0 mmsegmentation==0.29.1 mmdet3d==1.0.0rc6
 ```
 
 

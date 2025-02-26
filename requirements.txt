@@ -4,3 +4,5 @@ einops==0.8.1
 numpy==1.22.4
 casadi==3.6.7
 pytorch-lightning==1.2.5
+ipython==8.12.3
+yapf==0.40.1

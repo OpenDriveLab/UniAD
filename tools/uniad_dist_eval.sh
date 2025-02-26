@@ -19,13 +19,13 @@ if [ ! -d ${WORK_DIR}logs ]; then
 fi
 
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
-python -m torch.distributed.run \
+python -m torch.distributed.launch \
     --nproc_per_node=$GPUS_PER_NODE \
     --master_port=$MASTER_PORT \
     $(dirname "$0")/test.py \
     $CFG \
     $CKPT \
-    ${@:4} \
+    --launcher pytorch ${@:4} \
     --eval bbox \
     --show-dir ${WORK_DIR} \
     2>&1 | tee ${WORK_DIR}logs/eval.$T
