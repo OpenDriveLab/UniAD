@@ -24,17 +24,22 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 
 <br><br>
 
-![teaser](sources/pipeline.png)
+## 🎉🎉 UniAD-2.0 is Coming Soon!
 
-## 🎉🎉 UniAD-2.0 is coming soon
+We are thrilled to announce the upcoming release of the latest version of our project! This update introduces essential upgrades and improvements to enhance functionality and ensure future compatibility.
 
-We are excited to announce the latest version of our project! This release introduces critical upgrades and important updates to enhance functionality and future compatibility.
+✨ **New Features & Upgrades**: We have updated [mmcv](https://github.com/open-mmlab/mmcv) and [mmdet3d](https://github.com/open-mmlab/mmdetection3d) to their latest versions. Importantly, checkpoints from previous versions are still compatible, allowing you to reproduce existing results effortlessly.
 
-✨ New Features & Upgrades: We have upgraded [mmcv](https://github.com/open-mmlab/mmcv) and [mmdet3d](https://github.com/open-mmlab/mmdetection3d) to their latest versions. Importantly, checkpoints from previous versions remain compatible, allowing you to reproduce existing results seamlessly. Check the [Installation](docs/INSTALL.md) for installation guidance. 
+‼️ **Critical Warning**: Due to changes in the underlying framework, our current bbox definition is now inconsistent with mmdet3d 1.0. Using any submethods or attributes related to mmdet3d's bbox implementation may result in unexpected errors or incorrect results.
 
-‼️ Critical Warning: Due to updates in the underlying framework, our current bbox definition is now inconsistent with mmdet3d 1.0. Using any submethods or attributes related to mmdet3d's bbox implementation may lead to unexpected errors or incorrect results.
+🎯 **Future Plans**: We are actively working on restructuring the codebase for enhanced flexibility, including support for customizable coordinate systems and smoother integration with [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets. Stay tuned for more dynamic and extensible workflows!
 
-🎯 Future Plans: We are actively working to restructure the codebase for improved flexibility, including support for customizable coordinate systems and streamlined integration with [nuPlan](https://www.nuscenes.org/nuplan) / [NAVSIM](https://github.com/autonomousvision/navsim) datasets. Stay tuned for more dynamic and extensible workflows!
+- [x] Updated [mmcv](https://github.com/open-mmlab/mmcv) and [mmdet3d](https://github.com/open-mmlab/mmdetection3d). For installation instructions, check [Installation](docs/INSTALL.md).
+
+- [ ] Modify bbox definition to support mmdet3d 1.x and provide new checkpoints.
+
+- [ ] Support for [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets.
+
 
 ## Table of Contents:
 1. [Highlights](#high)
