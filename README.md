@@ -20,25 +20,21 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 
 
 
-
-
 <br><br>
 
-## 🎉🎉 UniAD-2.0 is Coming Soon!
+## 🚀 `2025/02/27` UniAD 2.0 Preview
 
-We are thrilled to announce the upcoming release of the latest version of our project! This update introduces essential upgrades and improvements to enhance functionality and ensure future compatibility.
+We’re thrilled to announce ​**UniAD 2.0**, a milestone release delivering critical upgrades and future-ready capabilities!
 
-✨ **New Features & Upgrades**: We have updated [mmcv](https://github.com/open-mmlab/mmcv) and [mmdet3d](https://github.com/open-mmlab/mmdetection3d) to their latest versions. Importantly, checkpoints from previous versions are still compatible, allowing you to reproduce existing results effortlessly.
+🔑 ​**Key Enhancements**​ 
+- 🛠️ ​**​Framework**: Migrating to `mmdet3d 1.x` & `torch 2.x` (commonly used version today).  
+- 🔄 ​**Compatibility**: Existing workflows preserved - replicate out results via [Evaluation Example](docs/TRAIN_EVAL.md#example). 
+- 📊 ​**Dataset**: Integrating [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets.  
 
-‼️ **Critical Warning**: Due to changes in the underlying framework, our current bbox definition is now inconsistent with mmdet3d 1.0. Using any submethods or attributes related to mmdet3d's bbox implementation may result in unexpected errors or incorrect results.
-
-🎯 **Future Plans**: We are actively working on restructuring the codebase for enhanced flexibility, including support for customizable coordinate systems and smoother integration with [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets. Stay tuned for more dynamic and extensible workflows!
-
-- [x] Updated [mmcv](https://github.com/open-mmlab/mmcv) and [mmdet3d](https://github.com/open-mmlab/mmdetection3d). For installation instructions, check [Installation](docs/INSTALL.md).
-
-- [ ] Modify bbox definition to support mmdet3d 1.x and provide new checkpoints.
-
-- [ ] Support for [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets.
+​📅 ​**TODO List**
+- [x] Core Framework Upgrade​ (`mmdet3d 1.0.0rc6`,  `torch 2.0.1+cu118`) → [Installation Guide](docs/INSTALL.md).
+- [ ] New checkpoints Release.
+- [ ] ​Full Dataset Integration.
 
 
 ## Table of Contents:
@@ -51,9 +47,8 @@ We are thrilled to announce the upcoming release of the latest version of our pr
    - [GPU Requirements](docs/TRAIN_EVAL.md#gpu)
    - [Train/Eval](docs/TRAIN_EVAL.md)
 4. [Results and Models](#models)
-5. [TODO List](#todos)
-6. [License](#license)
-7. [Citation](#citation)
+5. [License](#license)
+6. [Citation](#citation)
 8. [🔥 See Also: GenAD & Vista](#see)
 
 ## Highlights <a name="high"></a>
