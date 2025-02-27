@@ -28,7 +28,7 @@ We’re thrilled to announce ​**UniAD 2.0**, a milestone release delivering cr
 
 🔑 ​**Key Enhancements**​ 
 - 🛠️ ​**​Framework**: Migrating to `mmdet3d 1.x` & `torch 2.x` (commonly used version today).  
-- 🔄 ​**Compatibility**: Existing workflows preserved - replicate out results via [Evaluation Example](docs/TRAIN_EVAL.md#example). 
+- 🔄 ​**Compatibility**: Existing workflows preserved - replicate our results via [Evaluation Example](docs/TRAIN_EVAL.md#example). 
 - 📊 ​**Dataset**: Integrating [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets.  
 
 ​📅 ​**TODO List**
