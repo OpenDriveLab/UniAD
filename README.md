@@ -20,11 +20,22 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
 
 
 
-
-
 <br><br>
 
-![teaser](sources/pipeline.png)
+## 🚀 `2025/02/27` UniAD 2.0 Preview
+
+We’re thrilled to announce ​**UniAD 2.0**, a milestone release delivering critical upgrades and future-ready capabilities!
+
+🔑 ​**Key Enhancements**​ 
+- 🛠️ ​**​Framework**: Migrating to `mmdet3d 1.x` & `torch 2.x` (commonly used version today).  
+- 🔄 ​**Compatibility**: Existing workflows preserved - replicate our results via [Evaluation Example](docs/TRAIN_EVAL.md#example). 
+- 📊 ​**Dataset**: Integrating [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets.  
+
+​📅 ​**TODO List**
+- [x] Core Framework Upgrade​ (`mmdet3d 1.0.0rc6`,  `torch 2.0.1+cu118`) → [Installation Guide](docs/INSTALL.md).
+- [ ] New checkpoints Release.
+- [ ] ​Full Dataset Integration.
+
 
 ## Table of Contents:
 1. [Highlights](#high)
@@ -36,9 +47,8 @@ https://github.com/OpenDriveLab/UniAD/assets/48089846/bcf685e4-2471-450e-8b77-e0
    - [GPU Requirements](docs/TRAIN_EVAL.md#gpu)
    - [Train/Eval](docs/TRAIN_EVAL.md)
 4. [Results and Models](#models)
-5. [TODO List](#todos)
-6. [License](#license)
-7. [Citation](#citation)
+5. [License](#license)
+6. [Citation](#citation)
 8. [🔥 See Also: GenAD & Vista](#see)
 
 ## Highlights <a name="high"></a>

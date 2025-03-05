@@ -335,8 +335,9 @@ def _fill_trainval_infos(nusc,
                     names[i] = NuScenesDataset.NameMapping[names[i]]
             names = np.array(names)
             # instance_inds = [nusc.getind('instance', ann['instance_token']) for ann in annotations]
-            # we need to convert rot to SECOND format.
-            gt_boxes = np.concatenate([locs, dims, -rots - np.pi / 2], axis=1)
+            # TODO(box3d): convert gt_boxes to mmdet3d 1.0.0rc6 LiDARInstance3DBoxes format. [DONE]
+            gt_boxes = np.concatenate([locs, dims, rots], axis=1)
+            # gt_boxes = np.concatenate([locs, dims[:, [1, 0, 2]], rots], axis=1)
             assert len(gt_boxes) == len(
                 annotations), f'{len(gt_boxes)}, {len(annotations)}'
             info['gt_boxes'] = gt_boxes

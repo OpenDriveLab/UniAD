@@ -21,7 +21,7 @@ def dice_loss(input, target,mask=None,eps=0.001):
     d = (2 * a) / (b + c)
     return 1 - d
 
-@LOSSES.register_module()
+@LOSSES.register_module(force=True)
 class DiceLoss(nn.Module):
 
     def __init__(self, eps=1e-6, reduction='mean', loss_weight=1.0):

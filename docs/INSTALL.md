@@ -3,16 +3,13 @@
 
 **a. Env: Create a conda virtual environment and activate it.**
 ```shell
-conda create -n uniad python=3.8 -y
-conda activate uniad
+conda create -n uniad2.0 python=3.9 -y
+conda activate uniad2.0
 ```
 
 **b. Torch: Install PyTorch and torchvision following the [official instructions](https://pytorch.org/).**
 ```shell
-conda install cudatoolkit=11.1.1 -c conda-forge
-# We use cuda-11.1 by default
-pip install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html
-# Recommended torch>=1.9
+pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
 ```
 
 **c. GCC: Make sure gcc>=5 in conda env.**
@@ -27,33 +24,19 @@ export PATH=YOUR_GCC_PATH/bin:$PATH
 **d. CUDA: Before installing MMCV family, you need to set up the CUDA_HOME (for compiling some operators on the gpu).**
 ```shell
 export CUDA_HOME=YOUR_CUDA_PATH/
-# Eg: export CUDA_HOME=/mnt/cuda-11.1/
+# Eg: export CUDA_HOME=/mnt/cuda-11.8/
 ```
 
 
-**e. Install mmcv-full.**
+**e. Install mmcv-series packages.**
 ```shell
-pip install mmcv-full==1.4.0
-# If it's not working, try:
-# pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu111/torch1.9.0/index.html
-```
-
-**f. Install mmdet and mmseg.**
-```shell
-pip install mmdet==2.14.0
-pip install mmsegmentation==0.14.1
-```
-
-**g. Install mmdet3d from source code.**
-```shell
-cd ~
-git clone https://github.com/open-mmlab/mmdetection3d.git
-cd mmdetection3d
-git checkout v0.17.1
-pip install scipy==1.7.3
-pip install scikit-image==0.20.0
+git clone https://github.com/open-mmlab/mmcv.git & cd mmcv
+git checkout v1.6.0
+export MMCV_WITH_OPS=1 MMCV_CUDA_ARGS=-std=c++17
 pip install -v -e .
+pip install mmdet==2.26.0 mmsegmentation==0.29.1 mmdet3d==1.0.0rc6
 ```
+
 
 **h. Install UniAD.**
 ```shell

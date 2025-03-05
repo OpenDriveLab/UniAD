@@ -149,7 +149,7 @@ class NuScenesE2EDataset(NuScenesDataset):
         """
         if self.file_client_args['backend'] == 'disk':
             # data_infos = mmcv.load(ann_file)
-            data = pickle.loads(self.file_client.get(ann_file))
+            data = pickle.loads(self.file_client.get(ann_file.name))
             data_infos = list(
                 sorted(data['infos'], key=lambda e: e['timestamp']))
             data_infos = data_infos[::self.load_interval]
@@ -554,7 +554,8 @@ class NuScenesE2EDataset(NuScenesDataset):
         translation = input_dict['ego2global_translation']
         can_bus = input_dict['can_bus']
         can_bus[:3] = translation
-        can_bus[3:7] = rotation
+        # NOTE(lty): fix can_bus format, in https://github.com/OpenDriveLab/UniAD/pull/214
+        can_bus[3:7] = rotation.elements
         patch_angle = quaternion_yaw(rotation) / np.pi * 180
         if patch_angle < 0:
             patch_angle += 360
