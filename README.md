@@ -33,8 +33,8 @@ We’re thrilled to announce ​**UniAD 2.0**, a milestone release delivering cr
 
 ​📅 ​**TODO List**
 - [x] Core Framework Upgrade​ (`mmdet3d 1.0.0rc6`,  `torch 2.0.1+cu118`) → [Installation Guide](docs/INSTALL.md).
-- [ ] New checkpoints Release.
-- [ ] ​Full Dataset Integration.
+- [ ] New checkpoints Release. [2025 Q2]
+- [ ] ​Full Dataset Integration. [2025 Q3]
 
 
 ## Table of Contents:
@@ -106,6 +106,46 @@ Pre-trained models and results under main metrics are provided below. We refer y
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | Motion<br>minADE |Occupancy<br>IoU-n. | Planning<br>avg.Col. | config | Download |
 | :---: | :---: | :---: | :---: | :---:|:---:| :---: | :---: | :---: |
 | UniAD-B | R101 | 0.363 | 0.313 | 0.705 | 63.7 | 0.29 |  [base-stage2](projects/configs/stage2_e2e/base_e2e.py) | [base-stage2](https://github.com/OpenDriveLab/UniAD/releases/download/v1.0.1/uniad_base_e2e.pth) |
+
+> Planning results on the nuScense benchmark
+
+<table style="text-align: center; vertical-align: middle;">
+  <tr>
+    <td rowspan = "2" > Method </td>
+    <td rowspan = "2" > Encoder </td>
+    <td colspan="4">L2(m)</td>
+    <td colspan="4">Col. Rate(%)</td>
+  </tr>
+  <tr>
+    <td>1s</td>
+    <td>2s</td>
+    <td>3s</td>
+    <td>Avg.</td>
+    <td>1s</td>
+    <td>2s</td>
+    <td>3s</td>
+    <td>Avg.</td>
+  </tr>
+  <tr>
+    <td>UniAD-B</td>
+    <td>R101</td>
+    <td>0.48</td>
+    <td>0.96</td>
+    <td>1.65</td>
+    <td>1.03</td>
+    <td>0.05</td>
+    <td>0.17</td>
+    <td>0.71</td>
+    <td>0.31</td>
+  </tr>
+</table>
+
+> Planning results on the [NAVSIM](https://github.com/autonomousvision/navsim) benchmark
+
+
+| Method | Encoder | NC | DAC | TTC | Comf. | EP | PDMS | 
+| :---: | :---: | :---: | :---: | :---:|:---:|:---:|:---:|
+| UniAD | R34 | 97.8 | 91.9 | 92.9 | 100 | 78.8 | 83.4 |
 
 ### Checkpoint Usage
 * Download the checkpoints you need into `UniAD/ckpts/` directory.
