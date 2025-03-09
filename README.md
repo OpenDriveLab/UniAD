@@ -32,9 +32,8 @@ We’re thrilled to announce ​**UniAD 2.0**, a milestone release delivering cr
 - 📊 ​**Dataset**: Integrating [nuPlan](https://www.nuscenes.org/nuplan) and [NAVSIM](https://github.com/autonomousvision/navsim) datasets.  
 
 ​📅 ​**TODO List**
-- [x] Core Framework Upgrade​ (`mmdet3d 1.0.0rc6`,  `torch 2.0.1+cu118`) → [Installation Guide](docs/INSTALL.md).
-- [ ] New checkpoints Release. [2025 Q2]
-- [ ] ​Full Dataset Integration. [2025 Q3]
+- [x] Framework upgrade​ (`mmdet3d 1.0.0rc6`,  `torch 2.0.1+cu118`) → [Installation Guide](docs/INSTALL.md).
+- [ ] Tools release for nuPlan and NAVSIM benchmark. [ETA 2025Q2]
 
 
 ## Table of Contents:
@@ -140,7 +139,7 @@ Pre-trained models and results under main metrics are provided below. We refer y
   </tr>
 </table>
 
-> Planning results on the [NAVSIM](https://github.com/autonomousvision/navsim) benchmark
+> ✨NEW in v2.0: Planning results on the NAVSIM benchmark (from [NAVSIM](https://arxiv.org/abs/2406.15349)).
 
 
 | Method | Encoder | NC | DAC | TTC | Comf. | EP | PDMS | 
