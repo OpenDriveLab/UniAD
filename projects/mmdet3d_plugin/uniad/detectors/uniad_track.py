@@ -371,6 +371,7 @@ class UniADTrack(MVXTwoStageDetector):
         all_matched_indices=None,
         all_instances_pred_logits=None,
         all_instances_pred_boxes=None,
+        is_last=False,
     ):
         """
         Perform forward only on one frame. Called in  forward_train
@@ -470,8 +471,11 @@ class UniADTrack(MVXTwoStageDetector):
         tmp = {}
         tmp["init_track_instances"] = self._generate_empty_tracks()
         tmp["track_instances"] = track_instances
-        out_track_instances = self.query_interact(tmp)
-        out["track_instances"] = out_track_instances
+        if is_last:
+            out["track_instances"] = None
+        else:
+            out_track_instances = self.query_interact(tmp)
+            out["track_instances"] = out_track_instances
         return out
 
     def select_active_track_query(self, track_instances, active_index, img_metas, with_mask=True):
@@ -567,6 +571,7 @@ class UniADTrack(MVXTwoStageDetector):
                 all_matched_idxes,
                 all_instances_pred_logits,
                 all_instances_pred_boxes,
+                is_last=(i==num_frame-1),
             )
             # all_query_embeddings: len=dec nums, N*256
             # all_matched_idxes: len=dec nums, N*2
