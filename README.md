@@ -91,7 +91,7 @@ We’re thrilled to announce ​**UniAD 2.0**, a milestone release delivering cr
 UniAD is trained in two stages. Pretrained checkpoints of both stages will be released and the results of each model are listed in the following tables.
 
 ### Stage1: Perception training
-> We first train the perception modules (i.e., track and map) to obtain a stable weight initlization for the next stage. BEV features are aggregated with 5 frames (queue_length = 5).
+> We first train the perception modules (i.e., track and map) to obtain a stable weight initialization for the next stage. BEV features are aggregated with 5 frames (queue_length = 5).
 
 | Method | Encoder | Tracking<br>AMOTA | Mapping<br>IoU-lane | config | Download |
 | :---: | :---: | :---: | :---: | :---:|:---:| 
