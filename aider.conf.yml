@@ -1,0 +1,83 @@
+# Note: You can only put OpenAI and Anthropic API keys in the yaml
+# config file. Keys for all APIs can be stored in a .env file
+# https://aider.chat/docs/config/dotenv.html
+# https://github.com/paul-gauthier/aider/blob/main/aider/website/assets/sample.aider.conf.yml
+
+##########
+# options:
+
+## show this help message and exit
+#help:
+
+#######
+# Main:
+
+## Specify the model to use for the main chat
+# aider --list-models openai
+model: anthropic/claude-3-7-sonnet-latest
+# model: anthropic/claude-3-5-sonnet-20240620
+# model: openai/o1-preview
+
+## Vertex AI
+# VERTEXAI_PROJECT: personal-435709
+# VERTEXAI_LOCATION: us-east5
+
+## Use colors suitable for a dark terminal background (default: False)
+dark-mode: true
+
+## Only consider files in the current subtree of the git repository
+# subtree-only: true
+
+## Enable/disable auto commit of LLM changes (default: True)
+auto-commits: false
+
+## Prefix all commit messages with 'aider: ' (default: False)
+attribute-commit-message-committer: true
+
+## Specify a custom prompt for generating commit messages
+#commit-prompt:
+
+## Lint and fix provided files, or dirty files if none provided
+#lint: false
+
+## Specify lint commands to run for different languages, eg: "python: flake8 --select=..." (can be used multiple times)
+#lint-cmd:
+
+## Specify command to run tests
+#test-cmd:
+
+## Enable/disable automatic testing after changes (default: False)
+#auto-test: false
+
+## Run tests and fix problems found
+#test: false
+
+## specify a file to edit (can be used multiple times)
+#file:
+
+## specify a read-only file (can be used multiple times)
+read: [~/personal/CONVENTIONS.md]
+
+## Check for new aider versions on launch
+check-update: true
+
+## Apply the changes from the given file instead of running the chat (debug)
+#apply:
+
+## Print the repo map and exit (debug)
+#show-repo-map: false
+
+## Print the system prompts and exit (debug)
+#show-prompts: false
+
+## Do all startup activities then exit before accepting user input (debug)
+#exit: false
+
+## Specify a single message to send the LLM, process reply then exit (disables chat mode)
+#message:
+
+## Specify a file containing the message to send the LLM, process reply, then exit (disables chat mode)
+#message-file:
+
+## Run aider in your browser
+gui: false
