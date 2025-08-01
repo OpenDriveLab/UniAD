@@ -74,18 +74,18 @@ Key features:
 
 ```python
 class OperationTracer:
-    def __init__(self, model, trace_backward=False, filter_ops=None, 
+    def __init__(self, model, trace_backward=False, filter_ops=None,
                  stage=2, task_heads=None):
         # Initialize tracer with UniAD-specific options
         self.stage = stage  # Stage 1 or 2
         self.task_heads = task_heads or ['track', 'seg', 'motion', 'occ', 'planning']
-        
+
     def register_hooks(self):
         # Register hooks on model modules
-        
+
     def trace(self, inputs):
         # Perform tracing with given inputs
-        
+
     def get_trace_data(self):
         # Return collected trace data with task head annotations
 ```
@@ -113,21 +113,21 @@ class TraceNode:
     module_path: str
     input_shapes: List[Tuple]
     output_shapes: List[Tuple]
-    
+
     # UniAD-specific fields
     task_head: Optional[str] = None  # track/seg/motion/occ/planning
     temporal_index: Optional[int] = None  # frame index in queue
     is_frozen: bool = False  # for frozen BEV encoder in stage 2
-    
+
     # Performance metrics
     memory_usage: float = 0.0  # MB
     compute_time: float = 0.0  # ms
     flops: Optional[int] = None
-    
+
     # BEV-specific
     is_bev_operation: bool = False
     bev_grid_size: Optional[Tuple[int, int]] = None
-    
+
     # Dependencies
     depends_on: List[str] = field(default_factory=list)
     feeds_into: List[str] = field(default_factory=list)
@@ -188,7 +188,7 @@ class MultiHeadTracer:
             'occ': ['track'],
             'planning': ['track', 'motion', 'occ']
         }
-    
+
     def trace_task_heads(self, model):
         # Track data flow between task heads
         # Identify inter-head dependencies
@@ -203,7 +203,7 @@ Handles temporal queue operations for multi-frame processing:
 class TemporalTracer:
     def __init__(self, queue_length=3):
         self.queue_length = queue_length
-        
+
     def trace_temporal_flow(self, bev_features):
         # Track how features aggregate over frames
         # Visualize temporal fusion operations
@@ -219,7 +219,7 @@ class BEVFeatureTracer:
     def __init__(self):
         self.bev_shape = (200, 200)  # BEV grid size
         self.feature_dim = 256
-        
+
     def trace_bev_operations(self, encoder, decoder):
         # Track BEV encoder operations
         # Monitor feature propagation through decoder
@@ -236,7 +236,7 @@ class MemoryProfiler:
     def __init__(self, stage=2):
         self.stage = stage
         self.expected_usage = {1: 30000, 2: 17000}  # MB
-        
+
     def profile_gpu_memory(self):
         # Track memory allocation per operation
         # Identify memory bottlenecks
@@ -367,7 +367,7 @@ graph TB
         I2[Image t-1<br/>3x928x1600] --> BEV2[BEV t-1<br/>256x200x200]
         I3[Image t<br/>3x928x1600] --> BEV3[BEV t<br/>256x200x200]
     end
-    
+
     subgraph "Task Heads"
         BEV3 --> Track[Track Head<br/>AMOTA: 0.390<br/>Memory: 8GB]
         BEV3 --> Seg[Seg Head<br/>IoU: 63.7%<br/>Memory: 5GB]
@@ -376,7 +376,7 @@ graph TB
         Motion --> Plan[Planning Head<br/>Col Rate: 0.29%<br/>Memory: 3GB]
         Occ --> Plan
     end
-    
+
     style Track fill:#f9f,stroke:#333,stroke-width:2px
     style Motion fill:#bbf,stroke:#333,stroke-width:2px
     style Plan fill:#bfb,stroke:#333,stroke-width:2px
