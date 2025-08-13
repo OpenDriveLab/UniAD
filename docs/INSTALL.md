@@ -30,7 +30,7 @@ export CUDA_HOME=YOUR_CUDA_PATH/
 
 **e. Install mmcv-series packages.**
 ```shell
-git clone https://github.com/open-mmlab/mmcv.git & cd mmcv
+git clone https://github.com/open-mmlab/mmcv.git && cd mmcv
 git checkout v1.6.0
 export MMCV_WITH_OPS=1 MMCV_CUDA_ARGS=-std=c++17
 pip install -v -e .
