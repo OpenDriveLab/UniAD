@@ -1,3 +1,4 @@
+> 📌 This fork includes reproduction notes and compatibility fixes — see [README_CN.md](README_CN.md)
 > [!IMPORTANT]
 > 🌟 Stay up to date at [opendrivelab.com](https://opendrivelab.com/#news)!
 
