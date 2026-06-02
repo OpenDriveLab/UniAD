@@ -56,11 +56,11 @@
 BEVFormer (图像特征 → BEV特征)
     ↓
 ┌─────────────────────────────────────────────┐
-│  TrackFormer  →  检测 + 追踪（agent tokens）  │
-│  MapFormer    →  高精地图语义分割              │
+│  TrackFormer  →  检测 + 追踪（agent tokens） │
+│  MapFormer    →  高精地图语义分割             │
 │  MotionFormer →  未来轨迹预测（6s, 12 steps） │
 │  OccFormer    →  未来占用流预测               │
-│  Planner      →  自车轨迹规划（3s）            │
+│  Planner      →  自车轨迹规划（3s）           │
 └─────────────────────────────────────────────┘
 ```
 
