@@ -1,3 +1,6 @@
+> 📌 **复现笔记**：本仓库包含完整复现记录和兼容性修复，详见 [README_CN.md](README_CN.md)
+
+> 📌 This fork includes reproduction notes and compatibility fixes — see [README_CN.md](README_CN.md)
 > [!IMPORTANT]
 > 🌟 Stay up to date at [opendrivelab.com](https://opendrivelab.com/#news)!
 
