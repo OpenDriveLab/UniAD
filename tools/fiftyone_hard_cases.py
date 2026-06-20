@@ -91,6 +91,11 @@ def main():
             s['l2_2s'] = float(row.l2_2s)
             s['l2_3s'] = float(row.l2_3s)
             s['col_any'] = bool(int(getattr(row, 'col_any', 0)))
+            # 场景归因标签 (若 CSV 来自 label_scene_attribution.py 则带这些列)
+            if 'is_intersection' in df.columns:
+                s['is_intersection'] = bool(row.is_intersection)
+            if 'map_location' in df.columns:
+                s['map_location'] = str(row.map_location)
             samples.append(s)
 
     dataset.add_samples(samples)
