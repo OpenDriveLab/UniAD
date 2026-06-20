@@ -1,3 +1,5 @@
+> 🧰 **配套分析工作台**：基于本仓库做的「UniAD 规划失效评测 + 路口根因归因」工具集与发现，见独立仓库 → **[uniad-planning-failure-analysis](https://github.com/SailorChiu/uniad-planning-failure-analysis)**（逐帧评测 → 难例挖掘 → FiftyOne → 路口归因）。相关 eval 改动在分支 [`stage1-eval-export`](https://github.com/SailorChiu/UniAD/tree/stage1-eval-export)。
+
 > 📌 **复现笔记**：本仓库包含完整复现记录和兼容性修复，详见 [README_CN.md](README_CN.md)
 
 > 📌 This fork includes reproduction notes and compatibility fixes — see [README_CN.md](README_CN.md)
