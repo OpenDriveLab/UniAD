@@ -29,6 +29,9 @@ def parse_args():
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--out', default='output/results.pkl', help='output result file in pickle format')
+    parser.add_argument('--planning-csv', default=None,
+                        help='path to dump per-frame planning metrics (L2/collision) as CSV. '
+                             'If omitted, defaults to planning_per_frame.csv next to --out.')
     parser.add_argument(
         '--fuse-conv-bn',
         action='store_true',
@@ -228,8 +231,12 @@ def main():
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
+        planning_csv = args.planning_csv
+        if planning_csv is None and args.out is not None:
+            planning_csv = osp.join(osp.dirname(osp.abspath(args.out)),
+                                    'planning_per_frame.csv')
         outputs = custom_multi_gpu_test(model, data_loader, args.tmpdir,
-                                        args.gpu_collect)
+                                        args.gpu_collect, planning_csv=planning_csv)
 
     rank, _ = get_dist_info()
     if rank == 0:
