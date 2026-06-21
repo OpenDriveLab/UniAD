@@ -147,3 +147,30 @@ class PlanningMetric(Metric):
             'obj_box_col': self.obj_box_col / self.total,
             'L2' : self.L2 / self.total
         }
+
+    def compute_per_frame(self, trajs, gt_trajs, gt_trajs_mask, segmentation):
+        '''
+        Non-destructive per-frame metric for the Stage-1 误差归因 export.
+        Mirrors the math in `update()` but returns this single sample's
+        per-timestep L2 / collision WITHOUT touching the running accumulators
+        and WITHOUT mutating the caller's tensors (update() negates x in place
+        via a view, which would corrupt the global metric if reused here).
+
+        trajs:         torch.Tensor (B, n_future, 2/3)
+        gt_trajs:      torch.Tensor (B, n_future, 2/3)
+        gt_trajs_mask: torch.Tensor (B, n_future, 2)
+        segmentation:  torch.Tensor (B, n_future, 200, 200)
+
+        Returns:
+            L2:       torch.Tensor (B, n_future)  per-timestep L2 error
+            box_coll: torch.Tensor (n_future,)    per-timestep box-collision count
+                      (0/1 per step for B=1, the value reported as obj_box_col)
+        '''
+        trajs = trajs.clone()
+        gt_trajs = gt_trajs.clone()
+        trajs[..., 0] = - trajs[..., 0]
+        gt_trajs[..., 0] = - gt_trajs[..., 0]
+        L2 = self.compute_L2(trajs, gt_trajs, gt_trajs_mask)
+        _, obj_box_coll_sum = self.evaluate_coll(
+            trajs[:, :, :2], gt_trajs[:, :, :2], segmentation)
+        return L2, obj_box_coll_sum

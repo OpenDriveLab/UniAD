@@ -1,3 +1,8 @@
+> 🧰 **配套分析工作台**：基于本仓库做的「UniAD 规划失效评测 + 路口根因归因」工具集与发现，见独立仓库 → **[uniad-planning-failure-analysis](https://github.com/SailorChiu/uniad-planning-failure-analysis)**（逐帧评测 → 难例挖掘 → FiftyOne → 路口归因）。相关 eval 改动在分支 [`stage1-eval-export`](https://github.com/SailorChiu/UniAD/tree/stage1-eval-export)。
+
+> 📌 **复现笔记**：本仓库包含完整复现记录和兼容性修复，详见 [README_CN.md](README_CN.md)
+
+> 📌 This fork includes reproduction notes and compatibility fixes — see [README_CN.md](README_CN.md)
 > [!IMPORTANT]
 > 🌟 Stay up to date at [opendrivelab.com](https://opendrivelab.com/#news)!
 
@@ -197,3 +202,7 @@ If you find our project useful for your research, please consider citing our pap
 
 
 
+
+- [VLM 难例语义归因(端到端失效可视化)](docs/VLM_HARDCASE_ATTRIBUTION.md) — worst-K 难例喂 Qwen2-VL-2B 做语义归因,VLM 路口判断对照地图真值纳入评测;诚实负结果 0% 召回 + FiftyOne 可视化
+
+- [Planner 输入审计:有没有 ego-status 开环泄漏](docs/PLANNER_INPUT_AUDIT.md) — 审计 UniAD planner 输入,确认无裸 ego-status 捷径;把开环批评重指向 command 先验依赖

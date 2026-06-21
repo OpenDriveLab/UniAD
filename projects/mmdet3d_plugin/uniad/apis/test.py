@@ -37,7 +37,8 @@ def custom_encode_mask_results(mask_results):
                         dtype='uint8'))[0])  # encoded with RLE
     return [encoded_mask_results]
 
-def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
+def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False,
+                          planning_csv=None):
     """Test model with multiple gpus.
     This method tests model with multiple gpus and collects the results
     under two different modes: gpu and cpu modes. By setting 'gpu_collect=True'
@@ -75,7 +76,9 @@ def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
                       and model.module.with_planning_head
     if eval_planning:
         planning_metrics = PlanningMetric().cuda()
-        
+        # Stage-1 误差归因: per-frame planning rows -> CSV
+        planning_rows = []
+
     bbox_results = []
     mask_results = []
     dataset = data_loader.dataset
@@ -99,6 +102,37 @@ def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
                 result[0]['planning_traj'] = result[0]['planning']['result_planning']['sdc_traj']
                 result[0]['planning_traj_gt'] = result[0]['planning']['planning_gt']['sdc_planning']
                 result[0]['command'] = result[0]['planning']['planning_gt']['command']
+                # Per-frame export BEFORE the accumulating call below: that call
+                # negates x in place on these tensors (basic slicing -> view),
+                # so compute it first while values are still original.
+                per_frame_L2, per_frame_col = planning_metrics.compute_per_frame(
+                    pred_sdc_traj[:, :6, :2], sdc_planning[0][0, :, :6, :2],
+                    sdc_planning_mask[0][0, :, :6, :2], segmentation[0][:, [1, 2, 3, 4, 5, 6]])
+                l2 = per_frame_L2[0].detach().cpu().numpy()          # (6,) at 0.5..3.0s
+                col = per_frame_col.detach().cpu().numpy()           # (6,) box-collision 0/1
+                # command is a list[torch.Tensor] (possibly nested); unwrap to a scalar int
+                cmd = result[0]['command']
+                try:
+                    while isinstance(cmd, (list, tuple)):
+                        cmd = cmd[0]
+                    if isinstance(cmd, torch.Tensor):
+                        cmd = int(cmd.flatten()[0].item())
+                    else:
+                        cmd = int(np.asarray(cmd).flatten()[0])
+                except Exception:
+                    cmd = -1
+                planning_rows.append({
+                    'token': result[0].get('token', ''),
+                    'command': cmd,
+                    'L2_0.5': float(l2[0]), 'L2_1.0': float(l2[1]), 'L2_1.5': float(l2[2]),
+                    'L2_2.0': float(l2[3]), 'L2_2.5': float(l2[4]), 'L2_3.0': float(l2[5]),
+                    # uniad strategy (config planning_evaluation_strategy="uniad"):
+                    # instantaneous L2 at 1s/2s/3s -> indices 1/3/5
+                    'l2_1s': float(l2[1]), 'l2_2s': float(l2[3]), 'l2_3s': float(l2[5]),
+                    'col_0.5': int(col[0]), 'col_1.0': int(col[1]), 'col_1.5': int(col[2]),
+                    'col_2.0': int(col[3]), 'col_2.5': int(col[4]), 'col_3.0': int(col[5]),
+                    'col_any': int((col > 0).any()),
+                })
                 planning_metrics(pred_sdc_traj[:, :6, :2], sdc_planning[0][0,:, :6, :2], sdc_planning_mask[0][0,:, :6, :2], segmentation[0][:, [1,2,3,4,5,6]])
 
             # Eval Occ
@@ -162,6 +196,19 @@ def custom_multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
     if eval_planning:
         planning_results = planning_metrics.compute()
         planning_metrics.reset()
+        # Dump per-frame planning rows to CSV (rank 0 only).
+        # NOTE: assumes single-GPU eval (the 4060 setup): each rank only holds
+        # its own shard, so under true multi-GPU this writes rank-0's frames
+        # only. Gather across ranks here if multi-GPU export is ever needed.
+        if rank == 0 and planning_csv is not None and len(planning_rows) > 0:
+            import csv
+            mmcv.mkdir_or_exist(osp.dirname(osp.abspath(planning_csv)))
+            fieldnames = list(planning_rows[0].keys())
+            with open(planning_csv, 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(planning_rows)
+            print(f'\n[Stage-1] wrote {len(planning_rows)} per-frame planning rows to {planning_csv}')
 
     ret_results = dict()
     ret_results['bbox_results'] = bbox_results

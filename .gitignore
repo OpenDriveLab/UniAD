@@ -156,3 +156,7 @@ mmcv
 
 # vscode config file
 .vscode/
+# CUDA installers (downloaded, too large)
+*.run
+*.deb
+demo.mp4
