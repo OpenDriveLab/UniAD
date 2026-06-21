@@ -164,6 +164,8 @@ class PlanningHeadSingleMode(nn.Module):
         
         
         navi_embed = self.navi_embed.weight[command]
+        if __import__('os').environ.get('ABLATE_COMMAND','0')=='1':
+            navi_embed = torch.zeros_like(navi_embed)
         navi_embed = navi_embed[None].expand(-1,P,-1)
         plan_query = torch.cat([sdc_traj_query, sdc_track_query, navi_embed], dim=-1)
 

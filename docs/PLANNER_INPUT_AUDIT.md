@@ -33,6 +33,26 @@ UniAD 不像被批的那类方法有裸 ego-status 捷径;ego 信息只经 ①�
 ③SDC track + can_bus **隐式**进入。所以对 UniAD,开环最该量化的是 **command 先验依赖**:
 L2 有多少来自"跟着 3 类离散命令走"的先验,而非真感知。
 
-## 下一步实验(待跑):command-prior ablation
-推理时把 `navi_embed` 置零/随机化,重跑 eval,对比 L2(1/2/3s)虚高量。
-若 L2 几乎不变 → planner 重度依赖命令先验 → 开环指标偏乐观(方法论结论,低算力)。
+## 实验结果:command-prior ablation(已跑,v1.0-mini,69 valid frames)
+推理时把 `navi_embed` 置零(`ABLATE_COMMAND=1` 环境开关,默认关、形状不变、逻辑不动;
+一键两遍脚本 `tools/run_command_ablation.sh`),其余完全一致,重跑 eval 对比逐帧 L2:
+
+| metric | baseline(command ON) | no_command(zeroed) | Δ(n−b) | 相对 |
+|---|---|---|---|---|
+| l2_1s | 0.3245 | 0.3568 | +0.0323 | +10% |
+| l2_2s | 1.0146 | 1.2349 | +0.2203 | +22% |
+| l2_3s | 2.2338 | 2.6933 | +0.4595 | +21% |
+
+paired mean&#124;Δl2_3s&#124; = **0.5183**(69 帧逐帧配对,证明是真改变,非均值抵消的假象)。
+
+### 读法(实测 Δ 大,而非 Δ≈0)
+- 去掉离散命令后 L2 显著变差,且**随时域放大**(1s 几乎不动 → 2/3s 大幅恶化)——
+  机理一致:3 类命令(左/右/直行)消歧的是**路由**,而路由只在长时域(2–3s 的转向)才分叉。
+- 结论:**navi command 是 planner 的承重输入(load-bearing),不是可有可无的标签。**
+  UniAD 长时域开环 L2 里有相当一块(**~0.46m / 21% @3s**)是"离散命令喂出来的"而非纯感知——
+  这把 AD-MLP/BEV-Planner 对开环指标的批评**在 UniAD 上量化了**:指标被高层命令先验抬着。
+- 诚实边界:本消融只证明命令**必要**(去掉就垮),**没**证明 planner 退化/忽略感知
+  (未做 command-only / 随机命令 / zero-BEV 对照)。要坐实"开环偏乐观"还需这些控制实验,留作后续。
+
+> 注:数字在 v1.0-mini(69 valid frames)上、绝对值噪声大;关键是 **Δ 的方向与随时域增大的趋势**,而非绝对 L2。
+> 复现:`bash tools/run_command_ablation.sh`(`ABLATE_COMMAND` 开关见 `planning_head.py` 的 `navi_embed` 处)。
