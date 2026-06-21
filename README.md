@@ -202,3 +202,5 @@ If you find our project useful for your research, please consider citing our pap
 
 
 
+
+- [VLM 难例语义归因(端到端失效可视化)](docs/VLM_HARDCASE_ATTRIBUTION.md) — worst-K 难例喂 Qwen2-VL-2B 做语义归因,VLM 路口判断对照地图真值纳入评测;诚实负结果 0% 召回 + FiftyOne 可视化
