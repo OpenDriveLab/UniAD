@@ -3,4 +3,5 @@ from .panseg_head import PansegformerHead
 from .motion_head import MotionHead
 from .occ_head import OccHead
 from .planning_head import PlanningHeadSingleMode
+from .planning_head_grpo import PlanningHeadGRPO
 from .bevformer_head import BEVFormerHead

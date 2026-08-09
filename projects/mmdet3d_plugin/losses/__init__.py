@@ -3,6 +3,7 @@ from .mtp_loss import MTPLoss
 from .occflow_loss import *
 from .traj_loss import TrajLoss
 from .planning_loss import PlanningLoss, CollisionLoss
+from .grpo_loss import PlannerReward
 from .dice_loss import DiceLoss
 
 __all__ = [
@@ -10,5 +11,5 @@ __all__ = [
     'DiceLoss',
     'FieryBinarySegmentationLoss', 'DiceLossWithMasks',
     'TrajLoss',
-    'PlanningLoss', 'CollisionLoss'
+    'PlanningLoss', 'CollisionLoss', 'PlannerReward'
 ]

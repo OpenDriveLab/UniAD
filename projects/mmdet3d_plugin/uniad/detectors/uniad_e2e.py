@@ -31,6 +31,7 @@ class UniAD(UniADTrack):
             occ=1.0,
             planning=1.0
         ),
+        planner_posttrain_only=False,
         **kwargs,
     ):
         super(UniAD, self).__init__(**kwargs)
@@ -42,6 +43,15 @@ class UniAD(UniADTrack):
             self.motion_head = build_head(motion_head)
         if planning_head:
             self.planning_head = build_head(planning_head)
+
+        self.planner_posttrain_only = planner_posttrain_only
+        if planner_posttrain_only:
+            if not self.with_planning_head or not hasattr(
+                    self.planning_head, 'freeze_for_posttrain'):
+                raise ValueError(
+                    'planner_posttrain_only requires a post-training head')
+            self.requires_grad_(False)
+            self.planning_head.freeze_for_posttrain()
         
         self.task_loss_weight = task_loss_weight
         assert set(task_loss_weight.keys()) == \
@@ -162,8 +172,10 @@ class UniAD(UniADTrack):
 
         losses_track, outs_track = self.forward_track_train(img, gt_bboxes_3d, gt_labels_3d, gt_past_traj, gt_past_traj_mask, gt_inds, gt_sdc_bbox, gt_sdc_label,
                                                         l2g_t, l2g_r_mat, img_metas, timestamp)
-        losses_track = self.loss_weighted_and_prefixed(losses_track, prefix='track')
-        losses.update(losses_track)
+        if not self.planner_posttrain_only:
+            losses_track = self.loss_weighted_and_prefixed(
+                losses_track, prefix='track')
+            losses.update(losses_track)
         
         # Upsample bev for tiny version
         outs_track = self.upsample_bev_if_tiny(outs_track)
@@ -178,8 +190,10 @@ class UniAD(UniADTrack):
             losses_seg, outs_seg = self.seg_head.forward_train(bev_embed, img_metas,
                                                           gt_lane_labels, gt_lane_bboxes, gt_lane_masks)
             
-            losses_seg = self.loss_weighted_and_prefixed(losses_seg, prefix='map')
-            losses.update(losses_seg)
+            if not self.planner_posttrain_only:
+                losses_seg = self.loss_weighted_and_prefixed(
+                    losses_seg, prefix='map')
+                losses.update(losses_seg)
 
         outs_motion = dict()
         # Forward Motion Head
@@ -193,11 +207,13 @@ class UniAD(UniADTrack):
             losses_motion = ret_dict_motion["losses"]
             outs_motion = ret_dict_motion["outs_motion"]
             outs_motion['bev_pos'] = bev_pos
-            losses_motion = self.loss_weighted_and_prefixed(losses_motion, prefix='motion')
-            losses.update(losses_motion)
+            if not self.planner_posttrain_only:
+                losses_motion = self.loss_weighted_and_prefixed(
+                    losses_motion, prefix='motion')
+                losses.update(losses_motion)
 
         # Forward Occ Head
-        if self.with_occ_head:
+        if self.with_occ_head and not self.planner_posttrain_only:
             if outs_motion['track_query'].shape[1] == 0:
                 # TODO: rm hard code
                 outs_motion['track_query'] = torch.zeros((1, 1, 256)).to(bev_embed)
