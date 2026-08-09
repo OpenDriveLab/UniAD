@@ -32,15 +32,18 @@ def masked_ade(trajectories, target, mask):
 
 def masked_fde(trajectories, target, mask):
     batch = torch.arange(trajectories.shape[0], device=trajectories.device)
-    last = mask.long().sum(-1).clamp_min(1) - 1
-    return torch.norm(
+    valid_count = mask.long().sum(-1)
+    last = (valid_count - 1).clamp_min(0)
+    fde = torch.norm(
         trajectories[batch, :, last] - target[batch, last, None], dim=-1)
+    return torch.where(valid_count[:, None] > 0, fde, torch.zeros_like(fde))
 
 
 def comfort_penalty(trajectories):
     if trajectories.shape[-2] < 4:
         return trajectories.new_zeros(trajectories.shape[:2])
-    velocity = torch.diff(trajectories, dim=-2, prepend=trajectories[..., :1, :])
+    origin = torch.zeros_like(trajectories[..., :1, :])
+    velocity = torch.diff(trajectories, dim=-2, prepend=origin)
     acceleration = torch.diff(velocity, dim=-2)
     jerk = torch.diff(acceleration, dim=-2)
     return jerk.square().mean(dim=(-1, -2))

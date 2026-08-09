@@ -36,6 +36,8 @@ compute_group_advantages = grpo_loss.compute_group_advantages
 diagonal_gaussian_kl = grpo_loss.diagonal_gaussian_kl
 gaussian_log_prob = grpo_loss.gaussian_log_prob
 group_relative_policy_loss = grpo_loss.group_relative_policy_loss
+comfort_penalty = grpo_loss.comfort_penalty
+masked_fde = grpo_loss.masked_fde
 LoRALinear = lora.LoRALinear
 
 
@@ -77,6 +79,20 @@ def test_group_advantages_are_centered_and_detached():
     advantages = compute_group_advantages(reward)
     assert torch.allclose(advantages.mean(1), torch.zeros(1), atol=1e-6)
     assert not advantages.requires_grad
+
+
+def test_fde_is_zero_without_valid_future_steps():
+    trajectories = torch.full((1, 3, 6, 2), 10.0)
+    target = torch.zeros(1, 6, 2)
+    mask = torch.zeros(1, 6, dtype=torch.bool)
+    assert torch.equal(
+        masked_fde(trajectories, target, mask), torch.zeros(1, 3))
+
+
+def test_comfort_includes_origin_to_first_waypoint():
+    trajectories = torch.zeros(1, 1, 6, 2)
+    trajectories[..., 0] = 10.0
+    assert comfort_penalty(trajectories).item() > 0
 
 
 def test_detached_actions_give_policy_mean_gradient():
