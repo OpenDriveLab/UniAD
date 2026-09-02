@@ -21,6 +21,24 @@ ext_module = ext_loader.load_ext(
     '_ext', ['ms_deform_attn_backward', 'ms_deform_attn_forward'])
 
 
+def _select_previous_bev(value, batch_size, num_bev_queue):
+    """Select each sample's history BEV from the interleaved queue.
+
+    The encoder packs temporal values as ``[prev_0, curr_0, prev_1,
+    curr_1, ...]``.  Flattened indexing with ``value[:batch_size]`` only
+    selects the correct history for the first sample when ``batch_size > 1``.
+    Reshaping the queue restores the sample/queue axes before selecting the
+    history slot.
+    """
+    if value.shape[0] != batch_size * num_bev_queue:
+        raise ValueError(
+            'Expected value batch dimension to equal '
+            f'batch_size * num_bev_queue ({batch_size} * {num_bev_queue}), '
+            f'but got {value.shape[0]}'
+        )
+    return value.reshape(batch_size, num_bev_queue, *value.shape[1:])[:, 0]
+
+
 @ATTENTION.register_module()
 class TemporalSelfAttention(BaseModule):
     """An attention module used in BEVFormer based on Deformable-Detr.
@@ -191,7 +209,8 @@ class TemporalSelfAttention(BaseModule):
         assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
         assert self.num_bev_queue == 2
 
-        query = torch.cat([value[:bs], query], -1)
+        query = torch.cat(
+            [_select_previous_bev(value, bs, self.num_bev_queue), query], -1)
         value = self.value_proj(value)
 
         if key_padding_mask is not None:
